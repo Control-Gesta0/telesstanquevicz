@@ -52,4 +52,4 @@ Etapas do SDR, em ordem: Leads de entrada (72104583) · NOVA OPORTUNIDADE (72104
 
 ## Perguntas que só o escritório responde
 
-Ver resposta no chat da sessão de 06/10/2026.
+Respondidas a partir da conta em `02-respostas-da-conta.md`.

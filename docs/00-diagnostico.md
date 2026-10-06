@@ -1,6 +1,6 @@
 # Teles Stanquevicz · Agente de IA (Kommo)
 
-Estado do projeto: **DIAGNOSTICANDO** (rodada 1 de 7)
+Estado do projeto: **DIAGNOSTICANDO** (rodadas 1–3 respondidas pela própria conta, ver 02-respostas-da-conta.md)
 Atualizado em 06/10/2026.
 
 ## Bloco 0 fechado
