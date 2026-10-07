@@ -1,6 +1,6 @@
 # Teles Stanquevicz · Agente de IA (Kommo)
 
-Estado do projeto: **DIAGNOSTICANDO → falta a rodada 4 (follow-up e recuperação) e as credenciais de build**
+Estado do projeto: **DESENHANDO** (regras de negócio fechadas; ver `03-desenho.md`). Próximo gate: credenciais de infraestrutura para construir.
 Atualizado em 07/10/2026.
 
 ## Bloco 0 fechado
@@ -74,7 +74,7 @@ A API lista os 63 bots só pelo nome; o fluxo interno não aparece. Proposta pel
 
 | Pendência | De quem | Bloqueia |
 |---|---|---|
-| Rodada 4: follow-up e definição de recuperação (respondeu × concretizou) | mestre / escritório | prompt de follow-up, Central |
+| QStash (token) para o relógio do follow-up | Control Gestão | follow-up |
 | Chave OpenAI de produção (conta comercial) | Control Gestão | evals, deploy |
 | Upstash Redis (URL + token REST) | Control Gestão | histórico da conversa, deploy |
 | Projeto Vercel | Control Gestão | deploy |

@@ -14,3 +14,4 @@
 | kommoSalesbotEnvio | 🔴 missing |
 | elevenlabs | — not-applicable |
 | uazapi | — not-applicable |
+| qstash | 🔴 missing |

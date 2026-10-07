@@ -2,8 +2,8 @@
 
 ## Duas conversões
 
-- **Voltou a conversar:** a definir na rodada 4
-- **Concretizou o objetivo:** Lead chegou em AGENDAR REUNIÃO depois de um toque de follow-up (proposta)
+- **Voltou a conversar:** O lead mandou mensagem depois de um toque de follow-up da IA
+- **Concretizou o objetivo:** O lead chegou em AGENDAR REUNIÃO até 7 dias depois do toque
 
 ## Prova no CRM
 

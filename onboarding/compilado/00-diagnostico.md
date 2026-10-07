@@ -24,9 +24,6 @@
 
 ## Gate
 
-- [ ] Confirmar definição de recuperação por resposta e registrar a fonte.
-- [ ] Confirmar definição de objetivo concretizado após follow-up e registrar a fonte.
-- [ ] Confirmar no CRM o sinal verificável do objetivo da recuperação.
 - [ ] Eliminar coexistência: o mesmo número já possui outro bot.
 - [ ] Obter credencial/acesso obrigatório: anthropic.
 - [ ] Obter credencial/acesso obrigatório: upstash.

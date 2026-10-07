@@ -43,8 +43,8 @@ export const CRM_MAP_DRAFT = {
     {
       id: 72104595,
       name: "FOLLOW UP",
-      quando: "Cadência de recontato de lead que parou de responder. A IA não mexe.",
-      aiCanMove: false,
+      quando: "Cadência de recontato. A IA move para cá quando os 2 toques das 24h se esgotam sem resposta; se o lead voltar, a automação leva para RETORNO IMEDIATO e a IA retoma.",
+      aiCanMove: true,
     },
   ],
   stageOrder: [72104583, 72104587, 72186399, 72113011, 86825532, 109569188, 72104595],
@@ -52,14 +52,14 @@ export const CRM_MAP_DRAFT = {
   humanTag: "atendimento-humano",
   aiLimit: "Agendado",
   recovery: {
-    responseLabel: "a definir na rodada 4",
-    goalLabel: "Lead chegou em AGENDAR REUNIÃO depois de um toque de follow-up (proposta)",
+    responseLabel: "O lead mandou mensagem depois de um toque de follow-up da IA",
+    goalLabel: "O lead chegou em AGENDAR REUNIÃO até 7 dias depois do toque",
     goalSignal: {
     "type": "stage",
     "id": 86825532,
     "name": "AGENDAR REUNIÃO",
     "value": 86825532,
-    "confirmed": false,
+    "confirmed": true,
     "source": "crm-2026-10-06"
 },
     attributionWindowHours: 168,

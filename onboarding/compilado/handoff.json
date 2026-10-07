@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "generatedAt": "2026-10-07T12:56:55.054Z",
+  "generatedAt": "2026-10-07T13:26:24.805Z",
   "client": {
     "name": "Teles & Stanquevicz Advogados",
     "slug": "telesstanquevicz",
@@ -10,9 +10,6 @@
   "crm": "kommo",
   "readyForBuild": false,
   "blockers": [
-    "Confirmar definição de recuperação por resposta e registrar a fonte.",
-    "Confirmar definição de objetivo concretizado após follow-up e registrar a fonte.",
-    "Confirmar no CRM o sinal verificável do objetivo da recuperação.",
     "Eliminar coexistência: o mesmo número já possui outro bot.",
     "Obter credencial/acesso obrigatório: anthropic.",
     "Obter credencial/acesso obrigatório: upstash.",
