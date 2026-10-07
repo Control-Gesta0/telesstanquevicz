@@ -20,7 +20,7 @@ const VALOR = /\d|mil|milh|cem\b|duzent|trezent|quatrocent|quinhent|reais|r\$/i
 
 const CAMPOS = {
   // RCPCC
-  tipoDivida: { key: 'tipoDivida', id: 0, name: 'Tipo de dívida e banco', type: 'text', sinal: /cart[aã]o|cheque|empr[eé]st|financ|consig|limite|fatura|cr[eé]dito|d[ií]vida|banco|ita[uú]|bradesco|santander|caixa|nubank|inter\b|brasil|sicredi|sicoob|c6|pan\b|bmg|agibank|mercado pago|picpay|neon|original|safra|banrisul/i, pergunta: 'Essa dívida é de cartão, cheque especial ou empréstimo, e em qual banco?' },
+  tipoDivida: { key: 'tipoDivida', id: 0, name: 'Tipo de dívida (e banco, se disser)', type: 'text', sinal: /cart[aã]o|cheque|empr[eé]st|financ|consig|limite|fatura|cr[eé]dito|d[ií]vida|banco|ita[uú]|bradesco|santander|caixa|nubank|inter\b|brasil|sicredi|sicoob|c6|pan\b|bmg|agibank|mercado pago|picpay|neon|original|safra|banrisul/i, pergunta: 'Essa dívida é de cartão, cheque especial ou empréstimo?' },
   valorDivida: { key: 'valorDivida', id: 0, name: 'Valor aproximado da dívida', type: 'text', sinal: VALOR, pergunta: 'Mais ou menos quanto está a dívida hoje, somando tudo?' },
   atraso: { key: 'atraso', id: 0, name: 'Parcelas em atraso', type: 'text', sinal: /atras|em dia|parcela|pag|venc|\d|n[aã]o|sim|nenhuma/i, pergunta: 'Já tem parcela em atraso? Se tiver, quantas?' },
   // RCV
@@ -63,6 +63,7 @@ export const CRM_MAP = {
       roteiro: ['tipoDivida', 'valorDivida', 'atraso', 'nomeCompleto', 'email'],
       obrigatorios: ['tipoDivida', 'valorDivida', 'nomeCompleto', 'email'],
       antesDeAgendar: ['tipoDivida', 'valorDivida'],
+      abertura: 'Certo. Essa dívida é de cartão, cheque especial ou empréstimo?',
     },
     {
       id: 'rcv',
@@ -76,6 +77,7 @@ export const CRM_MAP = {
       roteiro: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela', 'contrato', 'nomeCompleto', 'email'],
       obrigatorios: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela', 'nomeCompleto', 'email'],
       antesDeAgendar: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela'],
+      abertura: 'Certo. Por qual banco ou financeira foi feito o financiamento do veículo?',
     },
     {
       id: 'dba',
@@ -89,6 +91,7 @@ export const CRM_MAP = {
       roteiro: ['apreendido', 'dataApreensao', 'mandado', 'valorDividaDba', 'nomeCompleto', 'email'],
       obrigatorios: ['apreendido', 'nomeCompleto', 'email'],
       antesDeAgendar: ['apreendido'],
+      abertura: 'Entendi, vamos ver isso rápido. O veículo já foi apreendido?',
     },
     {
       id: 'geral',

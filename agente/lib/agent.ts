@@ -11,6 +11,7 @@ import { createBrain } from './llm'
 import { kommoPort } from './port'
 import { respostasDoFormulario } from './roteamento'
 import { rotear } from './router'
+import { agendarFollowup, cancelarFollowup } from './followup'
 import { clearState, getState, patchState } from './state'
 import { aplicarFinalizacao, type ToolCtx } from './tools'
 import { sendReply } from './transport'
@@ -83,6 +84,7 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
         const detail = await enviar(leadId, rota.texto)
         await markAnswered(leadId, target.id)
         await logExec({ tipo: 'menu', leadId, nome, ms: Date.now() - t0, detalhe: `${detail} · ${rota.texto.slice(0, 60)}` })
+        await agendarFollowup(leadId, 0).catch(e => console.error('[followup] falha ao agendar:', e))
         return
       }
       const porta = rota.porta
@@ -112,6 +114,7 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
         const detail = await enviar(leadId, texto)
         await markAnswered(leadId, target.id)
         await logExec({ tipo: 'finalizou', leadId, nome, porta: porta.id, ms: Date.now() - t0, detalhe: `porta sem agente · ${detail}` })
+        await cancelarFollowup(leadId).catch(() => {})
         return
       }
 
@@ -138,6 +141,8 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
         tipo: reply.handoff ? 'finalizou' : 'resposta', leadId, nome, porta: porta.id, ms: Date.now() - t0,
         tools: reply.toolsUsed, guard: reply.guard, usage: reply.usage, urgente: reply.urgente || undefined, detalhe: detail,
       })
+      if (reply.handoff) await cancelarFollowup(leadId).catch(() => {})
+      else await agendarFollowup(leadId, 0).catch(e => console.error('[followup] falha ao agendar:', e))
       console.log(`[agente] RESPONDEU lead ${leadId} (${porta.id}) em ${Date.now() - t0}ms · tools: ${reply.toolsUsed.join(', ') || '—'}${reply.guard.length ? ` · trava: ${reply.guard.join(' | ')}` : ''}`)
       return
     }

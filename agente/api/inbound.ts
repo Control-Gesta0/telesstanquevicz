@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { processLead } from '../lib/agent'
 import { CONFIG } from '../lib/config'
 import { logExec } from '../lib/execlog'
+import { cancelarFollowup } from '../lib/followup'
 import { appendMessage, isEchoOfSent, markHumanSpoke, seenMessage } from '../lib/history'
 import { mediaKind, mediaToText } from '../lib/media'
 import { isResetCommand, resetLead } from '../lib/reset'
@@ -87,6 +88,7 @@ async function ingest(msgs: InboundMsg[], webhookId: string): Promise<void> {
         // Saída que não é nossa = humano (ou outra automação) falando: registra e recua
         await appendMessage(m.leadId, { id: `kommo:${m.id}`, dir: 'out', text, ts: Date.now() })
         await markHumanSpoke(m.leadId)
+        await cancelarFollowup(m.leadId).catch(() => {})
         continue
       }
 
@@ -98,6 +100,8 @@ async function ingest(msgs: InboundMsg[], webhookId: string): Promise<void> {
       }
 
       await appendMessage(m.leadId, { id: `kommo:${m.id}`, dir: 'in', text, ts: Date.now() })
+      // O lead falou: qualquer toque agendado fica obsoleto (a resposta da IA reagenda)
+      await cancelarFollowup(m.leadId).catch(e => console.error('[followup] falha ao cancelar:', e))
       leads.add(m.leadId)
     } catch (e) {
       console.error(`[inbound] erro ingerindo msg ${m.id}:`, e)

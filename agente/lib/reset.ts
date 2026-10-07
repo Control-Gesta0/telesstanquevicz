@@ -12,6 +12,6 @@ export const isResetCommand = (leadId: number, text: string) =>
   CONFIG.testLeadIds.includes(leadId) && /^\s*reset\s*$/i.test(text)
 
 export async function resetLead(leadId: number): Promise<void> {
-  await redis.del(k('conv', leadId), k('state', leadId), k('done', leadId), k('token', leadId), k('lock', leadId), k('rl', leadId), k('sent', leadId), k('humano', leadId))
+  await redis.del(k('conv', leadId), k('state', leadId), k('done', leadId), k('token', leadId), k('lock', leadId), k('rl', leadId), k('sent', leadId), k('humano', leadId), k('fu', leadId))
   if (CONFIG.gateTag) await addLeadTags(leadId, [CONFIG.gateTag])
 }

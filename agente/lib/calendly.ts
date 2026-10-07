@@ -55,7 +55,8 @@ export function escolherOpcoes(isos: string[], agora: Date, pref: Preferencia = 
 /** O lead escolheu qual das opções? Casa por hora ("9h15", "9:15", "às 9") e, se preciso, pelo dia. */
 export function casarEscolha(texto: string, opcoes: Slot[], agora = new Date()): Slot | null {
   const t = texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-  const porOrdem = t.match(/\b(primeir|segund|terceir)[oa]\b/)
+  // "a primeira", "a segunda opção". Com hora ou "feira" no texto, "segunda" é dia da semana.
+  const porOrdem = !/\d|feira/.test(t) && t.match(/\b(primeir|segund|terceir)[oa]\b/)
   if (porOrdem) return opcoes[{ primeir: 0, segund: 1, terceir: 2 }[porOrdem[1] as 'primeir']] || null
   const semAcento = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '')
   const hoje = diaLocal(agora.toISOString())

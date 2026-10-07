@@ -11,6 +11,7 @@
     "dev": "vercel dev"
   },
   "dependencies": {
+    "@upstash/qstash": "^2.12.0",
     "@upstash/redis": "^1.34.3",
     "@vercel/functions": "^1.5.2",
     "openai": "^4.104.0"

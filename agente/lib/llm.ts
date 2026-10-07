@@ -4,6 +4,7 @@ import OpenAI from 'openai'
 import { CRM_MAP, type Porta } from './crm-map'
 import { addUsage, emptyUsage, type Usage } from './execlog'
 import { checkReply, keepLastQuestion, semTravessao, type Violation } from './guards'
+import { checarContexto } from './regras'
 import type { ChatMsg } from './history'
 import { aplicarFinalizacao, buildTools, describeOpen, runTool, snapshot, type ToolCtx } from './tools'
 
@@ -119,14 +120,17 @@ export function createBrain(opts: LlmOptions) {
   }
 
   /** Reescreve uma vez se a trava pegou algo; se insistir, sai o texto seguro. */
-  async function enforce(messages: Msg[], bruto: string, usage: Usage, handoff: boolean, lastLead: string): Promise<{ text: string; guard: string[] }> {
+  async function enforce(messages: Msg[], bruto: string, usage: Usage, handoff: boolean, ctx: ToolCtx): Promise<{ text: string; guard: string[] }> {
+    const lastLead = ctx.lastLeadText
+    const reuniaoMarcada = !!(await ctx.port.getState()).reuniao
+    const checkReplyCtx = (t: string): Violation[] => [...checkReply(t), ...checarContexto(t, { leadText: ctx.leadText, reuniaoMarcada })]
     const text = semTravessao(bruto)
     const marca = text !== bruto ? ['travessão: trocado em código'] : []
-    const v1 = checkReply(text)
+    const v1 = checkReplyCtx(text)
     if (!v1.length) return { text, guard: marca }
     if (v1.every(v => v.regra === 'mais de uma pergunta')) {
       const cortado = keepLastQuestion(text, lastLead)
-      if (cortado && cortado.length >= 20 && !checkReply(cortado).length) return { text: cortado, guard: [...marca, 'uma pergunta: cortado em código'] }
+      if (cortado && cortado.length >= 20 && !checkReplyCtx(cortado).length) return { text: cortado, guard: [...marca, 'uma pergunta: cortado em código'] }
     }
     const fix: Msg[] = [
       ...messages,
@@ -135,7 +139,7 @@ export function createBrain(opts: LlmOptions) {
     ]
     const c = await call(fix, null, usage)
     const text2 = semTravessao((c.message?.content || '').trim())
-    const v2 = checkReply(text2)
+    const v2 = checkReplyCtx(text2)
     if (!v2.length) return { text: text2, guard: [...marca, ...v1.map(v => `${v.regra}: ${v.trecho}`)] }
     return {
       text: handoff ? CRM_MAP.textoSeguroFinal : CRM_MAP.textoSeguro,
@@ -178,7 +182,7 @@ export function createBrain(opts: LlmOptions) {
       }
       const text = (choice.message?.content || '').trim()
       if (!text) break
-      const safe = await enforce(messages, text, usage, handoff, ctx.lastLeadText)
+      const safe = await enforce(messages, text, usage, handoff, ctx)
       if (!handoff) {
         const alerta = CRM_MAP.alertas.find(a => a.finaliza && a.re.test(ctx.lastLeadText) && a.finaliza.seResposta.test(safe.text))
         if (alerta?.finaliza) {
@@ -195,7 +199,7 @@ export function createBrain(opts: LlmOptions) {
     const final = await call(messages, null, usage)
     const text = (final.message?.content || '').trim()
     if (!text) return null
-    const safe = await enforce(messages, text, usage, handoff, ctx.lastLeadText)
+    const safe = await enforce(messages, text, usage, handoff, ctx)
     return { text: safe.text, toolsUsed, handoff, urgente, guard: safe.guard, usage }
   }
 

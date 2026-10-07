@@ -343,7 +343,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           if (!campo) { erros.push(`"${key}" não é do roteiro desta porta`); continue }
           const ev = String(r.evidencia || '')
           // Já respondido não se regrava (o modelo às vezes reaproveita uma frase qualquer para sobrescrever)
-          if (state.respostas?.[key]) { erros.push(`${campo.name} já estava respondido (${state.respostas[key]}) — não pergunte de novo`); continue }
+          if (state.respostas?.[key] && !state.respostas[key].startsWith('formulário:')) { erros.push(`${campo.name} já estava respondido (${state.respostas[key]}) — não pergunte de novo`); continue }
           const valor = String(r.valor ?? '')
           const naoSei = DISSE_NAO_SEI.test(ev)
           // "sim"/"não" curto vale quando responde exatamente a pergunta deste campo
