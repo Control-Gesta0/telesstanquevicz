@@ -57,6 +57,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         else if (v.value !== o.value) problems.push(`campo "${c.key}": enum ${o.id} é "${v.value}" no Kommo e "${o.value}" no mapa`)
       }
     }
+    // Regras do escritório (CRM_MAP.negocio): o código grava nestes IDs sem perguntar ao modelo
+    const neg = CRM_MAP.negocio
+    const confere = (id: number, nome: string, tipo: RegExp, enums: number[] = []) => {
+      const lf = live.get(id)
+      if (!lf) { problems.push(`negócio: campo ${nome} (${id}) NÃO existe mais`); return }
+      if (lf.name.trim() !== nome) problems.push(`negócio: campo ${id} renomeado: mapa="${nome}" kommo="${lf.name}"`)
+      if (!tipo.test(lf.type)) problems.push(`negócio: campo ${nome} é ${lf.type}`)
+      for (const e of enums) if (!(lf.enums || []).some(x => x.id === e)) problems.push(`negócio: campo ${nome}: enum ${e} sumiu`)
+    }
+    confere(neg.nicho.fieldId, neg.nicho.kommoName, /select/, CRM_MAP.portas.map(p => p.nichoEnumId || 0).filter(Boolean))
+    confere(neg.desqualificado.fieldId, neg.desqualificado.kommoName, /select/, [neg.desqualificado.enumRobo])
+    confere(neg.reuniao.fieldId, neg.reuniao.kommoName, /date/)
+    confere(neg.reuniao.linkFieldId, neg.reuniao.linkKommoName, /url|text/)
+    const pdn = await kommoGet<{ _embedded?: { pipelines?: LivePipeline[] } }>('/api/v4/leads/pipelines')
+    const funil = (pdn._embedded?.pipelines || []).find(x => x.id === neg.pipelineId)
+    if (!funil) problems.push(`negócio: funil ${neg.pipelineId} não existe`)
+    for (const e of [neg.etapaQualificado, neg.etapaFollowUp]) {
+      const st = funil?._embedded?.statuses?.find(x => x.id === e.id)
+      if (!st) problems.push(`negócio: etapa "${e.name}" (${e.id}) não existe no funil ${neg.pipelineId}`)
+      else if (st.name !== e.name) problems.push(`negócio: etapa ${e.id} renomeada: mapa="${e.name}" kommo="${st.name}"`)
+    }
+    const ud = await kommoGet<{ _embedded?: { users?: Array<{ id: number; name: string; rights?: { is_active?: boolean } }> } }>('/api/v4/users?limit=250')
+    const users = new Map((ud._embedded?.users || []).map(u => [u.id, u]))
+    for (const id of new Set([...neg.responsaveis.abaixo, neg.responsaveis.acima, neg.responsavelPadrao])) {
+      const u = users.get(id)
+      if (!u) problems.push(`negócio: usuário ${id} (${neg.responsaveis.nomes[id] || '?'}) não existe`)
+      else if (u.rights?.is_active === false) problems.push(`negócio: usuário ${u.name} (${id}) está desativado`)
+    }
+    if (!process.env.CALENDLY_TOKEN) problems.push('CALENDLY_TOKEN ausente — a IA não oferece horário')
+    if (!process.env.QSTASH_TOKEN || !process.env.SELF_URL) avisos.push('QSTASH_TOKEN ou SELF_URL ausente — follow-up desligado')
+
     if (CRM_MAP.etapas.length) {
       const pd = await kommoGet<{ _embedded?: { pipelines?: LivePipeline[] } }>('/api/v4/leads/pipelines')
       for (const e of CRM_MAP.etapas) {

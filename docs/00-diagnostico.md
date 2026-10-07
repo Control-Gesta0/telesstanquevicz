@@ -1,6 +1,6 @@
 # Teles Stanquevicz · Agente de IA (Kommo)
 
-Estado do projeto: **DESENHANDO** (regras de negócio fechadas; ver `03-desenho.md`). Próximo gate: credenciais de infraestrutura para construir.
+Estado do projeto: **VALIDANDO → PROVANDO** (código no ar, evals 39/39; ver `04-construcao.md`). Próximo gate: Salesbot de envio, webhook e E2E no WhatsApp.
 Atualizado em 07/10/2026.
 
 ## Bloco 0 fechado

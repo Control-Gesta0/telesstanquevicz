@@ -42,8 +42,8 @@ const CAMPOS = {
 const BANCO_MONTADORA = /\bbanco\s+(toyota|volkswagen|vw|gm|chevrolet|honda|hyundai|renault|rci|fiat|stellantis|nissan|mercedes|bmw|volvo|yamaha|jeep|peugeot|citro[eë]n|mitsubishi|caoa|psa)\b|\b(rci|stellantis|psa) financ/i
 
 export const CRM_MAP = {
-  /** textarea que o Salesbot de envio lê. Criado no Passo 2 do playbook. */
-  respostaFieldId: 0,
+  /** textarea "Resposta IA (agente)" que o Salesbot de envio lê. Criado pela API em 07/10/2026. */
+  respostaFieldId: 1048279,
 
   /** a IA NUNCA escreve nestes campos: Observações (do time, tem nº de processo), processos, formulário */
   camposProibidos: [917704, 1009846, 1009860, 1047831, 1047825] as number[],
