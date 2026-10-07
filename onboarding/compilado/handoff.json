@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-10-07T12:56:55.054Z",
+  "client": {
+    "name": "Teles & Stanquevicz Advogados",
+    "slug": "telesstanquevicz",
+    "agentName": "Gabi",
+    "owner": "a confirmar (aprovador do escritório)"
+  },
+  "crm": "kommo",
+  "readyForBuild": false,
+  "blockers": [
+    "Confirmar definição de recuperação por resposta e registrar a fonte.",
+    "Confirmar definição de objetivo concretizado após follow-up e registrar a fonte.",
+    "Confirmar no CRM o sinal verificável do objetivo da recuperação.",
+    "Eliminar coexistência: o mesmo número já possui outro bot.",
+    "Obter credencial/acesso obrigatório: anthropic.",
+    "Obter credencial/acesso obrigatório: upstash.",
+    "Obter credencial/acesso obrigatório: vercel.",
+    "Obter Groq para transcrição de áudio."
+  ],
+  "warnings": [],
+  "artifacts": [
+    "00-diagnostico.md",
+    "01-decisoes.md",
+    "02-pendencias.md",
+    "03-credenciais.md",
+    "04-recuperacao.md",
+    "prompt.draft.md",
+    "crm-map.draft.ts",
+    "evals.draft.json"
+  ]
+}
