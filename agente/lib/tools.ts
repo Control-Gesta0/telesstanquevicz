@@ -220,7 +220,7 @@ export function describeOpen(porta: Porta, s: Snapshot, state: LeadState = {}): 
     const falta = s.abertos.filter(c => c.key === 'nomeCompleto' || c.key === 'email').map(c => c.name)
     if (state.horarioEscolhido) return falta.length ? `Horário escolhido (${state.horarioEscolhido.label}), ainda não reservado. Peça agora: ${falta[0]}. Depois chame agendar_reuniao.` : `Tudo pronto: chame agendar_reuniao para reservar ${state.horarioEscolhido.label}.`
     if (state.horariosOferecidos?.length) return `Horários já oferecidos: ${state.horariosOferecidos.map(h => h.label).join(' · ')}. Quando o lead escolher, chame agendar_reuniao. Se ele pedir outro dia ou período, chame ver_horarios de novo.`
-    return 'Qualificação completa. Próximo passo: explique em uma frase que a reunião é sem custo, por Google Meet, com o Dr. Carlos Eduardo, chame ver_horarios e ofereça os horários. Não peça nome nem e-mail antes de o lead escolher o horário.'
+    return `Qualificação completa. Próximo passo: explique em uma frase que a reunião é sem custo, por Google Meet, com o Dr. Carlos Eduardo, chame ver_horarios e ofereça os horários. Não peça nome nem e-mail antes de o lead escolher o horário.${porta.avisoAoAgendar ? ` ${porta.avisoAoAgendar}` : ''}`
   }
   if (!s.abertos.length) return 'Roteiro COMPLETO — faça o fechamento previsto no prompt e chame finalizar_atendimento(qualificado).'
   const prox = s.abertos[0]
@@ -427,7 +427,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         if (!opcoes.length && (pref.periodo || pref.dia)) { opcoes = escolherOpcoes(livres, new Date()); aviso = 'Não há horário livre no dia/período pedido; diga isso ao lead e ofereça estes. ' }
         if (!opcoes.length) return err('Não há horário livre nos próximos dias. Diga que a equipe confirma o horário por aqui, peça nome completo e e-mail e finalize como qualificado.')
         await port.patchState({ horariosOferecidos: opcoes, horarioEscolhido: undefined })
-        return ok(`${aviso}Horários livres: ${opcoes.map(o => o.label).join(' · ')}. Ofereça exatamente estes, numa mensagem só, e pergunte qual fica melhor.`)
+        return ok(`${aviso}Horários livres: ${opcoes.map(o => o.label).join(' · ')}. Ofereça exatamente estes, numa mensagem só, e pergunte qual fica melhor.${porta.avisoAoAgendar ? ` ${porta.avisoAoAgendar}` : ''}`)
       }
 
       case 'agendar_reuniao': {

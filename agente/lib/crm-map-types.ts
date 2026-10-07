@@ -43,6 +43,8 @@ export interface Porta {
   nichoEnumId?: number
   /** chaves do roteiro que precisam estar respondidas antes de oferecer horário */
   antesDeAgendar?: string[]
+  /** frase obrigatória junto com a oferta de horários (ex.: urgência do DBA) */
+  avisoAoAgendar?: string
 }
 
 /** Detecção em CÓDIGO no turno do lead → aviso no contexto do modelo (o modelo age, o código garante que ele saiba). */

@@ -92,6 +92,7 @@ export const CRM_MAP = {
       obrigatorios: ['apreendido', 'nomeCompleto', 'email'],
       antesDeAgendar: ['apreendido'],
       abertura: 'Entendi, vamos ver isso rápido. O veículo já foi apreendido?',
+      avisoAoAgendar: 'Na mesma mensagem dos horários, diga em uma frase que o prazo de defesa pode já estar correndo e que por isso o ideal é falar com o advogado o quanto antes. Ofereça primeiro o horário mais cedo.',
     },
     {
       id: 'geral',

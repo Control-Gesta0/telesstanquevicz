@@ -131,6 +131,7 @@ async function main() {
       console.log(`\n${passou ? '✅' : '❌'} ${c.id} [${rep}/${REPS}] nota ${nota}/10`)
       if (!passou) {
         console.log(transcript.split('\n').map(l => `   ${l}`).join('\n'))
+        for (const t of turnos) if (t.guard.length) console.log(`   🔒 trava em "${t.lead.slice(0, 40)}": ${t.guard.join(' | ')}`)
         for (const f of falhasCodigo) console.log(`   ⛔ código: ${f}`)
         for (const f of falhasJuiz) console.log(`   ⛔ juiz: ${f.criterio} — ${f.porque}`)
         for (const l of w.log) console.log(`   · ${l}`)

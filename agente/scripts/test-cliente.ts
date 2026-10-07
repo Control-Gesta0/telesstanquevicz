@@ -22,6 +22,8 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('honorários inventados bloqueiam', checarContexto('Os honorários ficam em R$ 1.997,90 de entrada.', { leadText: 'quanto custa?', reuniaoMarcada: false }).map(v => v.regra), ['valor que o lead não disse'])
   eq('valor dito pelo lead passa', checarContexto('Entendi, uma dívida de uns 80 mil no cartão.', { leadText: 'deve dar uns 80 mil no cartão', reuniaoMarcada: false }), [])
   eq('"ficou marcado" sem reserva bloqueia', checarContexto('Pronto, ficou marcado para quinta às 9h15.', { leadText: 'quinta 9h15', reuniaoMarcada: false }).map(v => v.regra), ['disse que marcou sem reserva'])
+  eq('pedir e-mail "para deixar a reunião marcada" passa', checarContexto('Para deixar a reunião marcada, qual o seu e-mail?', { leadText: 'Maria Souza', reuniaoMarcada: false }), [])
+  eq('"já marquei" sem reserva bloqueia', checarContexto('Já marquei para quinta às 9h15.', { leadText: 'quinta', reuniaoMarcada: false }).map(v => v.regra), ['disse que marcou sem reserva'])
   eq('"ficou marcado" com reserva passa', checarContexto('Pronto, ficou marcado para quinta às 9h15.', { leadText: 'quinta 9h15', reuniaoMarcada: true }), [])
 
   // Valor da dívida e responsável

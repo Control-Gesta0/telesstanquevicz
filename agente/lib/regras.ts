@@ -28,7 +28,9 @@ export function checarContexto(text: string, ctx: { leadText: string; reuniaoMar
     if (numero && !digitosLead.has(numero)) out.push({ regra: 'valor que o lead não disse', trecho: m[0] })
   }
   if (!ctx.reuniaoMarcada) {
-    const marcado = text.match(/\b(est[aá]|fica|ficou|j[aá] (est[aá]|deixei)|deixei)\s+(marcad[oa]|agendad[oa]|reservad[oa]|confirmad[oa])\b|\breuni[aã]o (marcada|agendada|confirmada)\b/i)
+    // Só a AFIRMAÇÃO de que já está marcado ("ficou marcado", "já está agendada"). Pedir o e-mail
+    // "para deixar a reunião marcada" é legítimo e não pode cair na trava.
+    const marcado = text.match(/\b(est[aá]|ficou|foi|j[aá] est[aá])\s+(marcad[oa]|agendad[oa]|reservad[oa]|confirmad[oa])\b|\b(j[aá] )?(deixei|marquei|agendei|reservei)\b(?![^.?!]*\?)/i)
     if (marcado) out.push({ regra: 'disse que marcou sem reserva', trecho: marcado[0] })
   }
   return out
