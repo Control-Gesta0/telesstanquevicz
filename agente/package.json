@@ -1,0 +1,24 @@
+{
+  "name": "agente-ia-kommo",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Agente SDR de IA (Kommo, Desenho A/Salesbot) — OpenAI + Kommo v4 + Upstash Redis, sem n8n. Template Control Gestão.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/test-guards.ts",
+    "evals": "tsx scripts/evals.ts",
+    "discover": "tsx scripts/discover.ts",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.34.3",
+    "@vercel/functions": "^1.5.2",
+    "openai": "^4.104.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vercel/node": "^5.0.2",
+    "tsx": "^4.23.13",
+    "typescript": "^5.7.2"
+  }
+}
