@@ -179,7 +179,17 @@ export const CRM_MAP = {
       para: { pipelineId: 9312127, statusId: 72657491, name: 'contrato fechado/pago' },
       /** marca a venda: o lead sai do "ganho" do CLOSER, a tag guarda o fato para relatório */
       tag: 'contrato-pago',
+      nota: 'Contrato pago (venda ganha no CLOSER em {quando}{valor}). Movido para JURÍDICO › contrato fechado/pago pela automação.',
     },
+    /** SDR › ganho (= reunião realizada) → CLOSER › Proposta. Responsável mantido. */
+    reuniaoRealizada: {
+      de: { pipelineId: 9299515, statusId: 142, name: 'Closed - won' },
+      para: { pipelineId: 9312103, statusId: 72851523, name: 'Proposta' },
+      tag: 'reuniao-realizada',
+      nota: 'Reunião realizada (ganho no SDR em {quando}). Movido para CLOSER › Proposta pela automação.',
+    },
+    /** trava de movimentação em massa: mais que isso numa janela = limpeza de funil, não venda */
+    limiteEmMassa: { eventos: 20, janelaSeg: 600 },
   },
 
   calendly: {

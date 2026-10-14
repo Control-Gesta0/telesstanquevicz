@@ -35,30 +35,43 @@ export function parseStatusLead(raw: unknown): { accountId: string; mudancas: Mu
   return { accountId: pick(body, 'account[id]', ['account', 'id']), mudancas }
 }
 
+export type Automacao = 'contratoPago' | 'reuniaoRealizada'
+const AUTOMACOES: Automacao[] = ['contratoPago', 'reuniaoRealizada']
+
 /** Qual automação esta mudança dispara (null = nenhuma). */
-export function decidir(m: MudancaEtapa): 'contratoPago' | null {
-  const a = CRM_MAP.automacoes.contratoPago
-  if (m.pipelineId === a.de.pipelineId && m.statusId === a.de.statusId && m.oldStatusId !== a.de.statusId) return 'contratoPago'
+export function decidir(m: MudancaEtapa): Automacao | null {
+  for (const nome of AUTOMACOES) {
+    const a = CRM_MAP.automacoes[nome]
+    if (m.pipelineId === a.de.pipelineId && m.statusId === a.de.statusId && !(m.oldPipelineId === a.de.pipelineId && m.oldStatusId === a.de.statusId)) return nome
+  }
   return null
 }
 
 export async function executar(m: MudancaEtapa): Promise<string> {
-  const acao = decidir(m)
-  if (!acao) return 'nenhuma'
+  const nome = decidir(m)
+  if (!nome) return 'nenhuma'
+  const a = CRM_MAP.automacoes[nome]
   // Webhook repetido (o Kommo reenvia em falha) não move duas vezes
-  if ((await redis.set(k('auto', acao, m.leadId, m.oldStatusId), '1', { nx: true, ex: 3600 })) !== 'OK') return 'duplicado'
-  const a = CRM_MAP.automacoes.contratoPago
+  if ((await redis.set(k('auto', nome, m.leadId, m.oldStatusId), '1', { nx: true, ex: 3600 })) !== 'OK') return 'duplicado'
+  // Trava de massa: limpeza de funil (centenas de "ganhos" de uma vez) não é venda nem reunião
+  const lim = CRM_MAP.automacoes.limiteEmMassa
+  const n = await redis.incr(k('auto', nome, 'janela'))
+  if (n === 1) await redis.expire(k('auto', nome, 'janela'), lim.janelaSeg)
+  if (n > lim.eventos) {
+    await logExec({ tipo: 'automacao', leadId: m.leadId, detalhe: `${nome} PAUSADO: mais de ${lim.eventos} em ${lim.janelaSeg / 60} min (movimentação em massa?). Lead não movido.` })
+    return 'pausado (massa)'
+  }
   const lead = await getLead(m.leadId)
-  // Fail-closed: só age se o lead AINDA está em CLOSER › Venda ganha (o webhook pode chegar atrasado)
+  // Fail-closed: só age se o lead AINDA está na etapa de origem (o webhook pode chegar atrasado)
   if (lead.pipeline_id !== a.de.pipelineId || lead.status_id !== a.de.statusId) {
-    await logExec({ tipo: 'automacao', leadId: m.leadId, nome: lead.name, detalhe: `contrato pago: lead já não está em ${a.de.name}, nada feito` })
+    await logExec({ tipo: 'automacao', leadId: m.leadId, nome: lead.name, detalhe: `${nome}: lead já não está em ${a.de.name}, nada feito` })
     return 'fora da etapa'
   }
   await updateLeadStatus(m.leadId, a.para.statusId, a.para.pipelineId)
   const quando = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' })
   const valor = lead.price ? ` · valor R$ ${Number(lead.price).toLocaleString('pt-BR')}` : ''
   await addLeadTags(m.leadId, [a.tag]).catch(e => console.error('[automacao] tag falhou:', e))
-  await addLeadNote(m.leadId, `Contrato pago (venda ganha no CLOSER em ${quando}${valor}). Movido para JURÍDICO › ${a.para.name} pela automação.`).catch(e => console.error('[automacao] nota falhou:', e))
-  await logExec({ tipo: 'automacao', leadId: m.leadId, nome: lead.name, detalhe: `contrato pago → JURÍDICO › ${a.para.name}` })
-  return 'movido para o jurídico'
+  await addLeadNote(m.leadId, a.nota.replace('{quando}', quando).replace('{valor}', valor)).catch(e => console.error('[automacao] nota falhou:', e))
+  await logExec({ tipo: 'automacao', leadId: m.leadId, nome: lead.name, detalhe: `${nome} → ${a.para.name}` })
+  return `movido para ${a.para.name}`
 }

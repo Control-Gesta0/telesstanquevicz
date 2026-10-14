@@ -129,10 +129,11 @@ CLOSER: Leads de entrada · Proposta · Contrato · Pagamento
 | Função | Antes | Situação |
 |---|---|---|
 | Contrato pago → JURÍDICO | etapa "Jurídico" do CLOSER movia para JURÍDICO › contrato fechado/pago | **na Vercel desde 14/10**: CLOSER › Venda ganha → JURÍDICO › contrato fechado/pago em até 5s, com tag `contrato-pago` e nota. Prova: lead de teste 26201039 |
-| Reunião realizada (ganho no SDR) → CLOSER › Proposta | não existia | a construir |
+| Reunião realizada (ganho no SDR) → CLOSER › Proposta | não existia | **na Vercel desde 14/10**: em até 5s, com tag `reuniao-realizada` e nota. Prova: lead de teste 26201097 |
 | Origem e campanha (De onde, Define Campanha, Painel) | bots de origem | sem automação até o rastreador de origem |
 | Mensagens do CLOSER (proposta, documentos, assinatura, pagamento, Assas, follow-up do closer) | bots por etapa | sem automação: o closer envia pelas respostas prontas |
 | Tag "Follow up" ao entrar em Follow-up | gatilho da etapa | **continua ativa** no Kommo |
+| Tag "Desqualificado" ao ir para perdido no CLOSER | gatilho da etapa | **continua ativa** no Kommo (visto no teste de 14/10) |
 
 ### Ponto em aberto
 A API ainda mostra como **ligados** os 33 bots da lista de desligar. Se eles foram só tirados das etapas, isso basta para o funil. Mas eles continuam aptos a rodar se outro gatilho os chamar.
@@ -143,3 +144,11 @@ A API ainda mostra como **ligados** os 33 bots da lista de desligar. Se eles for
 - **Por que a tag:** o lead sai do "ganho" do CLOSER ao ir para o JURÍDICO (no Kommo um lead vive num funil só). A tag e o histórico de etapas guardam a venda para relatório.
 - **Prova:** lead de teste 26201039, sem contato, chegou ao JURÍDICO em menos de 5s; fechado como perdido no JURÍDICO depois do teste (a automação não reagiu a isso, como deve).
 - **Se falhar:** aparece como `erro` no diário (`/api/executions`) e o lead fica em Venda ganha. O time move à mão.
+
+## Automação "reunião realizada → CLOSER › Proposta" (14/10/2026)
+
+- **Como funciona:** depois da reunião, o lead é arrastado para **ganho no SDR**. A Vercel confirma que ele continua lá e move para **CLOSER › Proposta**, sem trocar o responsável, com tag `reuniao-realizada` e nota.
+- **Mudança de hábito do time:** "ganho no SDR" passou a significar **reunião realizada**. Para arquivar lead sem reunião, use **perdido** com motivo.
+- **Trava de massa (vale para as duas automações):** mais de 20 eventos em 10 minutos pausam a automação. Os leads ficam onde estão e o diário registra "PAUSADO". Isso protege contra limpeza de funil em massa, que já aconteceu (792 "ganhos" no SDR em 30 dias).
+- **Prova:** lead de teste 26201097 chegou a Proposta em menos de 5s; fechado como perdido no CLOSER depois do teste.
+- **Em aberto:** quem é o responsável no CLOSER para os leads de R$ 50 mil ou mais? Hoje ele continua com o SDR, que aqueceu o lead.

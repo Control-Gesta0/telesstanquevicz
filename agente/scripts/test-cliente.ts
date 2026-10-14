@@ -151,7 +151,10 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   const aninhado = parseStatusLead({ account: { id: '33277515' }, leads: { status: [{ id: '556', status_id: '142', pipeline_id: '9312103', old_status_id: '72851523', old_pipeline_id: '9312103' }] } })
   eq('webhook status_lead aninhado', [aninhado.accountId, aninhado.mudancas[0]?.leadId], ['33277515', 556])
   eq('venda ganha no CLOSER dispara contrato pago', decidir(plano.mudancas[0]), 'contratoPago')
-  eq('ganho no SDR não dispara', decidir({ leadId: 1, statusId: 142, pipelineId: 9299515, oldStatusId: 86825532, oldPipelineId: 9299515 }), null)
+  eq('ganho no SDR (reunião realizada) dispara Proposta', decidir({ leadId: 1, statusId: 142, pipelineId: 9299515, oldStatusId: 86825532, oldPipelineId: 9299515 }), 'reuniaoRealizada')
+  eq('a ida para Proposta não dispara (sem laço)', decidir({ leadId: 1, statusId: 72851523, pipelineId: 9312103, oldStatusId: 142, oldPipelineId: 9299515 }), null)
+  eq('perdido no SDR não dispara', decidir({ leadId: 1, statusId: 143, pipelineId: 9299515, oldStatusId: 72104595, oldPipelineId: 9299515 }), null)
+  eq('ganho do JURÍDICO não dispara', decidir({ leadId: 1, statusId: 142, pipelineId: 9312127, oldStatusId: 72186743, oldPipelineId: 9312127 }), null)
   eq('a própria ida ao JURÍDICO não dispara (sem laço)', decidir({ leadId: 1, statusId: 72657491, pipelineId: 9312127, oldStatusId: 142, oldPipelineId: 9312103 }), null)
   eq('mudança para Pagamento não dispara', decidir({ leadId: 1, statusId: 72186419, pipelineId: 9312103, oldStatusId: 72686979, oldPipelineId: 9312103 }), null)
 
