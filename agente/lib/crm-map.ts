@@ -140,15 +140,15 @@ export const CRM_MAP = {
     },
   ] as Alerta[],
 
-  /** o modelo NÃO move etapa: qualificado vai para AGENDAR REUNIÃO pelo código (negocio.etapaQualificado) */
+  /** o modelo NÃO move etapa: qualificado vai para Reunião agendada pelo código (negocio.etapaQualificado) */
   etapas: [] as Etapa[],
-  /** status onde o lead é do time — a IA não mexe: ganho, perdido, NO SHOW, "dia" */
+  /** status onde o lead é do time — a IA não mexe: ganho, perdido, No-show, "ANTIGA · dia" (funil enxuto de 14/10/2026) */
   etapasProtegidas: [142, 143, 72113011, 109569188] as number[],
 
   negocio: {
     pipelineId: 9299515,
-    etapaQualificado: { id: 86825532, name: 'AGENDAR REUNIÃO' },
-    etapaFollowUp: { id: 72104595, name: 'FOLLOW UP' },
+    etapaQualificado: { id: 86825532, name: 'Reunião agendada' },
+    etapaFollowUp: { id: 72104595, name: 'Follow-up' },
     nicho: { fieldId: 1023263, kommoName: 'Nichos' },
     desqualificado: { fieldId: 1023548, kommoName: 'Desqualificado', enumRobo: 744848, valorRobo: 'Desqualificado robô' },
     reuniao: { fieldId: 719788, kommoName: 'Reunião', linkFieldId: 1012980, linkKommoName: 'Link da Reunião' },

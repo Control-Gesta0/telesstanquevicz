@@ -52,3 +52,31 @@ Etapa renomeada mantém o histórico e as automações. Etapa apagada some dos r
 3. **impactmind** recebe mudança de etapa: se for painel por ID de etapa, os gráficos mudam junto.
 4. **Mudança em andamento:** 72186399 já foi renomeada para "no show" por alguém. Uma pessoa só mexe no funil até terminar.
 5. **A IA:** depois da mudança, atualizo o mapa (nome da etapa de reunião e a lista de etapas protegidas), rodo `/api/validate` e publico.
+
+## Execução
+
+**Passo 1 feito em 14/10/2026** (autorização escrita do mestre). Foto de antes: `docs/backup/funis-antes-2026-10-14.json`.
+
+| SDR (ordem na tela) | ID |
+|---|---|
+| Leads de entrada | 72104583 |
+| Em atendimento | 72186399 |
+| Follow-up | 72104595 |
+| Reunião agendada | 86825532 |
+| No-show | 72113011 |
+| ANTIGA · NOVA OPORTUNIDADE | 72104587 |
+| ANTIGA · dia | 109569188 |
+
+| CLOSER (ordem na tela) | ID |
+|---|---|
+| Leads de entrada | 72186407 |
+| Proposta | 72851523 |
+| Contrato | 72686979 |
+| Pagamento | 72186419 |
+| ANTIGA · FORMS, Retorno imediato, Reunião agendada, No show, Aguardando assinatura, Jurídico, Follow up | 110421768, 72686959, 72186411, 72577607, 72186415, 72574327, 72186443 |
+
+- Nenhum lead mudou de etapa (renomear não move lead).
+- Incidente: o Kommo apagou o nome das 6 etapas do SDR quando corrigi a ordem com um PATCH só de `sort` (respondeu 200). Ficaram sem nome por 1 a 2 minutos e foram restauradas com nome e posição no mesmo PATCH.
+- Mapa da IA atualizado (Reunião agendada, Follow-up), publicado, `/api/validate` ok exceto `KOMMO_BOT_ID`.
+
+**Passo 2, pendente:** inventário das automações das etapas "ANTIGA ·", religar o que importa nas etapas novas, decidir os 1.060 leads do "dia" e apagar as etapas antigas. Até lá, as 5 + 4 etapas novas são as primeiras da tela, mas as antigas ainda ocupam colunas à direita.
