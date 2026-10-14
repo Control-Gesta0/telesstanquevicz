@@ -110,3 +110,29 @@ Lembrete de reunião 24h (10528) e 2h (10530) até a versão Vercel · Fechar co
 3. Apago as etapas "ANTIGA ·" vazias.
 
 Também fora do alcance da API: os gatilhos do funil digital que não são Salesbot (mudar etapa, criar tarefa, webhook). Eles aparecem no botão "Automatizar" de cada funil e precisam ser removidos lá.
+
+## Passo 2 executado (14/10/2026)
+
+- **"dia" → Follow-up:** prova com 10 leads observada por 5 minutos (nenhuma mensagem, tarefa ou mudança de etapa); depois os demais em lotes. "dia" ficou com 0, Follow-up com 9.938. Na conta inteira, nenhuma mensagem saiu para os leads movidos. Única reação: uma automação de etapa que continua em Follow-up pôs a tag "Follow up" em 4 leads (os outros já tinham).
+- **Etapas apagadas (9):** ANTIGA · NOVA OPORTUNIDADE, ANTIGA · dia (SDR); FORMS, Retorno imediato, Reunião agendada, No show, Aguardando assinatura, Jurídico, Follow up (CLOSER). Cada uma conferida vazia logo antes de apagar.
+- O lead 1569162 tinha sido arrastado à mão para "ANTIGA · Retorno imediato" às 13h29 pelo usuário SDR; foi para **Proposta** com nota explicando.
+- Mapa da IA sem a etapa extinta, publicado; `/api/validate` ok, exceto `KOMMO_BOT_ID`.
+- Foto de depois: `docs/backup/funis-depois-2026-10-14.json`.
+
+### Resultado
+
+SDR: Leads de entrada · Em atendimento · Follow-up · Reunião agendada · No-show
+CLOSER: Leads de entrada · Proposta · Contrato · Pagamento
+
+### O que deixou de existir e precisa ir para a Vercel
+
+| Função | Antes | Situação |
+|---|---|---|
+| Contrato pago → JURÍDICO | etapa "Jurídico" do CLOSER movia para JURÍDICO › contrato fechado/pago | **sem automação**: até existir na Vercel, o time move à mão |
+| Reunião realizada (ganho no SDR) → CLOSER › Proposta | não existia | a construir |
+| Origem e campanha (De onde, Define Campanha, Painel) | bots de origem | sem automação até o rastreador de origem |
+| Mensagens do CLOSER (proposta, documentos, assinatura, pagamento, Assas, follow-up do closer) | bots por etapa | sem automação: o closer envia pelas respostas prontas |
+| Tag "Follow up" ao entrar em Follow-up | gatilho da etapa | **continua ativa** no Kommo |
+
+### Ponto em aberto
+A API ainda mostra como **ligados** os 33 bots da lista de desligar. Se eles foram só tirados das etapas, isso basta para o funil. Mas eles continuam aptos a rodar se outro gatilho os chamar.

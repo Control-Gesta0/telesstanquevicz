@@ -142,8 +142,8 @@ export const CRM_MAP = {
 
   /** o modelo NÃO move etapa: qualificado vai para Reunião agendada pelo código (negocio.etapaQualificado) */
   etapas: [] as Etapa[],
-  /** status onde o lead é do time — a IA não mexe: ganho, perdido, No-show, "ANTIGA · dia" (funil enxuto de 14/10/2026) */
-  etapasProtegidas: [142, 143, 72113011, 109569188] as number[],
+  /** status onde o lead é do time — a IA não mexe: ganho, perdido, No-show (funil enxuto de 14/10/2026: o "dia" foi extinto) */
+  etapasProtegidas: [142, 143, 72113011] as number[],
 
   negocio: {
     pipelineId: 9299515,
