@@ -187,5 +187,20 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('assinatura do Calendly: corpo alterado falha', assinaturaValida(`t=${tW},v1=${v1}`, corpo + ' ', chaveW), false)
   eq('assinatura do Calendly: velha (>5 min) falha', assinaturaValida(`t=${tW - 400},v1=${v1}`, corpo, chaveW), false)
 
+  // Rastreador de origem
+  const { novoCodigo, origemDoLink, linkWhatsapp, lerMarca, camposDaOrigem } = await import('../lib/rastreio')
+  eq('código: 4 letras sem O/0/I/1', /^[A-HJ-NP-Z2-9]{4}$/.test(novoCodigo()), true)
+  const oMeta = origemDoLink('meta-rcv', { utm_campaign: 'rcv-outubro', fbclid: 'abc123' })
+  eq('link: parâmetro da URL vence o padrão', [oMeta?.deOnde, oMeta?.utm_source, oMeta?.utm_campaign, oMeta?.fbclid], ['Meta', 'facebook', 'rcv-outubro', 'abc123'])
+  eq('link: slug inexistente', origemDoLink('nao-existe', {}), null)
+  eq('link do WhatsApp com frase e código', linkWhatsapp('+55 47 99999-0000', 'Olá!', 'K7PX'), 'https://wa.me/5547999990000?text=Ol%C3%A1!%20(c%C3%B3d.%20K7PX)')
+  eq('mensagem com código: lê e limpa', lerMarca('Olá! Vi o anúncio e quero saber sobre a revisão do financiamento do meu veículo. (cód. K7PX)'), { tipo: 'cod', codigo: 'K7PX', limpo: 'Olá! Vi o anúncio e quero saber sobre a revisão do financiamento do meu veículo.' })
+  eq('mensagem com ref fixa de anúncio', lerMarca('Quero saber mais (ref. RCV1)').codigo, 'RCV1')
+  eq('ref desconhecida não conta', lerMarca('oi (ref. XPTO9)').tipo, null)
+  eq('mensagem comum fica igual', lerMarca('oi, tudo bem?'), { tipo: null, codigo: '', limpo: 'oi, tudo bem?' })
+  eq('origem vira campos (UTM + De onde por enum)', camposDaOrigem({ deOnde: 'Meta', utm_source: 'facebook', utm_campaign: 'rcv', fbclid: 'x' }).map(f => f.field_id).sort(), [1023546, 369986, 369988, 370000].sort())
+  const { classificar: cls, escolherPorta: ep } = await import('../lib/router')
+  eq('frase do link leva a Gabi para a porta certa', ['meta-rcpcc', 'meta-rcv', 'meta-dba'].map(s => ep(cls(lerMarca((CRM_MAP as any).rastreio.links[s].texto).limpo))?.id), ['rcpcc', 'rcv', 'dba'])
+
   return 0
 }

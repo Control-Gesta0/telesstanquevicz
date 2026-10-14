@@ -7,6 +7,7 @@ import { logExec } from '../lib/execlog'
 import { cancelarFollowup } from '../lib/followup'
 import { appendMessage, isEchoOfSent, markHumanSpoke, seenMessage } from '../lib/history'
 import { mediaKind, mediaToText } from '../lib/media'
+import { aplicarRastreio } from '../lib/rastreio'
 import { isResetCommand, resetLead } from '../lib/reset'
 import { getLead, leadTags } from '../lib/kommo'
 import { k, redis } from '../lib/redis'
@@ -88,6 +89,9 @@ async function ingest(msgs: InboundMsg[], webhookId: string): Promise<void> {
   for (const m of msgs) {
     try {
       if (await seenMessage(`kommo:${m.id}`)) continue
+      // Rastreador de origem: roda para TODO lead (antes do gate), só quando a mensagem traz código.
+      // O código sai do texto antes de qualquer outro uso.
+      if (m.direction !== 'outgoing' && m.text) m.text = await aplicarRastreio(m.leadId, m.text)
       // Webhook da conta inteira: só guarda e processa conversa de lead que a IA atende (gate e sem humano).
       // Lead sem a tag não entra no Redis nem passa pela OpenAI (custo e LGPD).
       // (lead de teste passa sempre: o "reset" precisa chegar mesmo depois que a finalização tirou a tag)

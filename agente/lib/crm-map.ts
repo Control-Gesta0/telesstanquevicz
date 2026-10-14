@@ -214,6 +214,36 @@ export const CRM_MAP = {
     janelaMin: 30,
   },
 
+  /**
+   * Rastreador de origem e campanha (14/10/2026). O Tintim (webhook add_message) está desativado e
+   * desde 30/09 os leads entram sem UTM. Duas entradas, sem depender de Meta/Google:
+   *  - link rastreado /r/<slug>: gera código de uso único (7 dias) e abre o WhatsApp com a frase + "(cód. XXXX)"
+   *  - código fixo "(ref. XXXX)" na mensagem pronta de anúncio que abre o WhatsApp direto
+   * A primeira mensagem com o código grava De onde + UTMs no lead. O código sai do texto antes da IA.
+   */
+  rastreio: {
+    deOnde: { fieldId: 1023546, kommoName: 'De onde', enums: { Google: 744842, Meta: 744844, Instagram: 744846 } as Record<string, number> },
+    campos: { utm_source: 369988, utm_medium: 369984, utm_campaign: 369986, utm_content: 369982, utm_term: 369990, fbclid: 370000, gclid: 369998, referrer: 369994 } as Record<string, number>,
+    links: {
+      'meta-rcpcc': { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'paid_social', utm_campaign: 'rcpcc', texto: 'Olá! Vi o anúncio e quero saber sobre a revisão dos juros da minha dívida com o banco.' },
+      'meta-rcv': { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'paid_social', utm_campaign: 'rcv', texto: 'Olá! Vi o anúncio e quero saber sobre a revisão do financiamento do meu veículo.' },
+      'meta-dba': { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'paid_social', utm_campaign: 'dba', texto: 'Olá! Vi o anúncio e preciso de ajuda com a busca e apreensão do meu veículo.' },
+      'google-rcpcc': { deOnde: 'Google', utm_source: 'google', utm_medium: 'cpc', utm_campaign: 'rcpcc', texto: 'Olá! Quero saber sobre a revisão dos juros da minha dívida com o banco.' },
+      'google-rcv': { deOnde: 'Google', utm_source: 'google', utm_medium: 'cpc', utm_campaign: 'rcv', texto: 'Olá! Quero saber sobre a revisão do financiamento do meu veículo.' },
+      'google-dba': { deOnde: 'Google', utm_source: 'google', utm_medium: 'cpc', utm_campaign: 'dba', texto: 'Olá! Preciso de ajuda com a busca e apreensão do meu veículo.' },
+      'instagram-bio': { deOnde: 'Instagram', utm_source: 'instagram', utm_medium: 'bio', utm_campaign: 'perfil', texto: 'Olá! Vim pelo Instagram e quero falar sobre o meu caso.' },
+      'site': { deOnde: '', utm_source: 'site', utm_medium: 'organic', utm_campaign: 'site', texto: 'Olá! Vim pelo site e quero falar sobre o meu caso.' },
+      'youtube': { deOnde: '', utm_source: 'youtube', utm_medium: 'video', utm_campaign: 'youtube', texto: 'Olá! Vi o vídeo de vocês e quero falar sobre o meu caso.' },
+    } as Record<string, { deOnde: string; utm_source: string; utm_medium: string; utm_campaign: string; texto: string }>,
+    /** códigos fixos para anúncio que abre o WhatsApp direto (texto pronto do anúncio termina com "(ref. CODIGO)") */
+    refs: {
+      RCPCC1: { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'ctwa', utm_campaign: 'rcpcc' },
+      RCV1: { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'ctwa', utm_campaign: 'rcv' },
+      DBA1: { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'ctwa', utm_campaign: 'dba' },
+    } as Record<string, { deOnde: string; utm_source: string; utm_medium: string; utm_campaign: string }>,
+    validadeCodigoDias: 7,
+  },
+
   calendly: {
     /** ATENDIMENTO GERAL (30 min, Google Meet): 97 das 100 últimas reuniões */
     eventType: 'https://api.calendly.com/event_types/124acd98-cbd5-46cb-a23f-2473339a2996',

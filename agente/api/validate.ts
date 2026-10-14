@@ -93,6 +93,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!sj) problems.push(`automação ${nome}: etapa ${ap.statusId} não existe no funil ${ap.pipelineId}`)
       else if (sj.name !== ap.name) problems.push(`automação ${nome}: etapa ${ap.statusId} renomeada: mapa="${ap.name}" kommo="${sj.name}"`)
     }
+    // Rastreador de origem: campos de UTM e "De onde" com os enums usados
+    for (const [nome, id] of Object.entries(CRM_MAP.rastreio.campos)) {
+      const lf = live.get(id)
+      if (!lf) problems.push(`rastreio: campo ${nome} (${id}) NÃO existe mais`)
+      else if (lf.name.trim() !== nome) problems.push(`rastreio: campo ${id} renomeado: mapa="${nome}" kommo="${lf.name}"`)
+    }
+    confere(CRM_MAP.rastreio.deOnde.fieldId, CRM_MAP.rastreio.deOnde.kommoName, /select/, Object.values(CRM_MAP.rastreio.deOnde.enums))
+    if (!process.env.WHATSAPP_NUMERO) avisos.push('WHATSAPP_NUMERO ausente — os links /r/<slug> respondem 503')
     if (!process.env.CALENDLY_TOKEN) problems.push('CALENDLY_TOKEN ausente — a IA não oferece horário')
     if (!process.env.QSTASH_TOKEN || !process.env.SELF_URL) avisos.push('QSTASH_TOKEN ou SELF_URL ausente — follow-up desligado')
 

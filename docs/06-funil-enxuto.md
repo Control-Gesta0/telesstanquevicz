@@ -180,3 +180,20 @@ O Calendly teve **147 reuniões em 30 dias**; o campo "Reunião" do Kommo só te
 - **Provas:** teste num lead de TESTE (26201451): marcada → etapa, data, link e nota; cancelada → data limpa, nota e tarefa; fechado como perdido depois. Reunião real de 14/10 15:30 trazida pelo backfill e achada por telefone (lead 26193477): **o Kommo tinha 14:30, o Calendly 15:30**, e a ponte corrigiu.
 - **Scripts:** `scripts/test-calendly-sync.ts` (E2E no lead de teste) · `scripts/backfill-calendly.ts [dias]` (traz reuniões futuras).
 - Com isso, os lembretes (`/api/lembretes`) passam a enxergar as reuniões do Calendly, não só um terço delas.
+
+## Rastreador de origem e campanha (14/10/2026)
+
+**Diagnóstico:** dos 109 leads dos últimos 14 dias, 108 entraram sem nenhuma origem. UTMs e respostas do formulário pararam por volta de 30/09. O webhook do **Tintim** (rastreio de anúncio de WhatsApp) está **desativado** na conta. Os bots "Painel"/"Define Campanha" só copiavam tags.
+
+**Como funciona agora:**
+- **Link rastreado** `https://telesstanquevicz-ia.vercel.app/r/<link>`: cada clique gera um código de uso único (7 dias) e abre o WhatsApp do escritório com a frase pronta + "(cód. XXXX)". Aceita na URL `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `fbclid`, `gclid` (o parâmetro da URL vence o padrão do link).
+- **Anúncio que abre o WhatsApp direto:** colocar no fim da mensagem pronta do anúncio `(ref. RCPCC1)`, `(ref. RCV1)` ou `(ref. DBA1)`.
+- Na primeira mensagem com o código, a Vercel grava **De onde** + UTMs + fbclid/gclid no lead (qualquer lead, com ou sem a tag da Gabi). O código sai do texto antes de a Gabi ver. Mensagem sem código não é lida nem guardada.
+- A frase de cada link já leva a Gabi para a porta certa (RCPCC, RCV, DBA).
+- **Resumo:** `GET /api/r?resumo=1&secret=` → cliques e leads por link nos últimos 30 dias.
+
+**Links prontos:** meta-rcpcc · meta-rcv · meta-dba · google-rcpcc · google-rcv · google-dba · instagram-bio · site · youtube
+
+**Prova:** lead de teste 26201719 recebeu utm_source=facebook, utm_medium=paid_social, utm_campaign=rcv, utm_content, fbclid e De onde=Meta; o mesmo código reenviado foi ignorado (uso único). Lead fechado como perdido depois.
+
+**Falta:** `WHATSAPP_NUMERO` (número do WhatsApp do escritório) para os links redirecionarem; até lá respondem 503. "De onde" só tem Google, Meta e Instagram: site e YouTube ficam só na UTM, a não ser que se criem essas opções no campo.

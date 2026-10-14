@@ -1,13 +1,40 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/inbound.ts": { "maxDuration": 300, "includeFiles": "prompts/**" },
-    "api/validate.ts": { "maxDuration": 60, "includeFiles": "prompts/**" },
-    "api/executions.ts": { "maxDuration": 30 },
-    "api/salesbot.ts": { "maxDuration": 30 },
-    "api/followup.ts": { "maxDuration": 60 },
-    "api/crm-eventos.ts": { "maxDuration": 60 },
-    "api/lembretes.ts": { "maxDuration": 120 },
-    "api/calendly.ts": { "maxDuration": 60 }
-  }
+    "api/inbound.ts": {
+      "maxDuration": 300,
+      "includeFiles": "prompts/**"
+    },
+    "api/validate.ts": {
+      "maxDuration": 60,
+      "includeFiles": "prompts/**"
+    },
+    "api/executions.ts": {
+      "maxDuration": 30
+    },
+    "api/salesbot.ts": {
+      "maxDuration": 30
+    },
+    "api/followup.ts": {
+      "maxDuration": 60
+    },
+    "api/crm-eventos.ts": {
+      "maxDuration": 60
+    },
+    "api/lembretes.ts": {
+      "maxDuration": 120
+    },
+    "api/calendly.ts": {
+      "maxDuration": 60
+    },
+    "api/r.ts": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/r/:slug",
+      "destination": "/api/r?l=:slug"
+    }
+  ]
 }
