@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Central de IA · Guia de uso · Teles &amp; Stanquevicz Advogados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 15mm 15mm 16mm; }
+  @page :first { margin: 0; }
+  :root { --ink: #0b1220; --body: #35415a; --muted: #5a6882; --faint: #8592a6; --line: #dde2e8; --soft: #f2f5f8; --cyan: #0e7490; --cyan2: #0891b2; --cyan-soft: #e6f6fa; --ok: #15803d; --warn: #b45309; --purple: #6d28d9; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: 'Space Grotesk', system-ui, sans-serif; color: var(--body); font-size: 9.9pt; line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1, h2, h3 { font-family: 'Manrope', sans-serif; color: var(--ink); letter-spacing: -.015em; margin: 0; }
+  h2 { font-size: 21pt; font-weight: 700; line-height: 1.15; }
+  h3 { font-size: 12.5pt; font-weight: 700; margin-top: 12pt; }
+  p { margin: 6pt 0 0; }
+  ul, ol { margin: 6pt 0 0; padding-left: 15pt; }
+  li { margin: 3pt 0; }
+  b, strong { color: var(--ink); font-weight: 600; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 7.5pt; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
+  .pagina { break-before: page; }
+  .sec-head { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8pt; margin-bottom: 10pt; }
+  .sec-head .num { font-family: 'Manrope'; font-weight: 800; font-size: 30pt; color: #d7e9ee; line-height: .9; }
+  .lead { font-size: 11pt; color: var(--body); margin-top: 6pt; }
+  figure { margin: 10pt 0 0; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; max-height: 118mm; width: auto; display: inline-block; border: 1px solid var(--line); border-radius: 6pt; }
+  figcaption { text-align: left; }
+  .f84 img { max-height: 84mm; }
+  .f100 img { max-height: 100mm; }
+  h3 { break-after: avoid; }
+  .passo, .caixa, tr { break-inside: avoid; }
+  figcaption { font-size: 8.2pt; color: var(--muted); margin-top: 4pt; }
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9pt; }
+  .caixa { border: 1px solid var(--line); border-radius: 7pt; padding: 10pt 12pt; background: #fff; break-inside: avoid; }
+  .caixa.alt { background: var(--soft); border-color: #e3e8ee; }
+  .caixa.dica { background: var(--cyan-soft); border-color: #b9e3ec; }
+  .caixa.aviso { background: #fff7ed; border-color: #f3d3a8; }
+  .caixa h4 { margin: 0; font-family: 'Manrope'; font-size: 10.5pt; color: var(--ink); }
+  .caixa p:first-child, .caixa ul:first-child { margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8pt; font-size: 9.4pt; break-inside: avoid; }
+  th { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 7pt; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 500; padding: 6pt 8pt; border-bottom: 1px solid var(--line); }
+  td { padding: 7pt 8pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .chip { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 7pt; letter-spacing: .06em; text-transform: uppercase; padding: 1.5pt 6pt; border-radius: 4pt; border: 1px solid; vertical-align: 1pt; }
+  .chip.gabi { color: var(--cyan); border-color: #9edbe8; background: var(--cyan-soft); }
+  .chip.auto { color: var(--purple); border-color: #cdb8f5; background: #f4effd; }
+  .chip.time { color: var(--muted); border-color: var(--line); background: var(--soft); }
+  .passo { display: flex; gap: 9pt; align-items: flex-start; margin-top: 7pt; }
+  .passo .n { flex: 0 0 18pt; height: 18pt; border-radius: 99pt; background: var(--cyan2); color: #fff; font-family: 'Manrope'; font-weight: 700; font-size: 9pt; display: grid; place-items: center; }
+  .rodape { font-size: 8pt; color: var(--faint); margin-top: 18pt; border-top: 1px solid var(--line); padding-top: 8pt; }
+  .celulares { display: flex; justify-content: center; gap: 16pt; margin: 10pt 0 0; break-inside: avoid; }
+  .celulares img { height: 72mm; width: auto; border: 1px solid var(--line); border-radius: 12pt; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); }
+
+  /* capa */
+  .capa { height: 297mm; width: 210mm; position: relative; padding: 26mm 22mm; background: radial-gradient(130mm 90mm at 85% 0%, #dff4f8, transparent 70%), linear-gradient(180deg, #ffffff, #f4f7fa); display: flex; flex-direction: column; }
+  .capa .topo { display: flex; justify-content: space-between; align-items: center; }
+  .capa h1 { font-size: 38pt; line-height: 1.05; font-weight: 800; margin-top: 46mm; }
+  .capa h1 span { color: var(--cyan2); }
+  .capa .sub { font-size: 14pt; margin-top: 10pt; max-width: 135mm; color: var(--body); }
+  .capa .cliente { margin-top: 18mm; font-family: 'Manrope'; font-weight: 700; color: var(--ink); font-size: 15pt; }
+  .capa .meta { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: var(--muted); margin-top: 4pt; letter-spacing: .04em; }
+  .capa .print { margin-top: auto; border: 1px solid var(--line); border-radius: 8pt; overflow: hidden; box-shadow: 0 18pt 40pt rgba(15, 23, 42, .10); }
+  .capa .print img { width: 100%; display: block; }
+  .capa .assina { display: flex; align-items: center; gap: 8pt; font-size: 8.5pt; color: var(--muted); margin-top: 10mm; }
+  .capa .assina img { height: 16pt; }
+</style>
+</head>
+<body>
+
+<!-- ═════════════ CAPA ═════════════ -->
+<section class="capa">
+  <div class="topo">
+    <div class="eyebrow">Central de IA · versão 5</div>
+    <div class="eyebrow" style="color: var(--muted)">Guia de uso</div>
+  </div>
+  <h1>Acompanhe a <span>Gabi</span> e o funil do escritório numa tela só.</h1>
+  <p class="sub">Como entrar, o que cada área mostra, como testar e ensinar a Gabi e uma rotina de poucos minutos por dia.</p>
+  <div class="cliente">Teles &amp; Stanquevicz Advogados</div>
+  <div class="meta">central-telesstanquevicz.vercel.app · outubro de 2026</div>
+  <div class="print"><img src="img/02-visao.jpg" alt=""></div>
+  <div class="assina">Preparado pela <img src="img/logo-horizontal.png" alt="Control Gestão"></div>
+</section>
+
+<!-- ═════════════ EM UMA PÁGINA ═════════════ -->
+<section class="pagina">
+  <div class="eyebrow">Em uma página</div>
+  <h2 style="margin-top: 6pt">O que é a Central e onde está cada coisa.</h2>
+  <p class="lead">A Central é o painel do escritório. Ela mostra o que a Gabi (a assistente virtual do WhatsApp) e as automações do funil fizeram, onde estão os leads no SDR e no CLOSER, quem tem reunião, de onde os leads vieram e quanto a IA custou. Ela só lê o Kommo: não apaga nem edita card.</p>
+
+  <table>
+    <thead><tr><th>Área</th><th>Responde a pergunta</th><th>O que tem dentro</th></tr></thead>
+    <tbody>
+      <tr><td>Visão Geral</td><td>Está tudo bem? O que pede decisão?</td><td>Resumo do dia, um cartão de prioridade, quatro números e o que está ligado.</td></tr>
+      <tr><td>Operação</td><td>O que está acontecendo agora?</td><td>Agora, Funil, Agenda, Automações, Retomada e Histórico.</td></tr>
+      <tr><td>Ensinar</td><td>Como corrijo a Gabi?</td><td>Testar a Gabi, ensinar uma correção, ler as regras e acompanhar os pedidos.</td></tr>
+      <tr><td>Resultados</td><td>Que valor a operação produziu?</td><td>Resumo, dinheiro parado, origem dos leads, simulador "E se?" e recibo de valor.</td></tr>
+      <tr><td>Configurações</td><td>Como a operação está montada?</td><td>Funil e etapas, agenda e distribuição, automações, retomada, sistema e segurança.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Três ideias que valem para todas as telas</h3>
+  <div class="tres" style="margin-top: 8pt">
+    <div class="caixa alt"><h4>Uma leitura por vez</h4><p>Cada área abre num assunto. O detalhe só aparece quando você clica no que quer ver.</p></div>
+    <div class="caixa alt"><h4>Número em branco não é zero</h4><p>Se uma fonte (Kommo, agenda, diário) não responde, a parte dela fica em branco com um aviso. A Central nunca mostra zero no lugar de "não sei".</p></div>
+    <div class="caixa alt"><h4>Tudo é calculado</h4><p>Os resumos e as respostas do "Pergunte à Central" saem de conta feita na hora, sem usar IA e sem custo.</p></div>
+  </div>
+
+  <h3>Rotina sugerida</h3>
+  <table>
+    <thead><tr><th>Quando</th><th>Onde</th><th>O que olhar</th></tr></thead>
+    <tbody>
+      <tr><td>Todo dia, 2 min</td><td>Visão Geral</td><td>O cartão principal e as reuniões de hoje e amanhã.</td></tr>
+      <tr><td>Toda semana, 10 min</td><td>Resultados › Dinheiro parado e Origem</td><td>Quem está parado há 7 dias ou mais e de onde vieram os leads.</td></tr>
+      <tr><td>Toda semana, 5 min</td><td>Ensinar</td><td>Teste uma conversa difícil e mande uma correção se algo ficou torto.</td></tr>
+      <tr><td>Todo mês</td><td>Resultados › Recibo de valor</td><td>Imprima ou salve em PDF o resumo dos 30 dias.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═════════════ 1 · ENTRAR ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Primeiros passos</div><h2>Como entrar</h2></div><div class="num">01</div></div>
+  <div class="duas">
+    <div>
+      <div class="passo"><div class="n">1</div><div>Abra <b>central-telesstanquevicz.vercel.app</b> no computador ou no celular.</div></div>
+      <div class="passo"><div class="n">2</div><div>Digite a senha do escritório, que a Control Gestão passou para vocês, e clique em <b>Entrar</b>.</div></div>
+      <div class="passo"><div class="n">3</div><div>A sessão vale 12 horas naquele aparelho. Depois disso, a Central pede a senha de novo.</div></div>
+      <div class="caixa alt" style="margin-top: 12pt">
+        <h4>Botões que aparecem em todas as telas</h4>
+        <ul>
+          <li><b>Sol ou lua</b>, no alto: troca entre tema claro e escuro.</li>
+          <li><b>Seta de saída</b>: encerra a sessão naquele aparelho.</li>
+          <li><b>Atualizar</b>: busca os números de novo. Ao lado aparece a hora da última leitura.</li>
+          <li><b>Pergunte à Central</b>, no canto de baixo: perguntas rápidas sobre a operação (seção 6).</li>
+        </ul>
+      </div>
+      <div class="caixa aviso" style="margin-top: 10pt"><h4>Segurança</h4><p>Depois de 8 senhas erradas seguidas, o aparelho fica bloqueado por 15 minutos. Não compartilhe a senha fora da equipe. Para trocar, peça à Control Gestão.</p></div>
+    </div>
+    <figure style="margin-top: 0"><img src="img/01-login.jpg" alt="Tela de login"><figcaption>Tela de entrada da Central.</figcaption></figure>
+  </div>
+  <h3>No celular</h3>
+  <p>O menu fica no alto, em faixa. Todas as telas funcionam na tela pequena, inclusive o funil.</p>
+  <div class="celulares">
+    <img src="img/21-celular-visao.jpg" alt="Visão geral no celular">
+    <img src="img/22-celular-funil.jpg" alt="Funil no celular">
+  </div>
+</section>
+
+<!-- ═════════════ 2 · VISÃO GERAL ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Área 1</div><h2>Visão Geral</h2></div><div class="num">02</div></div>
+  <p class="lead">A primeira tela depois de entrar. Em poucos segundos ela diz se está tudo bem e o que pede decisão.</p>
+  <figure><img src="img/02-visao.jpg" alt="Visão geral"><figcaption>O título muda conforme o estado. Abaixo vem o resumo, o cartão de prioridade e os quatro números do dia.</figcaption></figure>
+  <h3>O que o título quer dizer</h3>
+  <table>
+    <thead><tr><th>Título</th><th>Significa</th></tr></thead>
+    <tbody>
+      <tr><td>sendo verificada</td><td>A Central ainda está lendo o Kommo, o diário e a agenda. Espere alguns segundos.</td></tr>
+      <tr><td>quase no ar</td><td>Funil, automações, agenda e origem já rodam. Falta ligar o envio da Gabi no WhatsApp.</td></tr>
+      <tr><td>operando bem</td><td>A Gabi está respondendo e nada falhou nas últimas 24 horas.</td></tr>
+      <tr><td>pedindo atenção</td><td>Alguma fonte não respondeu ou houve falha. O cartão principal diz o quê.</td></tr>
+    </tbody>
+  </table>
+  <h3>O cartão principal e os outros sinais</h3>
+  <p>O cartão grande é a coisa mais importante para olhar agora: uma falha, um card parado no CLOSER, reuniões antigas sem desfecho, a agenda de amanhã. Clique nele para ir direto ao detalhe. Em <b>Ver mais sinais</b> ficam os outros, em ordem de importância.</p>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">Aprofunde se precisar</h3>
+  <p>Embaixo há três assuntos. <b>Próximos passos</b> leva às áreas. <b>Funil agora</b> mostra SDR e CLOSER em barras. <b>O que está ligado</b> lista cada peça da operação e o que falta.</p>
+  <figure><img src="img/03-visao-ligado.jpg" alt="O que está ligado"><figcaption>Visão Geral › O que está ligado. Círculo verde: funcionando. Círculo laranja: pronto, esperando um passo, que aparece escrito ao lado.</figcaption></figure>
+</section>
+
+<!-- ═════════════ 3 · OPERAÇÃO ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Área 2</div><h2>Operação</h2></div><div class="num">03</div></div>
+  <p class="lead">O que está acontecendo, em seis subabas. Escolha uma no alto da tela.</p>
+  <h3>Funil: as duas esteiras numa tela</h3>
+  <p>Todas as etapas do SDR e do CLOSER lado a lado, sem rolar. Cada etapa mostra quantos leads tem, quantos entraram nos últimos 7 dias e quantos estão parados há 7 dias ou mais. A etiqueta diz como o card chega ali:</p>
+  <p><span class="chip gabi">Gabi</span> a Gabi atende ou coloca o card ali &nbsp; <span class="chip auto">Automático</span> uma automação move sozinha &nbsp; <span class="chip time">Equipe</span> a equipe move</p>
+  <figure><img src="img/04-op-funil.jpg" alt="Funil"><figcaption>Clique numa etapa para ver os cards parados, com o primeiro nome, há quantos dias e o responsável. "Abrir no Kommo" leva direto ao card.</figcaption></figure>
+  <div class="caixa dica" style="margin-top: 10pt"><p><b>Follow-up é estacionamento.</b> Ali ficam os leads que não responderam às retomadas. Ficar parado nessa etapa é o normal, por isso ela não entra no radar de dinheiro parado.</p></div>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">Agenda: quem vem e quem atende</h3>
+  <p>As próximas reuniões, lidas do campo Reunião dos cards, com etapa e responsável. Quando uma reunião é marcada ou cancelada no Calendly, o card no Kommo é atualizado sozinho e o evento aparece aqui.</p>
+  <figure><img src="img/05-op-agenda.jpg" alt="Agenda"><figcaption>Operação › Agenda. O quadro do meio diz se os lembretes de 24h e 2h estão sendo enviados pela Central ou ainda em modo sombra.</figcaption></figure>
+  <div class="caixa alt" style="margin-top: 10pt"><p><b>Modo sombra</b> quer dizer que a Central já calcula quem deve receber cada lembrete, sem enviar, para comparar com o que o Kommo faz hoje. Na comparação, o Kommo deixou de mandar o lembrete de 2h em duas reuniões. Quando o envio passar para a Central, isso deixa de acontecer.</p></div>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">Automações: o que andou sozinho</h3>
+  <p>As regras que saíram dos robôs do Kommo e agora rodam na Central, com o gatilho e o efeito de cada uma e a lista do que foi executado.</p>
+  <ul>
+    <li><b>Reunião realizada</b> (ganho no SDR): o card vai para CLOSER › Proposta.</li>
+    <li><b>Contrato pago</b> (venda ganha no CLOSER): o card vai para JURÍDICO › contrato fechado/pago.</li>
+    <li><b>Calendly</b>: marcou, grava data e link e move para Reunião agendada; cancelou, limpa a data e cria tarefa de reagendar.</li>
+    <li><b>Origem</b>: lead que chegou por link rastreado ganha De onde e a campanha no card.</li>
+  </ul>
+  <p>Antes de mexer, cada automação relê o card. Se ele já mudou, ela não faz nada. Se aparecerem mais de 20 mudanças em 10 minutos (uma limpeza de funil, por exemplo), as automações pausam para não arrastar cards por engano.</p>
+  <figure><img src="img/06-op-automacoes.jpg" alt="Automações"><figcaption>Operação › Automações.</figcaption></figure>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">Agora, Retomada e Histórico</h3>
+  <div class="tres">
+    <div class="caixa alt"><h4>Agora</h4><p>As últimas execuções e os números das 24 horas. Atualiza sozinho a cada 2 minutos.</p></div>
+    <div class="caixa alt"><h4>Retomada</h4><p>Quem parou de responder e quando sai o próximo toque da Gabi. São até dois toques, dentro da janela de 24 horas do WhatsApp e entre 8h e 20h.</p></div>
+    <div class="caixa alt"><h4>Histórico</h4><p>Cada execução, com filtro: Gabi, automações, agenda, origem, retomada ou falhas.</p></div>
+  </div>
+  <figure><img src="img/07b-op-historico-detalhe.jpg" alt="Histórico com detalhe"><figcaption>Clique numa linha do histórico para ver quando foi, quanto demorou, quanto custou, o que a Gabi fez e se alguma trava de segurança agiu. O link leva ao card no Kommo.</figcaption></figure>
+  <div class="caixa dica" style="margin-top: 10pt"><p><b>Privacidade.</b> Na Central, os leads aparecem só pelo primeiro nome. Telefone, e-mail e CPF são retirados antes de chegar na tela.</p></div>
+</section>
+
+<!-- ═════════════ 4 · ENSINAR ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Área 3</div><h2>Ensinar</h2></div><div class="num">04</div></div>
+  <p class="lead">Onde vocês testam a Gabi e dizem, do seu jeito, o que ela deveria fazer diferente. Ninguém precisa mexer em código ou no texto de instrução dela.</p>
+  <figure><img src="img/08-ens-inicio.jpg" alt="Ensinar"><figcaption>A tela começa pelos quatro passos e pelas quatro opções. Ao abrir uma, as outras somem; "Todas as opções" volta.</figcaption></figure>
+  <h3>Testar a Gabi</h3>
+  <p>Escolha o assunto (dívida com banco, financiamento de veículo ou busca e apreensão) e escreva como um lead escreveria. É a mesma Gabi do atendimento, com as mesmas regras e travas, mas num card de mentira:</p>
+  <ul>
+    <li>nada é gravado no Kommo e nenhuma mensagem sai para ninguém;</li>
+    <li>a agenda do teste é de mentira e nenhuma reunião é marcada;</li>
+    <li>ao lado da conversa, a Central mostra o que ela faria no Kommo de verdade: o que anotou, para onde moveria o card e para quem passaria.</li>
+  </ul>
+  <p>Cada mensagem de teste custa poucos centavos. Há um limite de 150 por dia.</p>
+</section>
+
+<section class="pagina">
+  <figure style="margin-top: 0"><img src="img/10-ens-testar-conversa.jpg" alt="Conversa de teste"><figcaption>Teste real: o "lead" contou banco, parcelas e valor numa mensagem só. A Gabi anotou tudo, buscou horários e ofereceu três opções. Custo do teste: R$ 0,024.</figcaption></figure>
+  <h3>Ensinar uma correção</h3>
+  <p>Se uma resposta ficou torta, clique em <b>A última resposta ficou torta? Ensinar</b>, ou abra <b>Ensinar uma correção</b>. Cole o exemplo (opcional) e escreva como deveria ser, com suas palavras. Por exemplo: "quando a pessoa diz que está desesperada, a Gabi deveria acolher antes de perguntar o valor".</p>
+  <p>A Central diz na hora para onde a correção vai:</p>
+  <table>
+    <thead><tr><th>Destino</th><th>O que acontece</th></tr></thead>
+    <tbody>
+      <tr><td>jeito de conversar</td><td>Vira regra da Gabi. A equipe técnica escreve a regra, roda os cenários de teste e só publica se todos passarem.</td></tr>
+      <tr><td>agenda</td><td>Horário é lido do Calendly na hora. Mudou a disponibilidade, ajuste no Calendly e ela já oferece os novos horários.</td></tr>
+      <tr><td>funil</td><td>Regra de etapa, responsável ou tarefa. A equipe técnica testa num lead de teste antes de ligar.</td></tr>
+      <tr><td>fora do escopo</td><td>Valores, honorários e percentuais: a Gabi não fala, por decisão do escritório. Mudar isso é conversado antes.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">Ler as regras</h3>
+  <p>O que a Gabi pergunta em cada assunto, o que ela nunca faz, quando passa para a equipe, como marca a reunião, para quem vai cada lead e como funciona a retomada. As regras de "nunca faz" são travas: se uma resposta casar com uma delas, ela não sai. A Gabi reescreve uma vez e, se insistir, sai um texto seguro aprovado.</p>
+  <figure><img src="img/12-ens-regras.jpg" alt="Regras"><figcaption>Ensinar › Ler as regras.</figcaption></figure>
+  <h3>Pedidos de ensino</h3>
+  <p>Cada correção enviada aparece aqui com o andamento: <b>recebido</b>, <b>em teste</b>, <b>publicado</b> ou <b>não publicado</b> (com o motivo). Nada muda no atendimento antes de "publicado".</p>
+</section>
+
+<!-- ═════════════ 5 · RESULTADOS ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Área 4</div><h2>Resultados</h2></div><div class="num">05</div></div>
+  <p class="lead">O valor que a operação produziu, sempre com a fonte e a regra de contagem à vista.</p>
+  <figure><img src="img/13-res-resumo.jpg" alt="Resumo dos resultados"><figcaption>Resultados › Resumo: reuniões marcadas, realizadas, faltas e contratos pagos nos últimos 30 dias, o gráfico diário e o custo da IA.</figcaption></figure>
+  <div class="caixa alt" style="margin-top: 10pt">
+    <h4>Como os números são contados</h4>
+    <ul>
+      <li>Cada número conta <b>lead distinto</b> que entrou na etapa no período.</li>
+      <li><b>Movimentação em massa não conta.</b> Mais de 5 mudanças do mesmo usuário no mesmo minuto é limpeza de funil, não venda. Em 30 dias, 1.077 das 1.127 "vendas ganhas" eram desse tipo.</li>
+      <li>Hoje aparecem mais "realizadas" do que "marcadas" porque o SDR marca ganho também em cards que não passaram por Reunião agendada. A Central mostra o que está no Kommo.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">Dinheiro parado</h3>
+  <p>As etapas com cards sem mudança há 7 dias ou mais, as duas mais importantes primeiro. Etapas do CLOSER vêm marcadas como "perto do contrato". Clique em "ver os cards" para abrir a lista com o link de cada um no Kommo.</p>
+  <figure class="f84"><img src="img/14-res-radar.jpg" alt="Dinheiro parado"><figcaption>Resultados › Dinheiro parado. Hoje o maior sinal são os cards antigos em Reunião agendada: reuniões que já passaram e não foram marcadas como realizada ou no-show.</figcaption></figure>
+  <h3>Origem</h3>
+  <p>De onde vieram os leads criados nos últimos 7 ou 30 dias (campo De onde), as campanhas e os cliques em cada link rastreado. Desde o fim de setembro, a maior parte dos leads do WhatsApp entra sem origem. Os links rastreados da Central resolvem isso quando entrarem nos anúncios: quem chega por eles já vem com a origem e a campanha gravadas no card.</p>
+  <figure class="f84"><img src="img/15-res-origem.jpg" alt="Origem"><figcaption>Resultados › Origem.</figcaption></figure>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">E se?</h3>
+  <p>Um simulador de metas. Ele começa com os números reais do Kommo (leads e reuniões dos últimos 30 dias, faltas) e você ajusta as taxas para ver quantas reuniões e contratos dariam por mês. Com o honorário médio preenchido, mostra também o valor. A linha de sensibilidade diz quanto cada 5 pontos a mais na taxa de marcação somam. É conta, não previsão.</p>
+  <figure class="f84"><img src="img/16-res-ese.jpg" alt="E se"><figcaption>Resultados › E se?</figcaption></figure>
+  <h3>Recibo de valor</h3>
+  <p>O resumo dos 30 dias numa folha: conversas da Gabi, reuniões, contratos, ações feitas sozinhas, tempo da equipe poupado e custo da IA. O tempo poupado é estimativa, e você ajusta os minutos por conversa. Clique em <b>Imprimir ou salvar PDF</b> para guardar ou mandar para os sócios.</p>
+  <figure class="f84"><img src="img/17-res-recibo.jpg" alt="Recibo de valor"><figcaption>Resultados › Recibo de valor. Reunião marcada não é contrato, e contrato não é dinheiro recebido: o recibo diz isso por escrito.</figcaption></figure>
+</section>
+
+<!-- ═════════════ 6 · CONFIGURAÇÕES E PERGUNTE ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Área 5</div><h2>Configurações e Pergunte à Central</h2></div><div class="num">06</div></div>
+  <p class="lead">Configurações mostra como a operação está montada. É para consulta: mudanças são feitas pela equipe técnica e conferidas antes de valer.</p>
+  <figure><img src="img/18-cfg-mapa.jpg" alt="Configurações"><figcaption>Configurações começa por um mapa de assuntos. Cada um abre numa página própria.</figcaption></figure>
+  <figure class="f100"><img src="img/19-cfg-sistema.jpg" alt="Sistema"><figcaption>Configurações › Sistema: o que está ligado, cada fonte de dados com o tempo de resposta e a versão.</figcaption></figure>
+</section>
+
+<section class="pagina">
+  <h3 style="margin-top: 0">Pergunte à Central</h3>
+  <p>O botão no canto de baixo (ou Ctrl+K no computador) abre um campo de perguntas. Escreva como falaria ou use os atalhos: "O que falta ligar?", "Quanto a IA custou?", "Teve falha hoje?", "Quem está parado?", "Quantas reuniões vêm aí?", "Como está o funil?". A resposta vem com os números que a sustentam e um link para a tela certa. É calculada na hora, sem usar IA.</p>
+  <figure><img src="img/20-pergunte.jpg" alt="Pergunte à Central"><figcaption>Pergunte à Central respondendo "O que falta ligar?".</figcaption></figure>
+
+  <h3>Perguntas frequentes</h3>
+  <table>
+    <tbody>
+      <tr><td>A Central mexe no Kommo?</td><td>Ela só lê. Quem move card são as automações descritas na Operação, que conferem o card antes de agir.</td></tr>
+      <tr><td>O teste da Gabi manda mensagem?</td><td>Não. Roda num card de mentira, sem WhatsApp, sem Kommo e sem Calendly.</td></tr>
+      <tr><td>Apareceu "não conseguiu ler"</td><td>Clique em Atualizar. Se continuar, avise a Control Gestão. Enquanto isso, os números daquela parte ficam em branco de propósito.</td></tr>
+      <tr><td>Por que só o primeiro nome?</td><td>Proteção de dados. Para ver o card completo, use "abrir no Kommo".</td></tr>
+      <tr><td>Quanto custa a IA?</td><td>A Central mostra o custo estimado de cada resposta e a soma do dia, da semana e do mês. A fatura do provedor fecha o valor.</td></tr>
+      <tr><td>Quero trocar a senha</td><td>Peça à Control Gestão. A senha nunca fica guardada em texto, só a versão embaralhada dela.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═════════════ SITUAÇÃO HOJE ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Situação em 14 de outubro de 2026</div><h2>O que já roda e o que falta</h2></div><div class="num">07</div></div>
+  <p class="lead">Esta página envelhece. A versão sempre atual fica em Visão Geral › O que está ligado.</p>
+  <table>
+    <thead><tr><th>Peça</th><th>Estado</th><th>O que falta</th></tr></thead>
+    <tbody>
+      <tr><td>Funil enxuto SDR e CLOSER</td><td class="ok">no ar</td><td>nada</td></tr>
+      <tr><td>Reunião realizada → Proposta</td><td class="ok">no ar</td><td>nada</td></tr>
+      <tr><td>Contrato pago → Jurídico</td><td class="ok">no ar</td><td>nada</td></tr>
+      <tr><td>Calendly atualizando o Kommo</td><td class="ok">no ar</td><td>nada</td></tr>
+      <tr><td>Retomada de quem parou</td><td class="ok">pronta</td><td>começa junto com a Gabi</td></tr>
+      <tr><td>Gabi no WhatsApp</td><td class="warn">pronta</td><td>criar no Kommo o robô que envia a resposta dela; depois, começar por uma etiqueta de teste e ampliar aos poucos</td></tr>
+      <tr><td>Lembretes 24h e 2h</td><td class="warn">modo sombra</td><td>desligar o disparo por data dos robôs de lembrete no Kommo e passar o envio para a Central</td></tr>
+      <tr><td>Links rastreados de campanha</td><td class="warn">prontos</td><td>informar o número de WhatsApp do escritório e usar os links nos anúncios</td></tr>
+    </tbody>
+  </table>
+  <div class="caixa dica" style="margin-top: 14pt">
+    <h4>Quando a Gabi for ligada</h4>
+    <p>A Visão Geral passa de "quase no ar" para "operando bem" sozinha. A primeira conversa real inaugura a contagem de conversas, o tempo de resposta e o custo por resposta. Até lá, esses números aparecem como zero porque de fato não houve conversa, e a Central diz isso ao lado.</p>
+  </div>
+  <div class="rodape">Central de IA v5 da Teles &amp; Stanquevicz Advogados · central-telesstanquevicz.vercel.app · Preparado pela Control Gestão em outubro de 2026.</div>
+</section>
+
+</body>
+</html>

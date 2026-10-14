@@ -61,3 +61,7 @@ navegador ──cookie assinado──▶ central (Next 14, Vercel)
 1. Trocar a senha 54321 por uma forte (pedido ao cliente).
 2. Quando o robô de envio for ligado (`KOMMO_BOT_ID`), a Prontidão vira "ligada" sozinha e a primeira conversa inaugura o custo por resposta.
 3. Confirmar o câmbio de `USD_BRL` antes de apresentar custo em reunião.
+
+## Guia de uso para o cliente
+
+`docs/Guia de uso - Central de IA - Teles & Stanquevicz.pdf` (18 páginas, prints reais de produção em 14/10/2026). Fonte em `docs/guia-central/` (HTML + prints). Para regenerar: `PW=$(npm root -g)/playwright HTML=$PWD/docs/guia-central/guia.html PDF=saida.pdf node docs/guia-central/gerar-pdf.mjs`; antes, `medir.mjs` confere se cada página planejada cabe nos 266 mm úteis do A4. A senha não aparece no guia: ela vai separada.

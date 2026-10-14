@@ -1,0 +1,11 @@
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+const { chromium } = require(process.env.PW)
+const browser = await chromium.launch()
+const page = await browser.newPage()
+await page.goto('file://' + process.env.HTML, { waitUntil: 'networkidle' })
+await page.evaluate(() => document.fonts.ready)
+const fontes = await page.evaluate(() => [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family).filter((v, i, a) => a.indexOf(v) === i))
+await page.pdf({ path: process.env.PDF, format: 'A4', printBackground: true, preferCSSPageSize: true })
+await browser.close()
+console.log('fontes:', fontes.join(', '))
