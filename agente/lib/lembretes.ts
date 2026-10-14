@@ -30,16 +30,18 @@ export function lembretesDevidos(leads: Array<{ id: number; name?: string; reuni
   return out
 }
 
-async function leadsComReuniao(): Promise<Array<{ id: number; name?: string; reuniaoEm: number | null }>> {
+export interface LeadComReuniao { id: number; name?: string; reuniaoEm: number | null; statusId: number; pipelineId: number; responsavelId?: number }
+
+export async function leadsComReuniao(): Promise<LeadComReuniao[]> {
   const cfg = CRM_MAP.lembretes
-  const out: Array<{ id: number; name?: string; reuniaoEm: number | null }> = []
+  const out: LeadComReuniao[] = []
   const filtro = cfg.etapas.map((e, i) => `filter[statuses][${i}][pipeline_id]=${e.pipelineId}&filter[statuses][${i}][status_id]=${e.statusId}`).join('&')
   for (let page = 1; page <= 20; page++) {
     const j = await kommoGet<{ _embedded?: { leads?: KommoLead[] } }>(`/api/v4/leads?limit=250&page=${page}&${filtro}`)
     const ls = j._embedded?.leads || []
     for (const l of ls) {
       const v = (l.custom_fields_values || []).find(f => f.field_id === cfg.campoReuniao)?.values?.[0]?.value
-      out.push({ id: l.id, name: l.name, reuniaoEm: v ? Number(v) : null })
+      out.push({ id: l.id, name: l.name, reuniaoEm: v ? Number(v) : null, statusId: l.status_id, pipelineId: l.pipeline_id, responsavelId: l.responsible_user_id })
     }
     if (ls.length < 250) break
   }

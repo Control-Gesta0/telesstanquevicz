@@ -102,12 +102,21 @@ export async function aplicarRastreio(leadId: number, texto: string): Promise<st
 export async function resumoRastreio(dias = 30): Promise<Record<string, { cliques: number; leads: number }>> {
   const out: Record<string, { cliques: number; leads: number }> = {}
   const slugs = [...Object.keys(CRM_MAP.rastreio.links), ...Object.keys(CRM_MAP.rastreio.refs).map(r => `ref-${r}`)]
+  const pares: Array<{ slug: string; tipo: 'cliques' | 'leads'; chave: string }> = []
   for (let d = 0; d < dias; d++) {
     const dia = new Date(Date.now() - d * 86400_000).toISOString().slice(0, 10)
-    for (const s of slugs) {
-      const [c, l] = await Promise.all([redis.get<number>(k('rastro-cliques', dia, s)), redis.get<number>(k('rastro-leads', dia, s))])
-      if (c || l) { out[s] ||= { cliques: 0, leads: 0 }; out[s].cliques += Number(c || 0); out[s].leads += Number(l || 0) }
-    }
+    for (const s of slugs) for (const tipo of ['cliques', 'leads'] as const) pares.push({ slug: s, tipo, chave: k(`rastro-${tipo}`, dia, s) })
+  }
+  // uma ida ao Redis por lote (eram 2 por dia por link: 55 s para 30 dias)
+  for (let i = 0; i < pares.length; i += 200) {
+    const lote = pares.slice(i, i + 200)
+    const vals = await redis.mget<Array<number | null>>(...lote.map(p => p.chave))
+    lote.forEach((p, j) => {
+      const n = Number(vals[j] || 0)
+      if (!n) return
+      out[p.slug] ||= { cliques: 0, leads: 0 }
+      out[p.slug][p.tipo] += n
+    })
   }
   return out
 }

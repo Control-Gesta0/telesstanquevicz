@@ -1,0 +1,27 @@
+{
+  "name": "central-telesstanquevicz",
+  "version": "5.0.0",
+  "private": true,
+  "description": "Central de IA v5 — Teles & Stanquevicz Advogados (painel do cliente da Gabi).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/test-central.ts"
+  },
+  "dependencies": {
+    "lucide-react": "0.460.0",
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "tsx": "4.19.2",
+    "typescript": "5.7.2"
+  }
+}

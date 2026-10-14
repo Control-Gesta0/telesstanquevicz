@@ -450,7 +450,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           const reserva = await reservar({ iso: escolhido.iso, nome, email, telefone: await port.getPhone(), motivo, notas: String(input.resumo || '').slice(0, 500) })
           await port.patchState({ reuniao: reserva })
           // a ponte Calendly → Kommo reconhece esta reserva sem procurar por telefone
-          await redis.set(k('cal-invitee', reserva.inviteeUri), (await port.getLead()).id, { ex: 60 * 86400 }).catch(() => {})
+          if (!reserva.inviteeUri.startsWith('fake:')) await redis.set(k('cal-invitee', reserva.inviteeUri), (await port.getLead()).id, { ex: 60 * 86400 }).catch(() => {})
           const neg = CRM_MAP.negocio
           const writes: KommoFieldValue[] = [{ field_id: neg.reuniao.fieldId, values: [{ value: Math.floor(new Date(reserva.iso).getTime() / 1000) }] }]
           if (reserva.joinUrl) writes.push({ field_id: neg.reuniao.linkFieldId, values: [{ value: reserva.joinUrl }] })

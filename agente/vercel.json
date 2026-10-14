@@ -29,6 +29,10 @@
     },
     "api/r.ts": {
       "maxDuration": 10
+    },
+    "api/central.ts": {
+      "maxDuration": 60,
+      "includeFiles": "prompts/**"
     }
   },
   "rewrites": [

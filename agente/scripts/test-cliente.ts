@@ -202,5 +202,50 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   const { classificar: cls, escolherPorta: ep } = await import('../lib/router')
   eq('frase do link leva a Gabi para a porta certa', ['meta-rcpcc', 'meta-rcv', 'meta-dba'].map(s => ep(cls(lerMarca((CRM_MAP as any).rastreio.links[s].texto).limpo))?.id), ['rcpcc', 'rcv', 'dba'])
 
+  // Central v5: o que vai para a tela
+  const C = await import('../lib/central')
+  eq('central: primeiro nome só', [C.primeiroNome('MARIA da silva'), C.primeiroNome('+55 47 99999-0000'), C.primeiroNome(undefined)], ['Maria', 'Lead sem nome', 'Lead sem nome'])
+  eq('central: telefone, e-mail e CPF somem', C.anonimizar('liga 47 99999-0000, maria@x.com.br, cpf 123.456.789-09'), 'liga •••, •••@•••, cpf •••')
+  eq('central: data e id de lead ficam', C.anonimizar('calendly marcou 15/10/2026, 13:30 · lead 26157673'), 'calendly marcou 15/10/2026, 13:30 · lead 26157673')
+  const tC = 1_800_000_000
+  const sts = [{ id: 1, name: 'Incoming leads', type: 1, sort: 10 }, { id: 2, name: 'Proposta', sort: 20 }, { id: 142, name: 'ganho', sort: 10000 }]
+  const foto = C.agregarFunil({ id: 9, nome: 'CLOSER' }, sts, [
+    { id: 11, name: 'Ana Paula', status_id: 2, pipeline_id: 9, price: 5000, updated_at: tC - 10 * 86400, created_at: tC - 20 * 86400, responsible_user_id: 7 },
+    { id: 12, name: 'Bruno', status_id: 2, pipeline_id: 9, price: 0, updated_at: tC - 86400, created_at: tC - 86400 },
+    { id: 13, name: 'Outro funil', status_id: 2, pipeline_id: 8, price: 999 },
+    { id: 14, name: 'Ganho', status_id: 142, pipeline_id: 9, price: 999 },
+  ], tC, { 7: 'Carla' })
+  eq('funil: etapas na ordem, sem ganho/perdido, entrada com nome em português', foto.etapas.map(e => e.nome), ['Leads de entrada', 'Proposta'])
+  eq('funil: conta, soma, parados e novos', [foto.n, foto.valor, foto.etapas[1].parados, foto.etapas[1].novos7d], [2, 5000, 1, 1])
+  eq('funil: amostra parada com primeiro nome e responsável', foto.etapas[1].amostras, [{ id: 11, nome: 'Ana', dias: 10, valor: 5000, responsavel: 'Carla' }])
+  const massa = Array.from({ length: 8 }, (_, i) => ({ entity_id: 100 + i, created_at: tC + i, created_by: 5 }))
+  const limpos = C.limparEventos([...massa, { entity_id: 1, created_at: tC - 3600, created_by: 5 }, { entity_id: 1, created_at: tC - 1800, created_by: 5 }, { entity_id: 2, created_at: tC, created_by: 0 }])
+  eq('resultados: movimentação em massa não conta e lead repetido conta uma vez', [limpos.n, limpos.massa], [2, 8])
+  const org = C.agregarOrigem([
+    { id: 1, status_id: 1, pipeline_id: 1, custom_fields_values: [{ field_id: 1023546, values: [{ enum_id: 744844 }] }, { field_id: 369986, values: [{ value: 'rcv' }] }] },
+    { id: 2, status_id: 1, pipeline_id: 1, custom_fields_values: null },
+  ])
+  eq('origem: De onde por enum, sem origem e campanha', [org.deOnde, org.campanhas], [{ Meta: 1, 'Sem origem registrada': 1 }, { rcv: 1 }])
+  const nowMs = Date.parse('2026-10-14T20:00:00Z')
+  const ex = (h: number, tipo: string, extra: Record<string, unknown> = {}) => C.paraTela({ at: new Date(nowMs - h * 3600_000).toISOString(), tipo: tipo as any, leadId: 1, ...extra })
+  const mc = C.metricasDiario([
+    ex(1, 'resposta', { ms: 4000, leadId: 1, custoUsd: 0.001 }), ex(2, 'finalizou', { ms: 6000, leadId: 2, tools: ['agendar_reuniao'] }),
+    ex(3, 'erro'), ex(5, 'followup', { detalhe: 'toque 1 · x' }), ex(30, 'automacao', { detalhe: 'reuniaoRealizada → Proposta' }),
+    ex(31, 'automacao', { detalhe: 'contratoPago: lead já não está em Venda ganha, nada feito' }),
+  ], nowMs)
+  eq('diário 24h: conversas, reunião da Gabi, erro, retomada e mediana', [mc.h24.conversas, mc.h24.reunioesGabi, mc.h24.erros, mc.h24.retomadas, mc.h24.respostaMedianaSeg], [2, 1, 1, 1, 6])
+  eq('diário 7d: automação que não fez nada não conta', [mc.d7.automacoes, mc.h24.automacoes], [1, 0])
+  eq('diário: custo em reais com o câmbio da env', mc.h24.custoBrl, Math.round(0.001 * Number(process.env.USD_BRL || 5.4) * 100) / 100)
+  eq('categoria: rastreio é origem, calendly é agenda', [C.categoria({ at: '', tipo: 'automacao', leadId: 0, detalhe: 'rastreio: x' }), C.categoria({ at: '', tipo: 'automacao', leadId: 0, detalhe: 'calendly marcou' })], ['origem', 'agenda'])
+  const pr = C.prontidao({ GATE_TAG: 'ia-gabi', LEMBRETES_MODO: 'sombra' })
+  eq('prontidão: sem robô de envio a Gabi não aparece como ligada', pr.find(i => i.id === 'gabi')?.ok, false)
+  eq('prontidão: lembretes em sombra não aparecem como enviando', pr.find(i => i.id === 'lembretes')?.estado, 'modo sombra: confere sem enviar')
+  eq('prontidão: rampagem explica a etiqueta', pr.find(i => i.id === 'rampa')?.estado, 'fase de teste: só leads com a etiqueta ia-gabi')
+  eq('régua: horário é agenda viva', C.destinoDaCorrecao('ela ofereceu horário de sábado').destino, 'agenda')
+  eq('régua: honorário fica fora', C.destinoDaCorrecao('ela devia dizer que a consulta custa R$ 300').destino, 'fora do escopo')
+  eq('régua: tom vira regra de conversa', C.destinoDaCorrecao('ela foi seca demais quando a pessoa disse que estava desesperada').destino, 'jeito de conversar')
+  const h = C.hashSenha('54321')
+  eq('senha: hash confere só com a senha certa', [C.confereSenha('54321', h), C.confereSenha('12345', h), C.confereSenha('54321', ''), h.includes('54321')], [true, false, false, false])
+
   return 0
 }
