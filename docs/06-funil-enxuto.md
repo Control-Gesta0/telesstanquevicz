@@ -152,3 +152,21 @@ A API ainda mostra como **ligados** os 33 bots da lista de desligar. Se eles for
 - **Trava de massa (vale para as duas automações):** mais de 20 eventos em 10 minutos pausam a automação. Os leads ficam onde estão e o diário registra "PAUSADO". Isso protege contra limpeza de funil em massa, que já aconteceu (792 "ganhos" no SDR em 30 dias).
 - **Prova:** lead de teste 26201097 chegou a Proposta em menos de 5s; fechado como perdido no CLOSER depois do teste.
 - **Em aberto:** quem é o responsável no CLOSER para os leads de R$ 50 mil ou mais? Hoje ele continua com o SDR, que aqueceu o lead.
+
+## Lembretes de reunião pela Vercel (14/10/2026)
+
+- **Como funciona:** agenda QStash `scd_6cF7zkPGixMqmkbABibhbYpH4CMr` chama `/api/lembretes` a cada 15 min. A Vercel lê os leads com reunião marcada (SDR › Reunião agendada, No-show, Em atendimento e DIRETORIA › reuniões agendadas) e, quando falta 24h ou 2h para a reunião, roda o bot do lembrete: 10528 (24h) ou 10530 (2h). Os bots mandam o modelo aprovado pela Meta "Lembrete de Reunião" (43417), que entra mesmo fora da janela de 24h. Um lembrete nunca sai duas vezes.
+- **Modo atual: SOMBRA.** Só registra no diário o que enviaria (`LEMBRETES_MODO` ausente). Para ligar: `LEMBRETES_MODO=ativo` + deploy.
+- **Prova até aqui:** primeira chamada do relógio às 18:15 UTC, entregue com 200 e assinatura conferida; testes de janela (24h, 2h, fora da janela, reunião passada).
+- **Comparador:** `npx tsx scripts/comparar-lembretes.ts [horas]`.
+
+### O que a comparação mostrou
+Nas reuniões de 13 e 14/10 com data no Kommo, **o Kommo não mandou o lembrete de 2h** nas duas em que ele cabia (leads 26188763 e 26193477): nenhuma mensagem saiu para elas. Na terceira (25408463) a data foi preenchida 53 min antes da reunião, então não cabia lembrete. Ou o gatilho de data dos bots não está ativo, ou esses leads não têm conversa de WhatsApp no Kommo.
+
+### Lacuna maior
+O Calendly teve **147 reuniões em 30 dias**; o campo "Reunião" do Kommo só tem cerca de um terço delas. Lembrete por campo nunca alcança os outros dois terços. Cura proposta: webhook do Calendly (`invitee.created` / `invitee.canceled`) achando o lead pelo telefone e preenchendo "Reunião" (e limpando no cancelamento).
+
+### Para ligar o envio de verdade
+1. Teste com um lead de WhatsApp nosso: rodar o bot 10530 nele e ver o lembrete chegar no celular.
+2. Tirar o gatilho de data dos bots 10528 e 10530 no Kommo (se existir), para não sair em dobro.
+3. `LEMBRETES_MODO=ativo` e deploy.

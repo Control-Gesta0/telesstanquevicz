@@ -192,6 +192,28 @@ export const CRM_MAP = {
     limiteEmMassa: { eventos: 20, janelaSeg: 600 },
   },
 
+  /**
+   * Lembretes de reunião pela Vercel (14/10/2026). A Vercel decide quem e quando; a entrega
+   * sai pelos Salesbots que já mandam o modelo aprovado pela Meta "Lembrete de Reunião" (43417),
+   * porque o lembrete de 24h quase sempre cai fora da janela de 24h do WhatsApp oficial.
+   */
+  lembretes: {
+    campoReuniao: 719788,
+    /** onde mora lead com reunião marcada: SDR (Reunião agendada, No-show remarcado, Em atendimento) e DIRETORIA (reuniões agendadas) */
+    etapas: [
+      { pipelineId: 9299515, statusId: 86825532 },
+      { pipelineId: 9299515, statusId: 72113011 },
+      { pipelineId: 9299515, statusId: 72186399 },
+      { pipelineId: 9312147, statusId: 83784180 },
+    ],
+    tipos: [
+      { id: '24h', antesMin: 24 * 60, botId: 10528 },
+      { id: '2h', antesMin: 120, botId: 10530 },
+    ],
+    /** tolerância de atraso do relógio (QStash a cada 15 min); o NX evita repetir */
+    janelaMin: 30,
+  },
+
   calendly: {
     /** ATENDIMENTO GERAL (30 min, Google Meet): 97 das 100 últimas reuniões */
     eventType: 'https://api.calendly.com/event_types/124acd98-cbd5-46cb-a23f-2473339a2996',

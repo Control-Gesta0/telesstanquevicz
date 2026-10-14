@@ -158,5 +158,20 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('a própria ida ao JURÍDICO não dispara (sem laço)', decidir({ leadId: 1, statusId: 72657491, pipelineId: 9312127, oldStatusId: 142, oldPipelineId: 9312103 }), null)
   eq('mudança para Pagamento não dispara', decidir({ leadId: 1, statusId: 72186419, pipelineId: 9312103, oldStatusId: 72686979, oldPipelineId: 9312103 }), null)
 
+  // Lembretes de reunião: 24h e 2h antes, janela de 30 min, nada para reunião passada
+  const { lembretesDevidos } = await import('../lib/lembretes')
+  const agoraL = Date.parse('2026-10-15T12:00:00Z')
+  const seg = (iso: string) => Math.floor(Date.parse(iso) / 1000)
+  const devidos = lembretesDevidos([
+    { id: 1, reuniaoEm: seg('2026-10-16T11:50:00Z') },  // 24h antes foi há 10 min → 24h
+    { id: 2, reuniaoEm: seg('2026-10-15T13:55:00Z') },  // 2h antes foi há 5 min → 2h
+    { id: 3, reuniaoEm: seg('2026-10-16T13:00:00Z') },  // 24h antes ainda não chegou
+    { id: 4, reuniaoEm: seg('2026-10-16T11:00:00Z') },  // 24h antes foi há 60 min → fora da janela
+    { id: 5, reuniaoEm: seg('2026-10-15T11:00:00Z') },  // já passou
+    { id: 6, reuniaoEm: null },
+  ], agoraL)
+  eq('lembretes: 24h e 2h na janela, nada fora dela', devidos.map(d => `${d.leadId}:${d.tipo}`), ['1:24h', '2:2h'])
+  eq('lembretes: bot certo por tipo', devidos.map(d => d.botId), [10528, 10530])
+
   return 0
 }
