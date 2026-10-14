@@ -128,7 +128,7 @@ CLOSER: Leads de entrada · Proposta · Contrato · Pagamento
 
 | Função | Antes | Situação |
 |---|---|---|
-| Contrato pago → JURÍDICO | etapa "Jurídico" do CLOSER movia para JURÍDICO › contrato fechado/pago | **sem automação**: até existir na Vercel, o time move à mão |
+| Contrato pago → JURÍDICO | etapa "Jurídico" do CLOSER movia para JURÍDICO › contrato fechado/pago | **na Vercel desde 14/10**: CLOSER › Venda ganha → JURÍDICO › contrato fechado/pago em até 5s, com tag `contrato-pago` e nota. Prova: lead de teste 26201039 |
 | Reunião realizada (ganho no SDR) → CLOSER › Proposta | não existia | a construir |
 | Origem e campanha (De onde, Define Campanha, Painel) | bots de origem | sem automação até o rastreador de origem |
 | Mensagens do CLOSER (proposta, documentos, assinatura, pagamento, Assas, follow-up do closer) | bots por etapa | sem automação: o closer envia pelas respostas prontas |
@@ -136,3 +136,10 @@ CLOSER: Leads de entrada · Proposta · Contrato · Pagamento
 
 ### Ponto em aberto
 A API ainda mostra como **ligados** os 33 bots da lista de desligar. Se eles foram só tirados das etapas, isso basta para o funil. Mas eles continuam aptos a rodar se outro gatilho os chamar.
+
+## Automação "contrato pago → JURÍDICO" (14/10/2026)
+
+- **Como funciona:** o closer arrasta o lead para "Venda ganha" no CLOSER. O Kommo avisa a Vercel (webhook `status_lead`). A Vercel relê o lead, confirma que ele ainda está em Venda ganha e move para **JURÍDICO › contrato fechado/pago**, sem trocar o responsável (igual à automação antiga). Põe a tag `contrato-pago` e uma nota com data e valor.
+- **Por que a tag:** o lead sai do "ganho" do CLOSER ao ir para o JURÍDICO (no Kommo um lead vive num funil só). A tag e o histórico de etapas guardam a venda para relatório.
+- **Prova:** lead de teste 26201039, sem contato, chegou ao JURÍDICO em menos de 5s; fechado como perdido no JURÍDICO depois do teste (a automação não reagiu a isso, como deve).
+- **Se falhar:** aparece como `erro` no diário (`/api/executions`) e o lead fica em Venda ganha. O time move à mão.

@@ -144,5 +144,16 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('toque 1 RCV pergunta o próximo dado', textoDoToque(1, { porta: 'rcv', respostas: { bancoVeiculo: 'BV' } }), 'Oi! Só para a gente seguir com o seu caso: O financiamento foi feito em quantas parcelas?')
   eq('toque 2 passa nas travas', tregras(textoDoToque(2, {})), [])
 
+  // Automação: contrato pago → JURÍDICO
+  const { parseStatusLead, decidir } = await import('../lib/crm-eventos')
+  const plano = parseStatusLead({ 'account[id]': '33277515', 'leads[status][0][id]': '555', 'leads[status][0][status_id]': '142', 'leads[status][0][pipeline_id]': '9312103', 'leads[status][0][old_status_id]': '72186419', 'leads[status][0][old_pipeline_id]': '9312103' })
+  eq('webhook status_lead plano', plano.mudancas[0], { leadId: 555, statusId: 142, pipelineId: 9312103, oldStatusId: 72186419, oldPipelineId: 9312103 })
+  const aninhado = parseStatusLead({ account: { id: '33277515' }, leads: { status: [{ id: '556', status_id: '142', pipeline_id: '9312103', old_status_id: '72851523', old_pipeline_id: '9312103' }] } })
+  eq('webhook status_lead aninhado', [aninhado.accountId, aninhado.mudancas[0]?.leadId], ['33277515', 556])
+  eq('venda ganha no CLOSER dispara contrato pago', decidir(plano.mudancas[0]), 'contratoPago')
+  eq('ganho no SDR não dispara', decidir({ leadId: 1, statusId: 142, pipelineId: 9299515, oldStatusId: 86825532, oldPipelineId: 9299515 }), null)
+  eq('a própria ida ao JURÍDICO não dispara (sem laço)', decidir({ leadId: 1, statusId: 72657491, pipelineId: 9312127, oldStatusId: 142, oldPipelineId: 9312103 }), null)
+  eq('mudança para Pagamento não dispara', decidir({ leadId: 1, statusId: 72186419, pipelineId: 9312103, oldStatusId: 72686979, oldPipelineId: 9312103 }), null)
+
   return 0
 }

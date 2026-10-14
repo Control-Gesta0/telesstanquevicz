@@ -8,6 +8,8 @@ Estado do projeto: **VALIDANDO → PROVANDO**. Código pronto, testado e publica
 
 - Agente: https://telesstanquevicz-ia.vercel.app (projeto Vercel `telesstanquevicz-ia`, equipe control-gestao)
 - `GET /api/inbound` → saúde · `GET /api/validate?secret=` → mapa × Kommo vivo · `GET /api/executions?secret=` → diário
+- `POST /api/crm-eventos` (webhook `status_lead` 47514080) → automações de funil. Hoje: **contrato pago → JURÍDICO**
+- Webhooks do agente no Kommo: 47513684 (`add_message`) e 47514080 (`status_lead`)
 - Redis compartilhado da Control Gestão com prefixo exclusivo `agente-telesstanquevicz:`
 - Campo criado no Kommo: **Resposta IA (agente)** (1048279), onde a Gabi deixa a resposta para o Salesbot enviar.
 

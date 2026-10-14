@@ -168,6 +168,20 @@ export const CRM_MAP = {
     responsavelPadrao: 11719355,
   },
 
+  /**
+   * Automações de funil que saíram do Kommo e vivem na Vercel (decisão de 14/10/2026).
+   * Disparo: webhook status_lead → /api/crm-eventos. Sempre relê o lead antes de agir (fail-closed).
+   */
+  automacoes: {
+    /** CLOSER › Venda ganha (contrato pago) → JURÍDICO › contrato fechado/pago. Responsável mantido, como era no Kommo. */
+    contratoPago: {
+      de: { pipelineId: 9312103, statusId: 142, name: 'Venda ganha' },
+      para: { pipelineId: 9312127, statusId: 72657491, name: 'contrato fechado/pago' },
+      /** marca a venda: o lead sai do "ganho" do CLOSER, a tag guarda o fato para relatório */
+      tag: 'contrato-pago',
+    },
+  },
+
   calendly: {
     /** ATENDIMENTO GERAL (30 min, Google Meet): 97 das 100 últimas reuniões */
     eventType: 'https://api.calendly.com/event_types/124acd98-cbd5-46cb-a23f-2473339a2996',

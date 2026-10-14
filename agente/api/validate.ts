@@ -85,6 +85,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!u) problems.push(`negócio: usuário ${id} (${neg.responsaveis.nomes[id] || '?'}) não existe`)
       else if (u.rights?.is_active === false) problems.push(`negócio: usuário ${u.name} (${id}) está desativado`)
     }
+    // Automações de funil: a etapa de destino precisa existir com o mesmo nome
+    const ap = CRM_MAP.automacoes.contratoPago.para
+    const fj = (pdn._embedded?.pipelines || []).find(x => x.id === ap.pipelineId)
+    const sj = fj?._embedded?.statuses?.find(x => x.id === ap.statusId)
+    if (!sj) problems.push(`automação contrato pago: etapa ${ap.statusId} não existe no funil ${ap.pipelineId}`)
+    else if (sj.name !== ap.name) problems.push(`automação contrato pago: etapa ${ap.statusId} renomeada: mapa="${ap.name}" kommo="${sj.name}"`)
     if (!process.env.CALENDLY_TOKEN) problems.push('CALENDLY_TOKEN ausente — a IA não oferece horário')
     if (!process.env.QSTASH_TOKEN || !process.env.SELF_URL) avisos.push('QSTASH_TOKEN ou SELF_URL ausente — follow-up desligado')
 
