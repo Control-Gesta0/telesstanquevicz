@@ -4,6 +4,8 @@ Estado do projeto: **VALIDANDO → PROVANDO**. Código pronto, testado e publica
 
 ## No ar
 
+> 14/10/2026: o alias ficou 404 de 07/10 a 14/10 porque a Vercel publicava a raiz do repositório a cada push (ver aprendizado 8). Git desconectado; deploy só pela CLI depois dos evals.
+
 - Agente: https://telesstanquevicz-ia.vercel.app (projeto Vercel `telesstanquevicz-ia`, equipe control-gestao)
 - `GET /api/inbound` → saúde · `GET /api/validate?secret=` → mapa × Kommo vivo · `GET /api/executions?secret=` → diário
 - Redis compartilhado da Control Gestão com prefixo exclusivo `agente-telesstanquevicz:`
@@ -36,7 +38,7 @@ Estado do projeto: **VALIDANDO → PROVANDO**. Código pronto, testado e publica
 | # | Pendência | Quem |
 |---|---|---|
 | 1 | Criar o Salesbot de envio (1 bloco "Enviar mensagem" com `{{lead.cf.1048279}}`) e informar o `bot_id` | mestre no Kommo, ou eu com um login |
-| 2 | Autorizar o webhook `add_message` apontando para o agente | mestre |
+| 2 | ~~Autorizar o webhook `add_message`~~ **feito em 14/10: webhook 47513684 ativo; 1ª mensagem real recebida às 12:42 e corretamente ignorada (lead sem a tag)** | — |
 | 3 | Lead de teste: o WhatsApp de alguém da Control Gestão, com a tag `ia-gabi` | mestre |
 | 4 | Nos Salesbots de atendimento do SDR, condição "sem a tag ia-gabi" (senão o lead de teste recebe resposta dupla) | escritório/mestre |
 | 5 | Autorizar uma reserva de teste no Calendly do escritório (cancelada logo depois) | mestre |

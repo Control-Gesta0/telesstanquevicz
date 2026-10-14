@@ -8,6 +8,8 @@ import { cancelarFollowup } from '../lib/followup'
 import { appendMessage, isEchoOfSent, markHumanSpoke, seenMessage } from '../lib/history'
 import { mediaKind, mediaToText } from '../lib/media'
 import { isResetCommand, resetLead } from '../lib/reset'
+import { getLead, leadTags } from '../lib/kommo'
+import { k, redis } from '../lib/redis'
 import { sendReply } from '../lib/transport'
 
 /**
@@ -71,11 +73,25 @@ export function parseKommoWebhook(raw: unknown): { accountId: string; msgs: Inbo
   return msgs.length ? { accountId: pick(body, 'account[id]', ['account', 'id']), msgs } : null
 }
 
+/** O lead tem a tag de gate e não está com humano? (cache de 60s: rajada de mídia não vira rajada de GET) */
+async function leadAtendido(leadId: number): Promise<boolean> {
+  const cache = await redis.get<string>(k('gate', leadId))
+  if (cache) return cache === '1'
+  const tags = leadTags(await getLead(leadId)).map(t => t.toLowerCase())
+  const sim = (!CONFIG.gateTag || tags.includes(CONFIG.gateTag)) && !tags.includes(CONFIG.humanTag)
+  await redis.set(k('gate', leadId), sim ? '1' : '0', { ex: 60 })
+  return sim
+}
+
 async function ingest(msgs: InboundMsg[], webhookId: string): Promise<void> {
   const leads = new Set<number>()
   for (const m of msgs) {
     try {
       if (await seenMessage(`kommo:${m.id}`)) continue
+      // Webhook da conta inteira: só guarda e processa conversa de lead que a IA atende (gate e sem humano).
+      // Lead sem a tag não entra no Redis nem passa pela OpenAI (custo e LGPD).
+      // (lead de teste passa sempre: o "reset" precisa chegar mesmo depois que a finalização tirou a tag)
+      if (!CONFIG.testLeadIds.includes(m.leadId) && !(await leadAtendido(m.leadId))) continue
       let text = (m.text || '').trim()
       const kind = mediaKind(m.attachType)
       const outgoing = m.direction === 'outgoing'
