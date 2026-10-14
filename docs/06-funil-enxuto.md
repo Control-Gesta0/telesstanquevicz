@@ -80,3 +80,33 @@ Etapa renomeada mantém o histórico e as automações. Etapa apagada some dos r
 - Mapa da IA atualizado (Reunião agendada, Follow-up), publicado, `/api/validate` ok exceto `KOMMO_BOT_ID`.
 
 **Passo 2, pendente:** inventário das automações das etapas "ANTIGA ·", religar o que importa nas etapas novas, decidir os 1.060 leads do "dia" e apagar as etapas antigas. Até lá, as 5 + 4 etapas novas são as primeiras da tela, mas as antigas ainda ocupam colunas à direita.
+
+## Passo 2 · automações (decisão do mestre, 14/10/2026)
+
+Decisão: desligar (não apagar) as automações do SDR e do CLOSER; o bot que conversa sai quando a Gabi entrar; lembretes de reunião ficam até existir a versão na Vercel; JURÍDICO, FINANCEIRO, DIRETORIA, NPS e transmissões ficam.
+
+**A API pública do Kommo não desliga Salesbot** (`PATCH /api/v4/bots/{id}` → 405; `PATCH /api/v4/bots` → 403 "This is a private API"). Desligar é pela tela: Configurações › Salesbot (ou o funil › Automatizar). Foto dos bots antes: `docs/backup/bots-antes-2026-10-14.json`.
+
+### Desligar agora (antes de mover o "dia")
+
+| Grupo | Bots (id) |
+|---|---|
+| Follow-up do SDR | follow up (49477) · follow up scalex (57322) · sx - follow up copiar(1) (59391) · TestBot (48699) |
+| Classificação do SDR | Tags RCV/DBA (18394) · Tags RCPCC/RMC (18396) · Tags Danos Morais (18400) · Tags Embargos e Exceção (18402) · Tags RPJ (18408) · Tags Registrado (18410) · Tags DCB (18416) · Tags SE (18422) · Nicho - RCPCC (33292) · Nicho - DBA (33294) · Nicho - SE (33296) · Nicho - RCV (33298) · Nicho - RPJ (33300) · Nicho - IR (33302) |
+| Origem do SDR | Painel - Google (33304) · Painel - Meta (33306) · Painel - Instagram (33308) · Painel - desqualificado (33310) · Painel - desqualificado robô (33312) · Define Campanha (47656) |
+| CLOSER | C - Com proposta (22990) · C - Aguardando documentos (22992) · C - Aguardando assinatura (22998) · C - Aguardando documentos copiar 3011 (30946) · Aguardando documento (19082) · Aguardando pagamento (19084) · Aguardando assinatura (19090) · Assas Entrada (22336) · Follow up - CLOSER (19034) |
+
+Lacuna que isso abre: "De onde" e campanha deixam de ser preenchidos até o rastreador de origem existir na Vercel (`lib/tracker.ts` da skill). Nichos passa a ser gravado só pela Gabi, no lead qualificado.
+
+### Desligar quando a Gabi entrar (atendimento atual)
+BOT IA (55391) · ENVIAR MENSAGEM (55271) · retorno imediato (45683) · RCPCC - N (43775) · RCV - N (43777) · DBA - N (43683) · Spend - N (43761) · RPJ - N (43795) · Isenção de IR (37476) · Exemplo instagram (25992)
+
+### Ficam
+Lembrete de reunião 24h (10528) e 2h (10530) até a versão Vercel · Fechar conversa (11512) · Saudação Jurídico, Jurídico, Produzindo petição, Petição protocolada · -30D, +30D, +60D · Robô de NPS · Transmissões · negociação 2 · rcv êxito aguardando documentos (44329, a confirmar se é do CLOSER)
+
+### Depois de desligar
+1. Eu movo 10 leads do "dia" para Follow-up e confiro por 5 minutos que nenhuma mensagem saiu para eles.
+2. Sem mensagem, movo os outros ~1.050 em lotes de 250.
+3. Apago as etapas "ANTIGA ·" vazias.
+
+Também fora do alcance da API: os gatilhos do funil digital que não são Salesbot (mudar etapa, criar tarefa, webhook). Eles aparecem no botão "Automatizar" de cada funil e precisam ser removidos lá.
