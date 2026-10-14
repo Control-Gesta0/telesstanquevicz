@@ -173,5 +173,19 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('lembretes: 24h e 2h na janela, nada fora dela', devidos.map(d => `${d.leadId}:${d.tipo}`), ['1:24h', '2:2h'])
   eq('lembretes: bot certo por tipo', devidos.map(d => d.botId), [10528, 10530])
 
+  // Calendly → Kommo
+  const { chaveTelefone, escolherLead, assinaturaValida } = await import('../lib/calendly-sync')
+  eq('telefone: Calendly e Kommo casam', [chaveTelefone('+55 48 99966-1278'), chaveTelefone('5548999661278'), chaveTelefone('(48) 9966-1278')], ['4899661278', '4899661278', '4899661278'])
+  eq('telefone: DDD diferente não casa', chaveTelefone('+55 47 99966-1278') === chaveTelefone('+55 48 99966-1278'), false)
+  eq('telefone curto é ignorado', chaveTelefone('9966-1278'), null)
+  eq('lead: aberto no SDR vence', escolherLead([{ id: 1, pipelineId: 9312127, statusId: 72657491, updatedAt: 9 }, { id: 2, pipelineId: 9299515, statusId: 72104595, updatedAt: 5 }])?.id, 2)
+  eq('lead: perdido no SDR antes de outro funil fechado', escolherLead([{ id: 3, pipelineId: 9312103, statusId: 142, updatedAt: 9 }, { id: 4, pipelineId: 9299515, statusId: 143, updatedAt: 1 }])?.id, 4)
+  eq('lead: ganho no SDR não é escolhido', escolherLead([{ id: 5, pipelineId: 9299515, statusId: 142, updatedAt: 9 }]), null)
+  const chaveW = 'segredo-teste', corpo = '{"event":"invitee.created"}', tW = Math.floor(Date.now() / 1000)
+  const v1 = (await import('crypto')).createHmac('sha256', chaveW).update(`${tW}.${corpo}`).digest('hex')
+  eq('assinatura do Calendly: válida', assinaturaValida(`t=${tW},v1=${v1}`, corpo, chaveW), true)
+  eq('assinatura do Calendly: corpo alterado falha', assinaturaValida(`t=${tW},v1=${v1}`, corpo + ' ', chaveW), false)
+  eq('assinatura do Calendly: velha (>5 min) falha', assinaturaValida(`t=${tW - 400},v1=${v1}`, corpo, chaveW), false)
+
   return 0
 }

@@ -3,6 +3,7 @@ import { CalendlyError, casarEscolha, escolherOpcoes, horariosLivres, reservar, 
 import { CRM_MAP, campoByKey, type Campo, type Porta } from './crm-map'
 import { DISSE_NAO_SEI, evidenceFound, matchOption, overlap, parseNumeroBR } from './guards'
 import type { KommoFieldValue } from './kommo'
+import { k, redis } from './redis'
 import { escolherResponsavel, valorDoCaso } from './roteamento'
 import { classificar } from './router'
 import type { LeadState } from './state'
@@ -448,6 +449,8 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         try {
           const reserva = await reservar({ iso: escolhido.iso, nome, email, telefone: await port.getPhone(), motivo, notas: String(input.resumo || '').slice(0, 500) })
           await port.patchState({ reuniao: reserva })
+          // a ponte Calendly → Kommo reconhece esta reserva sem procurar por telefone
+          await redis.set(k('cal-invitee', reserva.inviteeUri), (await port.getLead()).id, { ex: 60 * 86400 }).catch(() => {})
           const neg = CRM_MAP.negocio
           const writes: KommoFieldValue[] = [{ field_id: neg.reuniao.fieldId, values: [{ value: Math.floor(new Date(reserva.iso).getTime() / 1000) }] }]
           if (reserva.joinUrl) writes.push({ field_id: neg.reuniao.linkFieldId, values: [{ value: reserva.joinUrl }] })

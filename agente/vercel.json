@@ -7,6 +7,7 @@
     "api/salesbot.ts": { "maxDuration": 30 },
     "api/followup.ts": { "maxDuration": 60 },
     "api/crm-eventos.ts": { "maxDuration": 60 },
-    "api/lembretes.ts": { "maxDuration": 120 }
+    "api/lembretes.ts": { "maxDuration": 120 },
+    "api/calendly.ts": { "maxDuration": 60 }
   }
 }

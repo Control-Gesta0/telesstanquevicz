@@ -170,3 +170,13 @@ O Calendly teve **147 reuniões em 30 dias**; o campo "Reunião" do Kommo só te
 1. Teste com um lead de WhatsApp nosso: rodar o bot 10530 nele e ver o lembrete chegar no celular.
 2. Tirar o gatilho de data dos bots 10528 e 10530 no Kommo (se existir), para não sair em dobro.
 3. `LEMBRETES_MODO=ativo` e deploy.
+
+## Ponte Calendly → Kommo (14/10/2026)
+
+- **Webhook do Calendly** `98a6fd10-f7b3-440e-8779-6504c1b32eae` (organização, `invitee.created` e `invitee.canceled`), assinado com `CALENDLY_WEBHOOK_KEY` → `/api/calendly`. Sem assinatura válida: 401.
+- **Reunião marcada:** acha o lead (reserva feita pela Gabi → telefone dígito a dígito, DDD + 8 últimos → e-mail), grava **Reunião** e **Link da Reunião**, leva para **SDR › Reunião agendada** se o lead estiver no SDR e não ganho (inclui perdido: quem marca voltou), nota no card. Lead em outro funil: só grava a data.
+- **Reunião cancelada:** se a data do card é a da reunião cancelada, limpa Reunião e link; nota com motivo; tarefa "Reagendar" para o responsável. Remarcação: só registra, a nova data chega no `invitee.created`.
+- **Lead não encontrado:** não cria (evita duplicata); vai para o diário como "lead NÃO encontrado".
+- **Provas:** teste num lead de TESTE (26201451): marcada → etapa, data, link e nota; cancelada → data limpa, nota e tarefa; fechado como perdido depois. Reunião real de 14/10 15:30 trazida pelo backfill e achada por telefone (lead 26193477): **o Kommo tinha 14:30, o Calendly 15:30**, e a ponte corrigiu.
+- **Scripts:** `scripts/test-calendly-sync.ts` (E2E no lead de teste) · `scripts/backfill-calendly.ts [dias]` (traz reuniões futuras).
+- Com isso, os lembretes (`/api/lembretes`) passam a enxergar as reuniões do Calendly, não só um terço delas.
