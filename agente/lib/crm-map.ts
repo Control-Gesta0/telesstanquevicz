@@ -190,6 +190,16 @@ export const CRM_MAP = {
     },
     /** trava de movimentação em massa: mais que isso numa janela = limpeza de funil, não venda */
     limiteEmMassa: { eventos: 20, janelaSeg: 600 },
+    /**
+     * Etiquetas ao entrar numa etapa (saíram do "Automatizar" do Kommo em 15/10/2026).
+     * Só põe a etiqueta, não move card. Teto próprio: movimentação em massa para Follow-up é comum
+     * e mil etiquetas de uma vez estourariam o limite da API do Kommo (7 por segundo).
+     */
+    etiquetas: {
+      etiquetaFollowUp: { em: { pipelineId: 9299515, statusId: 72104595, name: 'Follow-up' }, tag: 'Follow up' },
+      etiquetaVendaPerdida: { em: { pipelineId: 9312103, statusId: 143, name: 'Venda perdida' }, tag: 'Desqualificado' },
+    } as Record<string, { em: { pipelineId: number; statusId: number; name: string }; tag: string }>,
+    limiteEtiquetas: { eventos: 120, janelaSeg: 600 },
   },
 
   /**

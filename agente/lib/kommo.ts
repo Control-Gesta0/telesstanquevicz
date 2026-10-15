@@ -62,7 +62,8 @@ export async function updateLeadStatus(leadId: number, statusId: number, pipelin
   await kommo('PATCH', `/api/v4/leads/${leadId}`, { status_id: statusId, pipeline_id: pipelineId })
 }
 
-async function setLeadTags(leadId: number, names: string[]): Promise<void> {
+/** Grava o conjunto INTEIRO de tags (o PATCH substitui). Só passe a lista já mesclada. */
+export async function setLeadTags(leadId: number, names: string[]): Promise<void> {
   // Array vazio não limpa: o Kommo ignora. Para zerar, é preciso tags_to_delete.
   await kommo('PATCH', `/api/v4/leads/${leadId}`, { _embedded: { tags: names.map(name => ({ name })) } })
 }

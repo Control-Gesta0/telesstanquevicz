@@ -157,6 +157,11 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('ganho do JURÍDICO não dispara', decidir({ leadId: 1, statusId: 142, pipelineId: 9312127, oldStatusId: 72186743, oldPipelineId: 9312127 }), null)
   eq('a própria ida ao JURÍDICO não dispara (sem laço)', decidir({ leadId: 1, statusId: 72657491, pipelineId: 9312127, oldStatusId: 142, oldPipelineId: 9312103 }), null)
   eq('mudança para Pagamento não dispara', decidir({ leadId: 1, statusId: 72186419, pipelineId: 9312103, oldStatusId: 72686979, oldPipelineId: 9312103 }), null)
+  eq('entrar em Follow-up põe a etiqueta Follow up', decidir({ leadId: 1, statusId: 72104595, pipelineId: 9299515, oldStatusId: 72186399, oldPipelineId: 9299515 }), 'etiquetaFollowUp')
+  eq('venda perdida no CLOSER põe Desqualificado', decidir({ leadId: 1, statusId: 143, pipelineId: 9312103, oldStatusId: 72851523, oldPipelineId: 9312103 }), 'etiquetaVendaPerdida')
+  eq('perdido no SDR não põe Desqualificado', decidir({ leadId: 1, statusId: 143, pipelineId: 9299515, oldStatusId: 72104595, oldPipelineId: 9299515 }), null)
+  eq('Follow-up de outro funil não dispara', decidir({ leadId: 1, statusId: 72104595, pipelineId: 9312103, oldStatusId: 72851523, oldPipelineId: 9312103 }), null)
+  eq('evento repetido dentro do Follow-up não dispara', decidir({ leadId: 1, statusId: 72104595, pipelineId: 9299515, oldStatusId: 72104595, oldPipelineId: 9299515 }), null)
 
   // Lembretes de reunião: 24h e 2h antes, janela de 30 min, nada para reunião passada
   const { lembretesDevidos } = await import('../lib/lembretes')

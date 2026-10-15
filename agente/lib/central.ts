@@ -433,6 +433,8 @@ export function regras() {
       { gatilho: 'Reunião cancelada no Calendly', efeito: 'Limpa a data e cria tarefa de reagendar.' },
       { gatilho: '24h e 2h antes da reunião', efeito: 'Lembrete pelo modelo aprovado do WhatsApp.' },
       { gatilho: 'Lead chegou por link rastreado', efeito: 'Grava De onde e a campanha no card.' },
+      { gatilho: 'Card entra em Follow-up', efeito: 'Põe a etiqueta "Follow up".' },
+      { gatilho: 'Venda perdida no CLOSER', efeito: 'Põe a etiqueta "Desqualificado".' },
       { gatilho: `Mais de ${CRM_MAP.automacoes.limiteEmMassa.eventos} mudanças em ${CRM_MAP.automacoes.limiteEmMassa.janelaSeg / 60} min`, efeito: 'As automações pausam: é limpeza de funil, não venda.' },
     ],
   }
