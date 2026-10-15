@@ -344,9 +344,12 @@ Reunião: quinta, 15/10, às 14h · link do Google Meet</div>
     </tbody>
   </table>
 
-  <h3>O que falta para a fase 1</h3>
-  <div class="regra"><div class="n">1</div><div><b>Robô de envio no Kommo.</b> Um Salesbot simples, com um bloco “Enviar mensagem” que lê o campo Resposta IA (agente). É ele que entrega a resposta da Gabi no WhatsApp oficial. Criado pela equipe na tela do Kommo; a Control Gestão liga em seguida.</div></div>
-  <div class="regra"><div class="n">2</div><div><b>Um WhatsApp de teste da equipe</b> cadastrado como lead, para a primeira conversa completa antes de qualquer lead real.</div></div>
+  <h3>Como fazer o primeiro teste</h3>
+  <p>O robô de envio <b>Gabi · envio</b> já está criado e ligado (15/10). Falta a primeira conversa num WhatsApp da equipe.</p>
+  <div class="regra"><div class="n">1</div><div>Mande uma mensagem de um WhatsApp da equipe para o número do escritório, para o card existir no Kommo.</div></div>
+  <div class="regra"><div class="n">2</div><div>Nos robôs de atendimento do SDR, ponha a condição “sem a etiqueta ia-gabi”. Sem isso, o lead de teste recebe duas respostas.</div></div>
+  <div class="regra"><div class="n">3</div><div>Ponha a etiqueta <span class="tag">ia-gabi</span> no card, espere 1 minuto e mande “oi”. A resposta chega em 10 a 20 segundos.</div></div>
+  <p style="font-size: 8.6pt; color: var(--muted)">Não chegou nada? Veja o campo Resposta IA (agente) no card. Preenchido: a Gabi respondeu e o problema está no robô de envio. Vazio: fale com a Control Gestão.</p>
 
   <h3>Durante o teste, a equipe…</h3>
   <ul>
@@ -498,7 +501,7 @@ Reunião: quinta, 15/10, às 14h · link do Google Meet</div>
       <tr><td>Automações do SDR e do CLOSER</td><td style="color: var(--ok)">valendo</td><td>Todas no servidor da operação; as antigas do Kommo estão sendo desligadas.</td></tr>
       <tr><td>Calendly atualizando o card</td><td style="color: var(--ok)">valendo</td><td>Marcou, cancelou e remarcou chegam sozinhos.</td></tr>
       <tr><td>Painel da operação</td><td style="color: var(--ok)">no ar</td><td>Com o teste da Gabi já disponível.</td></tr>
-      <tr><td>Gabi no WhatsApp</td><td style="color: var(--warn)">pronta</td><td>Aguardando o robô de envio no Kommo para a fase 1.</td></tr>
+      <tr><td>Gabi no WhatsApp</td><td style="color: var(--warn)">ligada para teste</td><td>Robô de envio criado e ligado em 15/10. Responde só cards com a etiqueta ia-gabi; falta a primeira conversa de teste.</td></tr>
       <tr><td>Lembretes 24 h e 2 h</td><td style="color: var(--warn)">em transição</td><td>Saem pelos robôs do Kommo enquanto a versão nova é conferida. Na conferência de 13 e 14/10 o de 2 h falhou em duas reuniões: no dia, confirme a presença por mensagem.</td></tr>
       <tr><td>Origem pelos links de anúncio</td><td style="color: var(--warn)">pronta</td><td>Aguardando o número do WhatsApp do escritório.</td></tr>
     </tbody>
