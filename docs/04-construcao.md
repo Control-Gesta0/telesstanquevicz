@@ -41,7 +41,7 @@ Estado do projeto: **VALIDANDO → PROVANDO**. Código pronto, testado e publica
 
 | # | Pendência | Quem |
 |---|---|---|
-| 1 | Criar o Salesbot de envio (1 bloco "Enviar mensagem" com `{{lead.cf.1048279}}`) e informar o `bot_id` | mestre no Kommo, ou eu com um login |
+| 1 | ~~Criar o Salesbot de envio (1 bloco "Enviar mensagem" com `{{lead.cf.1048279}}`) e informar o `bot_id`~~ **feito em 15/10: "Gabi · envio" (61873), `KOMMO_BOT_ID` na Vercel, publicado, `/api/validate` ok:true. Entrega no WhatsApp real ainda por provar com o lead de teste** | — |
 | 2 | ~~Autorizar o webhook `add_message`~~ **feito em 14/10: webhook 47513684 ativo; 1ª mensagem real recebida às 12:42 e corretamente ignorada (lead sem a tag)** | — |
 | 3 | Lead de teste: o WhatsApp de alguém da Control Gestão, com a tag `ia-gabi` | mestre |
 | 4 | Nos Salesbots de atendimento do SDR, condição "sem a tag ia-gabi" (senão o lead de teste recebe resposta dupla) | escritório/mestre |
