@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import { waitUntil } from '@vercel/functions'
 import { CONFIG } from './config'
 import { CRM_MAP, portaById } from './crm-map'
-import { costUsd, readExecs, type ExecEntry } from './execlog'
+import { costUsd, emptyUsage, readExecs, type ExecEntry } from './execlog'
 import type { ChatMsg } from './history'
 import { kommoGet, type KommoFieldValue, type KommoLead } from './kommo'
 import { leadsComReuniao, lembretesDevidos } from './lembretes'
@@ -10,6 +10,8 @@ import { createBrain } from './llm'
 import { resumoRastreio } from './rastreio'
 import { k, redis } from './redis'
 import { REGRAS_CLIENTE } from './regras'
+import { comApresentacao } from './router'
+import { rotearTurno } from './triagem'
 import type { LeadPort } from './tools'
 import type { LeadState } from './state'
 
@@ -487,6 +489,7 @@ export async function atualizarEnsino(id: string, status: PedidoEnsino['status']
 // ─────────────────────────────── laboratório ───────────────────────────────
 
 interface Mundo {
+  /** vazio até a Gabi entender o assunto (o laboratório roteia como o atendimento real) */
   porta: string
   statusId: number
   pipelineId: number
@@ -534,18 +537,9 @@ export async function laboratorio(p: { sessao?: string; porta?: string; msg?: st
   let w = await redis.get<Mundo>(chave)
   const eventos: string[] = []
 
-  if (!w || (p.porta && p.porta !== w.porta && !p.msg)) {
-    const porta = portaById(p.porta || 'rcpcc')
-    if (!porta || !porta.abertura) throw new Error('Escolha um dos três assuntos para começar.')
-    w = {
-      porta: porta.id, statusId: 72186399, pipelineId: CRM_MAP.negocio.pipelineId, fields: {}, tags: [CONFIG.gateTag].filter(Boolean),
-      state: { porta: porta.id, portaEm: 1 }, turnos: 0,
-      history: [
-        { id: 'm0', dir: 'out', text: CRM_MAP.menu.texto, ts: 1 },
-        { id: 'm1', dir: 'in', text: String(porta.menu), ts: 2 },
-        { id: 'm2', dir: 'out', text: porta.abertura, ts: 3 },
-      ],
-    }
+  // Conversa nova começa vazia: quem escreve primeiro é o "lead", como no WhatsApp
+  if (!w) {
+    w = { porta: '', statusId: 72104583, pipelineId: CRM_MAP.negocio.pipelineId, fields: {}, tags: [CONFIG.gateTag].filter(Boolean), state: {}, turnos: 0, history: [] }
     await redis.set(chave, w, { ex: 7200 })
   }
 
@@ -560,9 +554,49 @@ export async function laboratorio(p: { sessao?: string; porta?: string; msg?: st
   if (w.turnos >= LIMITE_SESSAO) { eventos.push('Esta conversa chegou ao limite do teste. Comece outra.'); return resposta() }
   if (usados >= LIMITE_DIA) { eventos.push('O limite de testes de hoje acabou. Amanhã libera de novo.'); return resposta() }
 
-  const porta = portaById(w.porta)!
   w.history.push({ id: `m${w.history.length}`, dir: 'in', text: msg, ts: w.history.length + 1 })
   w.turnos++
+  const usoTriagem = emptyUsage()
+  const fechar = async (texto: string, travas: string[] = [], usd = 0) => {
+    w!.history.push({ id: `m${w!.history.length}`, dir: 'out', text: texto, ts: w!.history.length + 1 })
+    await redis.set(chave, w, { ex: 7200 })
+    await redis.incr(usoChave)
+    await redis.expire(usoChave, 2 * DIA)
+    const brl = Math.round(usd * USD_BRL() * 10000) / 10000
+    if (brl) await redis.incrbyfloat(k('central', 'lab-custo', diaBR(Date.now()).slice(0, 7)), brl).catch(() => {})
+    return resposta(travas, brl)
+  }
+
+  // Primeiro contato: o MESMO roteador do atendimento (palavra-chave, depois triagem por IA)
+  if (!w.state.porta) {
+    const rota = await rotearTurno(w.state, w.history.filter(m => m.dir === 'in').slice(-6).map(m => m.text).join('\n'), usoTriagem)
+    const usdTriagem = costUsd(CONFIG.llmModel, usoTriagem) || 0
+    if (rota.tipo === 'mensagem') {
+      if (rota.patch.respostas?.nome && !w.state.respostas?.nome) eventos.push(`Anotou: Nome = ${anonimizar(rota.patch.respostas.nome)}`)
+      eventos.push(w.state.aberturaEnviada
+        ? 'Ainda não deu para saber o assunto: perguntou de novo, com pergunta aberta (sem menu).'
+        : 'Se apresentou e perguntou o nome e o que a pessoa procura (sem menu).')
+      Object.assign(w.state, rota.patch)
+      return fechar(rota.texto, [], usdTriagem)
+    }
+    if (rota.tipo === 'encerrar') {
+      Object.assign(w.state, rota.patch)
+      w.state.finalizado = { motivo: rota.motivo, resumo: 'assunto não bancário', em: new Date().toISOString() }
+      eventos.push('Recusaria com respeito: o assunto não é bancário. Marcaria "Desqualificado robô" no card e pararia de atender.')
+      return fechar(rota.texto, [], usdTriagem)
+    }
+    if (rota.tipo !== 'porta') return fechar(CRM_MAP.textoSeguro)
+    if (!rota.porta.ativa) {
+      w.state.finalizado = { motivo: 'porta_sem_agente', resumo: 'assunto fora dos três que a Gabi atende', em: new Date().toISOString() }
+      eventos.push('Passaria para a equipe: o assunto não é um dos três que ela atende (tarefa "Assumir o atendimento" para o SDR).')
+      return fechar(comApresentacao(w.state, rota.patch?.respostas?.nome || w.state.respostas?.nome || '', rota.porta.mensagemSemAgente || CRM_MAP.textoSeguroFinal), [], usdTriagem)
+    }
+    w.porta = rota.porta.id
+    w.state = { ...w.state, porta: rota.porta.id, portaEm: w.history[w.history.length - 1].ts, respostas: { ...(w.state.respostas || {}), ...(rota.patch?.respostas || {}) } }
+    eventos.push(`Entendeu o assunto: ${rota.porta.label}.`)
+  }
+  const porta = portaById(w.porta)!
+  const conversa = w.history.filter(m => m.ts >= (w!.state.portaEm || 0))
   const antes = { ...(w.state.respostas || {}) }
   const brain = createBrain({
     apiKey: CONFIG.openaiApiKey, model: CONFIG.llmModel,
@@ -571,25 +605,18 @@ export async function laboratorio(p: { sessao?: string; porta?: string; msg?: st
       if (nome === 'agendar_reuniao') eventos.push('Tentou marcar a reunião (no teste, nada é reservado no Calendly).')
     },
   })
-  const iOut = w.history.map(m => m.dir).lastIndexOf('out')
+  const iOut = conversa.map(m => m.dir).lastIndexOf('out')
   const reply = await brain.generateReply({
     port: portaDoMundo(w, eventos), porta, gateTag: CONFIG.gateTag,
-    leadText: w.history.filter(m => m.dir === 'in').map(m => m.text).join('\n'),
-    lastLeadText: w.history.slice(iOut + 1).map(m => m.text).join('\n'),
-    lastAgentText: iOut >= 0 ? w.history[iOut].text : '',
-  }, { nomeContato: '', primeiroContatoDaPorta: false }, w.history)
+    leadText: conversa.filter(m => m.dir === 'in').map(m => m.text).join('\n'),
+    lastLeadText: conversa.slice(iOut + 1).map(m => m.text).join('\n'),
+    lastAgentText: iOut >= 0 ? conversa[iOut].text : '',
+  }, { nomeContato: '', primeiroContatoDaPorta: !conversa.some(m => m.dir === 'out') }, conversa)
   const anotou = Object.entries(w.state.respostas || {}).filter(([c, v]) => antes[c] !== v)
     .map(([c, v]) => `Anotou: ${CRM_MAP.campos[c]?.name || c} = ${anonimizar(String(v)).slice(0, 80)}`)
   eventos.unshift(...anotou)
-  const texto = reply?.text || CRM_MAP.textoSeguro
-  w.history.push({ id: `m${w.history.length}`, dir: 'out', text: texto, ts: w.history.length + 1 })
-  await redis.set(chave, w, { ex: 7200 })
-  await redis.incr(usoChave)
-  await redis.expire(usoChave, 2 * DIA)
-  const usd = reply ? costUsd(CONFIG.llmModel, reply.usage) || 0 : 0
-  const brl = Math.round(usd * USD_BRL() * 10000) / 10000
-  if (brl) await redis.incrbyfloat(k('central', 'lab-custo', diaBR(Date.now()).slice(0, 7)), brl).catch(() => {})
-  return resposta(reply?.guard || [], brl)
+  const usd = (reply ? costUsd(CONFIG.llmModel, reply.usage) || 0 : 0) + (costUsd(CONFIG.llmModel, usoTriagem) || 0)
+  return fechar(reply?.text || CRM_MAP.textoSeguro, reply?.guard || [], usd)
 }
 
 export async function custoLaboratorioMes(): Promise<number> {

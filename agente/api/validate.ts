@@ -31,10 +31,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (const key of [...p.roteiro, ...p.obrigatorios]) if (!CRM_MAP.campos[key]) problems.push(`porta "${p.id}": campo "${key}" não existe em CRM_MAP.campos`)
     for (const key of p.obrigatorios) if (!p.roteiro.includes(key)) problems.push(`porta "${p.id}": obrigatório "${key}" fora do roteiro`)
   }
-  const menus = CRM_MAP.portas.map(p => p.menu).filter(n => n !== null)
-  if (new Set(menus).size !== menus.length) problems.push('dois assuntos com o mesmo número no menu')
-  if (menus.includes(CRM_MAP.menu.outros)) problems.push(`menu.outros (${CRM_MAP.menu.outros}) colide com uma porta`)
-  if (!CRM_MAP.portas.find(p => p.id === CRM_MAP.menu.portaPadraoOutros)) problems.push(`menu.portaPadraoOutros "${CRM_MAP.menu.portaPadraoOutros}" não existe`)
+  if (CRM_MAP.portas.some(p => p.menu !== null)) problems.push('há assunto com número de menu: o primeiro contato é sem menu numerado')
+  if (!CRM_MAP.portas.find(p => p.id === CRM_MAP.abertura.portaOutros)) problems.push(`abertura.portaOutros "${CRM_MAP.abertura.portaOutros}" não existe`)
+  if (/\b[1-9]\.\s/.test(Object.values(CRM_MAP.abertura).join(' '))) problems.push('a abertura tem lista numerada')
   try { loadPromptFile('nucleo.md') } catch { problems.push('prompts/nucleo.md não existe') }
 
   try {

@@ -93,15 +93,15 @@
   .capa .assina img { height: 16pt; }
 
   /* conversa (WhatsApp) */
-  .zap { background: #efeae2; border: 1px solid #e2dccf; border-radius: 9pt; padding: 8pt 9pt; display: flex; flex-direction: column; gap: 4pt; break-inside: avoid; }
-  .zap .msg { max-width: 90%; padding: 4pt 7pt; border-radius: 7pt; font-size: 8.4pt; line-height: 1.33; color: #111b21; white-space: pre-wrap; box-shadow: 0 1px 0 rgba(0,0,0,.06); }
+  .zap { background: #efeae2; border: 1px solid #e2dccf; border-radius: 9pt; padding: 7pt 8pt; display: flex; flex-direction: column; gap: 3.5pt; break-inside: avoid; }
+  .zap .msg { max-width: 92%; padding: 3.5pt 7pt; border-radius: 7pt; font-size: 8.1pt; line-height: 1.3; color: #111b21; white-space: pre-wrap; box-shadow: 0 1px 0 rgba(0,0,0,.06); }
   .zap .in { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 2pt; }
   .zap .out { align-self: flex-start; background: #fff; border-top-left-radius: 2pt; }
   .zap .quem { display: block; font-family: 'JetBrains Mono', monospace; font-size: 6.4pt; letter-spacing: .08em; text-transform: uppercase; color: #667781; margin-bottom: 1.5pt; }
   .zap .corte { align-self: center; font-family: 'JetBrains Mono', monospace; font-size: 6.6pt; color: #54656f; background: #fff8; border-radius: 5pt; padding: 1.5pt 7pt; }
   .kommo { border: 1px solid var(--line); border-radius: 8pt; background: #fffdf3; padding: 9pt 11pt; font-size: 8.8pt; white-space: pre-wrap; line-height: 1.42; break-inside: avoid; }
   .kommo .t { font-family: 'JetBrains Mono', monospace; font-size: 6.8pt; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 4pt; white-space: normal; }
-  .lado { display: grid; grid-template-columns: 1.45fr .75fr; gap: 12pt; align-items: start; }
+  .lado { display: grid; grid-template-columns: 1.65fr .7fr; gap: 12pt; align-items: start; }
   figure { margin: 8pt 0 0; break-inside: avoid; text-align: center; }
   figure img { max-width: 100%; max-height: 96mm; width: auto; display: inline-block; border: 1px solid var(--line); border-radius: 6pt; }
   figcaption { text-align: left; font-size: 8pt; color: var(--muted); margin-top: 3pt; }
@@ -172,7 +172,7 @@
 <!-- ═════════════ 02 · A GABI ═════════════ -->
 <section class="pagina">
   <div class="sec-head"><div><div class="eyebrow">IA de atendimento</div><h2>A Gabi, assistente virtual do escritório</h2></div><div class="num">02</div></div>
-  <p class="lead">A Gabi responde pelo WhatsApp oficial do escritório, dentro do Kommo, a qualquer hora. Ela se apresenta como assistente virtual e, se perguntarem, confirma que é uma IA. Nunca diz que é uma pessoa.</p>
+  <p class="lead">A Gabi responde pelo WhatsApp oficial do escritório, dentro do Kommo, a qualquer hora. Ela abre perguntando <b>o nome e o que a pessoa procura</b> e entende o que a pessoa escreve ou fala, sem menu de números. Se perguntarem, confirma que é uma IA.</p>
 
   <div class="duas" style="margin-top: 9pt">
     <div class="caixa alt">
@@ -182,13 +182,13 @@
         <li><b>Financiamento de veículo:</b> revisão do contrato.</li>
         <li><b>Busca e apreensão do veículo:</b> tratado como urgente.</li>
       </ul>
-      <p>Qualquer outro assunto bancário vai para a equipe. Assunto que não é bancário (trabalhista, família, INSS) recebe uma recusa educada.</p>
+      <p>Outro assunto bancário vai para a equipe. Assunto não bancário (trabalhista, família, INSS) recebe uma recusa educada.</p>
     </div>
     <div class="caixa alt">
       <h4>O que ela entende</h4>
       <ul>
         <li><b>Texto</b> e <b>áudio</b>: ela transcreve o áudio e responde por escrito.</li>
-        <li><b>Foto e PDF</b>: mandado, contrato, extrato. Ela descreve o documento para o advogado, sem interpretar.</li>
+        <li><b>Foto e PDF</b>: mandado, contrato, extrato, descritos para o advogado, sem interpretar.</li>
         <li>As respostas do <b>formulário do anúncio</b>, quando existem: ela não pergunta de novo.</li>
       </ul>
     </div>
@@ -198,15 +198,16 @@
   <table>
     <thead><tr><th style="width: 24%">Assunto</th><th>Perguntas (ela pula o que o lead já contou)</th><th style="width: 24%">Já oferece horário quando sabe</th></tr></thead>
     <tbody>
+      <tr><td>Primeiro contato</td><td>Nome · o que a pessoa procura (sem entender, pergunta de novo com outras palavras)</td><td>—</td></tr>
       <tr><td>Dívida com banco</td><td>Tipo da dívida (e banco) · valor aproximado · parcelas em atraso</td><td>tipo e valor</td></tr>
       <tr><td>Financiamento de veículo</td><td>Banco ou financeira · total de parcelas · parcelas pagas · valor da parcela · se tem o contrato</td><td>banco e as três contas das parcelas</td></tr>
       <tr><td>Busca e apreensão</td><td>Se já foi apreendido · quando · se recebeu o mandado (pede foto) · quanto falta pagar</td><td>se já foi apreendido</td></tr>
     </tbody>
   </table>
-  <p style="font-size: 8.6pt; color: var(--muted)">Para marcar, ela pede o nome completo e o e-mail, um de cada vez. Na busca e apreensão ela avisa que o prazo de defesa pode já estar correndo e oferece primeiro o horário mais cedo.</p>
+  <p style="font-size: 8.6pt; color: var(--muted)">Para marcar, ela pede o nome completo e o e-mail, um de cada vez, só depois da escolha do horário.</p>
 
   <h3>A reunião que ela marca</h3>
-  <p>Diagnóstico sem custo e sem compromisso, de 30 minutos, pelo Google Meet, com o Dr. Carlos Eduardo. Ela oferece <b>3 horários reais</b> do Calendly, com pelo menos 2 horas de antecedência, nos próximos 5 dias. Só diz que está marcado depois que o Calendly confirma. O link chega no e-mail do lead, e ele pode entrar com a câmera fechada.</p>
+  <p>Diagnóstico sem custo, de 30 minutos, pelo Google Meet, com o Dr. Carlos Eduardo. Ela oferece <b>3 horários reais</b> do Calendly e só diz que está marcado depois que o Calendly confirma.</p>
 
   <h3>O que ela nunca faz</h3>
   <div class="duas" style="margin-top: 5pt">
@@ -220,27 +221,22 @@
       <li>Mandar PIX, boleto, conta, contrato ou qualquer link.</li>
       <li>Pedir CPF ou número de processo.</li>
       <li>Inventar valor que o lead não disse.</li>
-      <li>Usar frase de robô ("Fico à disposição").</li>
+      <li>Usar frase de robô ("Fico à disposição", "Perfeito!").</li>
     </ul>
   </div>
-  <p style="font-size: 8.6pt; color: var(--muted)">Essas regras são travas em código: se uma resposta casar com uma delas, ela não sai. A Gabi reescreve uma vez e, se insistir, sai um texto seguro aprovado.</p>
+  <p style="font-size: 8.6pt; color: var(--muted)">São travas em código: a resposta que casar com uma delas não sai.</p>
 </section>
 
 <!-- ═════════════ 03 · COMO É UMA CONVERSA ═════════════ -->
 <section class="pagina">
   <div class="sec-head"><div><div class="eyebrow">Conversas reais</div><h2>Como é uma conversa</h2></div><div class="num">03</div></div>
-  <p class="lead">As conversas abaixo são da própria Gabi, geradas no laboratório do painel em 15/10/2026, com agenda de teste. Só os dados do lead são fictícios.</p>
+  <p class="lead">As conversas abaixo são da própria Gabi, geradas no laboratório do painel em 15/10/2026, com agenda de teste, do jeito que o lead escreveria. Só os dados do lead são fictícios.</p>
   <h3>Financiamento de veículo, do “oi” à reunião marcada</h3>
   <div class="lado" style="margin-top: 6pt">
-    <div class="zap"><div class="msg out"><span class="quem">Gabi</span>Oi, aqui é a Gabi, assistente virtual da Teles &amp; Stanquevicz Advogados. Me conta qual é o seu caso, pode ser por texto ou áudio. Se preferir, responde só com o número:
-
-1. Dívida com banco (cartão, cheque especial, empréstimo)
-2. Financiamento de veículo
-3. Busca e apreensão do veículo
-9. Outro assunto</div><div class="msg in"><span class="quem">Lead</span>2</div><div class="msg out"><span class="quem">Gabi</span>Certo. Por qual banco ou financeira foi feito o financiamento do veículo?</div><div class="msg in"><span class="quem">Lead</span>foi pelo banco pan, financiei em 48 vezes</div><div class="msg out"><span class="quem">Gabi</span>Quantas parcelas já foram pagas?</div><div class="msg in"><span class="quem">Lead</span>já paguei 20, a parcela é 1.150</div><div class="msg out"><span class="quem">Gabi</span>Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet. Tenho quinta às 14h, sexta às 9h15 ou sexta às 14h, qual fica melhor?</div><div class="msg in"><span class="quem">Lead</span>pode ser o primeiro horário</div><div class="msg out"><span class="quem">Gabi</span>Me passa seu nome completo, por favor?</div><div class="msg in"><span class="quem">Lead</span>Marcos Pereira da Silva</div><div class="msg out"><span class="quem">Gabi</span>Me passa seu e-mail, por favor?</div><div class="msg in"><span class="quem">Lead</span>marcos.exemplo@gmail.com</div><div class="msg out"><span class="quem">Gabi</span>Pronto, ficou marcado para quinta, 15/10, às 14h, pelo Google Meet com o Dr. Carlos Eduardo. O link chega no seu e-mail marcos.exemplo@gmail.com. Se não quiser aparecer, pode entrar com a câmera fechada.</div></div>
+    <div class="zap"><div class="msg in"><span class="quem">Lead</span>oi</div><div class="msg out"><span class="quem">Gabi</span>Oi! Aqui é a Gabi, assistente virtual da Teles &amp; Stanquevicz Advogados. Com quem eu falo, e o que você está procurando? Pode ser por texto ou áudio.</div><div class="msg in"><span class="quem">Lead</span>Marcos</div><div class="msg out"><span class="quem">Gabi</span>Prazer, Marcos. Me conta um pouco do seu caso: o que está acontecendo?</div><div class="msg in"><span class="quem">Lead</span>meu carro é financiado pelo banco pan, em 48 vezes, e a parcela tá pesada</div><div class="msg out"><span class="quem">Gabi</span>Entendi. E quantas parcelas já foram pagas?</div><div class="msg in"><span class="quem">Lead</span>já paguei 20, a parcela é 1.150</div><div class="msg out"><span class="quem">Gabi</span>Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet, e eu tenho estes horários: quinta, 15/10, às 14h, sexta, 16/10, às 9h15, ou sexta, 16/10, às 14h. Qual fica melhor para você?</div><div class="msg in"><span class="quem">Lead</span>pode ser o primeiro horário</div><div class="msg out"><span class="quem">Gabi</span>Me passa seu nome completo, por favor?</div><div class="msg in"><span class="quem">Lead</span>Marcos Pereira da Silva</div><div class="msg out"><span class="quem">Gabi</span>Me passa seu e-mail, por favor?</div><div class="msg in"><span class="quem">Lead</span>marcos.exemplo@gmail.com</div><div class="msg out"><span class="quem">Gabi</span>Pronto, ficou marcado para quinta, 15/10, às 14h, pelo Google Meet com o Dr. Carlos Eduardo. O link chega no seu e-mail, e você pode entrar com a câmera fechada.</div></div>
     <div>
-      <div class="caixa dica"><h4>Repare</h4><ul><li>O menu aceita número, texto ou áudio.</li><li>O lead respondeu duas coisas de uma vez e ela não perguntou de novo.</li><li>Com banco e parcelas, já ofereceu horário.</li><li>Pediu nome e e-mail só depois da escolha.</li><li>Confirmou só depois da reserva.</li></ul></div>
-      <div class="caixa alt" style="margin-top: 8pt"><h4>No Kommo, ao mesmo tempo</h4><p>O card foi para Reunião agendada, com data e link da reunião. Como a dívida ficou em R$ 32.200 (28 parcelas de R$ 1.150), foi para a <b>Carla</b> pelo rodízio, com a tarefa “Reunião marcada pela IA”.</p></div>
+      <div class="caixa dica"><h4>Repare</h4><ul><li>Abriu perguntando o nome e o que a pessoa procura, sem menu.</li><li>Entendeu o assunto pelo que o lead escreveu.</li><li>O lead contou duas coisas de uma vez e ela não perguntou de novo.</li><li>Com banco e parcelas, já ofereceu horário.</li><li>Pediu nome completo e e-mail só depois da escolha e confirmou só depois da reserva.</li></ul></div>
+      <div class="caixa alt" style="margin-top: 8pt"><h4>No Kommo, ao mesmo tempo</h4><p>O card foi para Reunião agendada, com data e link da reunião. Como a dívida ficou em R$ 32.200 (28 parcelas de R$ 1.150), foi para <b>Carla</b> pelo rodízio, com a tarefa “Reunião marcada pela IA”.</p></div>
     </div>
   </div>
 </section>
@@ -248,13 +244,16 @@
 <section class="pagina">
   <h3 style="margin-top: 0">Busca e apreensão: urgência sem assustar</h3>
   <div class="lado" style="margin-top: 6pt">
-    <div class="zap"><div class="corte">o lead escolheu o assunto no menu</div><div class="msg out"><span class="quem">Gabi</span>Entendi, vamos ver isso rápido. O veículo já foi apreendido?</div><div class="msg in"><span class="quem">Lead</span>foi sim, levaram ontem de manhã</div><div class="msg out"><span class="quem">Gabi</span>A reunião sem custo com o Dr. Carlos Eduardo pode ser por Google Meet, e como o prazo de defesa pode já estar correndo, o ideal é falar com o advogado o quanto antes. Tenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15 ou sexta, 16/10, às 14h, qual fica melhor?</div><div class="msg in"><span class="quem">Lead</span>deixaram o mandado sim, tá aqui comigo</div><div class="msg out"><span class="quem">Gabi</span>Se tiver o mandado aí, manda uma foto por aqui que eu já deixo para o advogado. Tenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15 ou sexta, 16/10, às 14h, qual fica melhor?</div></div>
-    <div class="caixa dica"><h4>Repare</h4><ul><li>Bastou saber que o carro foi apreendido para ela oferecer horário.</li><li>Avisou do prazo de defesa uma vez, sem dramatizar.</li><li>Pediu a foto do mandado para deixar com o advogado.</li><li>Não prometeu recuperar o veículo.</li></ul></div>
+    <div class="zap"><div class="msg in"><span class="quem">Lead</span>Olá, vi o anúncio sobre busca e apreensão de veículo</div><div class="msg out"><span class="quem">Gabi</span>Oi! Aqui é a Gabi, assistente virtual da Teles &amp; Stanquevicz Advogados.  
+Com quem eu falo?</div><div class="msg in"><span class="quem">Lead</span>Rafael</div><div class="msg out"><span class="quem">Gabi</span>Rafael, entendi, vamos ver isso rápido. O veículo já foi apreendido?</div><div class="msg in"><span class="quem">Lead</span>foi sim, levaram ontem de manhã</div><div class="msg out"><span class="quem">Gabi</span>Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet, e como o prazo de defesa pode já estar correndo, o ideal é falar com ele o quanto antes.  
+Tenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15, ou sexta, 16/10, às 14h. Qual fica melhor para você?</div><div class="msg in"><span class="quem">Lead</span>deixaram o mandado sim, tá aqui comigo</div><div class="msg out"><span class="quem">Gabi</span>Se tiver o mandado aí, manda uma foto por aqui que eu já deixo para o advogado.  
+E me diz, qual desses horários fica melhor para você?</div></div>
+    <div class="caixa dica"><h4>Repare</h4><ul><li>Veio direto do anúncio: ela entendeu o assunto e perguntou o nome antes do caso.</li><li>Bastou saber que o carro foi apreendido para ela oferecer horário.</li><li>Avisou do prazo de defesa uma vez, sem dramatizar.</li><li>Pediu a foto do mandado para deixar com o advogado.</li><li>Não prometeu recuperar o veículo.</li></ul></div>
   </div>
   <h3>Dívida com banco: pergunta sobre honorários</h3>
   <div class="lado" style="margin-top: 6pt">
-    <div class="zap"><div class="corte">o lead escolheu o assunto no menu</div><div class="msg out"><span class="quem">Gabi</span>Certo. Essa dívida é de cartão, cheque especial ou empréstimo?</div><div class="msg in"><span class="quem">Lead</span>empréstimo no santander, tá uns 35 mil</div><div class="msg out"><span class="quem">Gabi</span>Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet. Tenho quinta às 14h, sexta às 9h15 ou sexta às 14h, qual fica melhor?</div><div class="msg in"><span class="quem">Lead</span>quanto vocês cobram pra entrar com a ação?</div><div class="msg out"><span class="quem">Gabi</span>A proposta de honorários depende do caso, e quem passa é o advogado na reunião. A reunião não tem custo nem compromisso, qual horário você prefere?</div><div class="msg in"><span class="quem">Lead</span>tenho 4 parcelas atrasadas</div><div class="msg out"><span class="quem">Gabi</span>Entendi. Dá para conversar sem custo com o Dr. Carlos Eduardo pelo Google Meet, qual desses horários fica melhor pra você?</div></div>
-    <div class="caixa dica"><h4>Repare</h4><ul><li>Não deu valor nem faixa de honorários.</li><li>Explicou que a proposta vem do advogado, na reunião sem custo.</li><li>Voltou para a escolha do horário.</li></ul></div>
+    <div class="zap"><div class="msg in"><span class="quem">Lead</span>boa tarde, sou a Ana</div><div class="msg out"><span class="quem">Gabi</span>Oi, Ana! Aqui é a Gabi, assistente virtual da Teles &amp; Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.</div><div class="msg in"><span class="quem">Lead</span>tenho um empréstimo no santander, tá uns 35 mil e estou com 4 parcelas atrasadas</div><div class="msg out"><span class="quem">Gabi</span>Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet. Tenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15 ou sexta, 16/10, às 14h, qual fica melhor?</div><div class="msg in"><span class="quem">Lead</span>quanto vocês cobram pra entrar com a ação?</div><div class="msg out"><span class="quem">Gabi</span>A proposta de honorários depende do caso, e quem passa é o advogado na reunião. A reunião não tem custo nem compromisso, qual horário fica melhor?</div><div class="msg in"><span class="quem">Lead</span>então pode ser sexta às 9h15</div><div class="msg out"><span class="quem">Gabi</span>Me envia seu nome completo?</div></div>
+    <div class="caixa dica"><h4>Repare</h4><ul><li>A pessoa disse o nome no primeiro “oi” e a Gabi já usou.</li><li>Não deu valor nem faixa de honorários.</li><li>Explicou que a proposta vem do advogado, na reunião sem custo.</li><li>Voltou para a escolha do horário e, com ele escolhido, pediu o nome completo para reservar.</li></ul></div>
   </div>
 </section>
 
@@ -262,8 +261,8 @@
 <section class="pagina">
   <div class="sec-head"><div><div class="eyebrow">Passagem de bastão</div><h2>Quando ela passa para a equipe</h2></div><div class="num">04</div></div>
   <div class="duas">
-    <div><h4 style="margin-bottom: 5pt">Assunto fora do escopo</h4><div class="zap"><div class="corte">o lead escolheu o assunto no menu</div><div class="msg out"><span class="quem">Gabi</span>Certo. Essa dívida é de cartão, cheque especial ou empréstimo?</div><div class="msg in"><span class="quem">Lead</span>na verdade é sobre uma causa trabalhista, fui demitido sem receber</div><div class="msg out"><span class="quem">Gabi</span>Entendi. Esse tipo de caso fica fora do que o escritório atende, porque a gente trabalha só com questões bancárias. Obrigada por explicar, e boa sorte com o seu caso.</div></div></div>
-    <div><h4 style="margin-bottom: 5pt">Quem já é cliente</h4><div class="zap"><div class="corte">o lead escolheu o assunto no menu</div><div class="msg out"><span class="quem">Gabi</span>Certo. Essa dívida é de cartão, cheque especial ou empréstimo?</div><div class="msg in"><span class="quem">Lead</span>oi, eu já sou cliente de vocês, queria saber como está meu processo</div><div class="msg out"><span class="quem">Gabi</span>Certo, vou passar para a equipe do escritório e alguém continua com você por aqui.</div></div></div>
+    <div><h4 style="margin-bottom: 5pt">Assunto fora do escopo</h4><div class="zap"><div class="msg in"><span class="quem">Lead</span>oi, aqui é o Paulo</div><div class="msg out"><span class="quem">Gabi</span>Oi, Paulo! Aqui é a Gabi, assistente virtual da Teles &amp; Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.</div><div class="msg in"><span class="quem">Lead</span>é sobre a pensão do meu filho, quero revisar o valor</div><div class="msg out"><span class="quem">Gabi</span>Entendi. Esse tipo de caso fica fora do que o escritório atende, porque a gente trabalha só com questões bancárias. Obrigada por explicar, e boa sorte com o seu caso.</div></div></div>
+    <div><h4 style="margin-bottom: 5pt">Quem já é cliente</h4><div class="zap"><div class="msg in"><span class="quem">Lead</span>oi, eu já sou cliente de vocês, queria saber como está meu processo</div><div class="msg out"><span class="quem">Gabi</span>Oi! Aqui é a Gabi, assistente virtual da Teles &amp; Stanquevicz Advogados. Esse assunto quem vê é a equipe do escritório, e alguém continua a conversa com você por aqui.</div></div></div>
   </div>
 
   <h3>Os casos e o que acontece em cada um</h3>
@@ -283,7 +282,7 @@
 
   <div class="duas" style="margin-top: 10pt">
     <div class="caixa dica"><h4>Como a Gabi para num lead</h4><ul><li><b>Você respondeu</b> pelo Kommo: ela fica 6 horas sem responder aquele lead.</li><li>Etiqueta <span class="tag">atendimento-humano</span> no card: ela não responde mais.</li><li>Depois que ela encerra, tira a etiqueta <span class="tag">ia-gabi</span> e não volta.</li></ul></div>
-    <div class="caixa alt"><h4>Retomada de quem parou de responder</h4><p>Se o lead some no meio da conversa, a Gabi manda até <b>dois toques curtos</b>: o primeiro 2 horas depois da última mensagem dela e o segundo perto de fechar a janela de 24 horas do WhatsApp, sempre entre 8h e 20h. Se ele responde, a retomada para na hora. Sem resposta, o card vai para Follow-up.</p></div>
+    <div class="caixa alt"><h4>Retomada de quem parou de responder</h4><p>Se o lead some no meio da conversa, a Gabi manda até <b>dois toques curtos</b>: 2 horas depois da última mensagem dela e perto de fechar a janela de 24 horas do WhatsApp, entre 8h e 20h. Respondeu, a retomada para. Sem resposta, o card vai para Follow-up.</p></div>
   </div>
 </section>
 
@@ -293,9 +292,10 @@
   <p class="lead">Quando a Gabi encerra, o card fica pronto para quem vai atender. Esta é a nota da conversa de financiamento da página anterior, no formato em que ela aparece no card:</p>
   <div class="kommo"><span class="t">Nota no card · Kommo</span>🤖 Gabi (IA) finalizou: Financiamento de veículo · qualificado
 
-Pessoa interessada em financiamento de veículo, pelo Banco Pan, com 48 parcelas, 20 pagas e parcela de R$ 1.150. Nome completo: Marcos Pereira da Silva. E-mail informado para confirmação da reunião sem custo com o Dr. Carlos Eduardo.
+Marcos procura orientação sobre financiamento de veículo com Banco Pan. Informou contrato de 48 parcelas, 20 já pagas, parcela de R$ 1.150, e quer conversar sobre o caso sem custo.
 
-• Banco ou financeira do veículo: foi pelo banco pan
+• Nome: Marcos
+• Banco ou financeira do veículo: meu carro é financiado pelo banco pan
 • Total de parcelas do financiamento: 48
 • Parcelas já pagas: 20
 • Valor de cada parcela: 1150

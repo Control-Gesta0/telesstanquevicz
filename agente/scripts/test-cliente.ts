@@ -19,6 +19,8 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('pagamento: encaminhar passa', regras('Certo, vou passar para a equipe do escritório e alguém continua com você por aqui.'), [])
   eq('link bloqueia', regras('Agende aqui: https://calendly.com/telesstanqueviczadvogados/atendimento-gabi'), ['link na mensagem'])
   eq('chatbot: "fico à disposição" bloqueia', regras('Qualquer coisa, fico à disposição.'), ['resíduo de chatbot'])
+  eq('chatbot: abrir com "Perfeito, Ana." bloqueia', regras('Perfeito, Ana. Me manda seu nome completo, por favor?'), ['resíduo de chatbot'])
+  eq('chatbot: "perfeito" no meio da frase passa', regras('Ficou perfeito o horário de sexta para você?'), [])
   eq('honorários inventados bloqueiam', checarContexto('Os honorários ficam em R$ 1.997,90 de entrada.', { leadText: 'quanto custa?', reuniaoMarcada: false }).map(v => v.regra), ['valor que o lead não disse'])
   eq('valor dito pelo lead passa', checarContexto('Entendi, uma dívida de uns 80 mil no cartão.', { leadText: 'deve dar uns 80 mil no cartão', reuniaoMarcada: false }), [])
   eq('"ficou marcado" sem reserva bloqueia', checarContexto('Pronto, ficou marcado para quinta às 9h15.', { leadText: 'quinta 9h15', reuniaoMarcada: false }).map(v => v.regra), ['disse que marcou sem reserva'])

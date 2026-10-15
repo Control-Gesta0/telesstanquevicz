@@ -37,6 +37,8 @@ export interface Cenario {
   /** conversa anterior na porta (já travada) */
   historico?: Array<['in' | 'out', string]>
   state?: Record<string, any>
+  /** padrão: a abertura já foi feita e o nome já é conhecido (como depois do primeiro contato). true = conversa começa do zero */
+  semAbertura?: boolean
   /** etapa inicial do lead (padrão: RETORNO IMEDIATO do funil SDR) */
   statusId?: number
   /** campos do card antes da conversa (ex.: respostas do formulário Meta) */
@@ -92,7 +94,7 @@ async function main() {
     for (let rep = 1; rep <= REPS; rep++) {
       const porta = portaById(c.porta)
       if (!porta) throw new Error(`cenário ${c.id}: porta ${c.porta} não existe`)
-      const w: World = { statusId: c.statusId ?? 72186399, pipelineId: 9299515, fields: structuredClone(c.fields || {}), tags: new Set([GATE]), notes: [], tasks: [], state: { porta: porta.id, portaEm: 0, ...(c.state || {}) }, log: [] }
+      const w: World = { statusId: c.statusId ?? 72186399, pipelineId: 9299515, fields: structuredClone(c.fields || {}), tags: new Set([GATE]), notes: [], tasks: [], state: c.semAbertura ? { porta: porta.id, portaEm: 0, ...(c.state || {}) } : { porta: porta.id, portaEm: 0, aberturaEnviada: true, ...(c.state || {}), respostas: { nome: 'Maria', ...(c.state?.respostas || {}) } }, log: [] }
       const history: ChatMsg[] = (c.historico || []).map(([dir, text], i) => ({ id: `h${i}`, dir, text, ts: i + 1 }))
       const turnos: Turno[] = []
       mundoAtual = w

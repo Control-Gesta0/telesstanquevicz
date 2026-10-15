@@ -11,10 +11,10 @@ export interface LeadState {
   porta?: string
   /** ts (ms) da 1ª mensagem do bloco que travou a porta — o cérebro só vê a conversa daí em diante */
   portaEm?: number
-  /** o menu foi enviado e o lead ainda não escolheu */
-  menuEnviado?: boolean
-  /** escolheu "outros assuntos": a próxima mensagem é o resumo do caso */
-  aguardandoResumo?: boolean
+  /** a Gabi já se apresentou (abertura do primeiro contato) */
+  aberturaEnviada?: boolean
+  /** quantas mensagens do lead passaram sem dar para entender o assunto */
+  tentativasTriagem?: number
   respondenteNome?: string
   respondenteRelacao?: string
   /** respostas do roteiro, por chave do campo (espelho do que foi gravado no CRM) */

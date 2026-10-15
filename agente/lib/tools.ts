@@ -385,7 +385,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         const citado = `${input.assunto || ''} ${input.evidencia || ''}`
         if (!evidenceFound(String(input.evidencia || ''), ctx.leadText)) return err('Não registrado: o lead não citou esse assunto.')
         // Só vale assunto de OUTRA área atendida (sinal de outra porta). Renda, saúde, dúvida do roteiro NÃO são outro assunto.
-        if (!classificar(citado).some(p => p.id !== porta.id)) return err('Não registrado: isso faz parte do assunto atual, não de outra área. Responda dentro do roteiro.')
+        if (!classificar(citado).some(p => p.id !== porta.id)) return err('Não registrado: não é outro caso bancário. Se o assunto da pessoa não é bancário (trabalhista, família, INSS, aluguel...), recuse com respeito e chame finalizar_atendimento(fora_do_escopo). Se faz parte do caso atual, responda dentro do roteiro.')
         await port.patchState({ outroAssunto: String(input.assunto || '').slice(0, 200) })
         return ok('Registrado para a equipe. Diga ao lead que a equipe também verá esse assunto e SIGA o roteiro atual.')
       }

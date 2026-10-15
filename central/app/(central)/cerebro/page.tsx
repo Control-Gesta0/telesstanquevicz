@@ -12,14 +12,9 @@ import { acao, useSecao } from '@/lib/useDados'
 type Modo = 'inicio' | 'testar' | 'ensinar' | 'regras' | 'pedidos'
 const MODOS = ['inicio', 'testar', 'ensinar', 'regras', 'pedidos'] as const
 
-const ASSUNTOS = [
-  { id: 'rcpcc', nome: 'Dívida com banco', texto: 'cartão, cheque especial, empréstimo' },
-  { id: 'rcv', nome: 'Financiamento de veículo', texto: 'revisão do contrato' },
-  { id: 'dba', nome: 'Busca e apreensão', texto: 'veículo apreendido ou em risco' },
-]
 
 const ESCOLHAS: Array<{ id: Exclude<Modo, 'inicio'>; Icon: typeof FlaskConical; cor: string; titulo: string; texto: string }> = [
-  { id: 'testar', Icon: FlaskConical, cor: '#06b6d4', titulo: `Testar a ${CLIENTE.agente}`, texto: 'Converse como se fosse um lead. Nada vai para o Kommo nem para a agenda.' },
+  { id: 'testar', Icon: FlaskConical, cor: '#06b6d4', titulo: `Testar a ${CLIENTE.agente}`, texto: 'Escreva como se fosse um lead, do primeiro “oi”. Nada vai para o Kommo nem para a agenda.' },
   { id: 'ensinar', Icon: PencilLine, cor: '#a78bfa', titulo: 'Ensinar uma correção', texto: 'Diga, do seu jeito, o que ela deveria ter feito diferente.' },
   { id: 'regras', Icon: BookOpen, cor: '#22c55e', titulo: 'Ler as regras', texto: 'O que ela faz, o que nunca faz e quando passa para a equipe.' },
   { id: 'pedidos', Icon: ClipboardList, cor: '#3b82f6', titulo: 'Pedidos de ensino', texto: 'Acompanhe cada correção até ser publicada.' },
@@ -42,7 +37,6 @@ function Jornada() {
 // ─────────────── laboratório ───────────────
 
 function Laboratorio({ aoCorrigir }: { aoCorrigir: (ex: { lead: string; gabi: string }) => void }) {
-  const [porta, setPorta] = useState<string | null>(null)
   const [lab, setLab] = useState<RespostaLab | null>(null)
   const [eventos, setEventos] = useState<string[]>([])
   const [travas, setTravas] = useState<string[]>([])
@@ -54,37 +48,20 @@ function Laboratorio({ aoCorrigir }: { aoCorrigir: (ex: { lead: string; gabi: st
 
   useEffect(() => { fim.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [lab?.mensagens.length])
 
-  const comecar = async (p: string) => {
-    setPorta(p); setErro(''); setEventos([]); setTravas([]); setCusto(0); setLab(null)
-    try { setLab(await acao<RespostaLab>({ acao: 'laboratorio', porta: p })) } catch (e) { setErro(e instanceof Error ? e.message : 'falhou') }
-  }
+  const recomecar = () => { setLab(null); setErro(''); setEventos([]); setTravas([]); setCusto(0); setTexto('') }
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!lab || !texto.trim()) return
+    if (!texto.trim()) return
     const msg = texto.trim()
+    const antes = lab
     setTexto(''); setEnviando(true); setErro('')
-    setLab({ ...lab, mensagens: [...lab.mensagens, { dir: 'in', text: msg }] })
+    setLab({ ...(lab || { ok: true, sessao: '', porta: '', eventos: [], travas: [], finalizado: false, custoBrl: 0, restamHoje: 0 }), mensagens: [...(lab?.mensagens || []), { dir: 'in', text: msg }] })
     try {
-      const r = await acao<RespostaLab>({ acao: 'laboratorio', sessao: lab.sessao, msg })
+      // conversa nova: sem sessão, o servidor cria uma (o primeiro contato passa pelo roteador real)
+      const r = await acao<RespostaLab>({ acao: 'laboratorio', ...(antes?.sessao ? { sessao: antes.sessao } : {}), msg })
       setLab(r); setEventos(ev => [...r.eventos, ...ev].slice(0, 40)); setTravas(r.travas); setCusto(c => c + (r.custoBrl || 0))
-    } catch (err) { setErro(err instanceof Error ? err.message : 'falhou'); setLab(lab) }
+    } catch (err) { setErro(err instanceof Error ? err.message : 'falhou'); setLab(antes) }
     setEnviando(false)
-  }
-
-  if (!porta) {
-    return (
-      <div className="stack-sm">
-        <p className="small">Escolha o assunto do lead que você vai fingir ser. A {CLIENTE.agente} começa como se a pessoa tivesse respondido o menu.</p>
-        <div className="grid g3">
-          {ASSUNTOS.map(a => (
-            <button key={a.id} className="panel pad clickable" style={{ textAlign: 'left' }} onClick={() => comecar(a.id)}>
-              <h3 style={{ fontSize: 15 }}>{a.nome}</h3>
-              <p className="small muted" style={{ marginTop: 4 }}>{a.texto}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-    )
   }
 
   const ultimaGabi = lab ? [...lab.mensagens].reverse().find(m => m.dir === 'out')?.text || '' : ''
@@ -93,17 +70,17 @@ function Laboratorio({ aoCorrigir }: { aoCorrigir: (ex: { lead: string; gabi: st
     <div className="lab">
       <div className="panel" style={{ minWidth: 0 }}>
         <div className="pad-sm row between" style={{ borderBottom: '1px solid var(--line-soft)' }}>
-          <div className="small ink"><b>{ASSUNTOS.find(a => a.id === porta)?.nome}</b> <span className="faint">· teste, nada é salvo no Kommo</span></div>
-          <button className="link" onClick={() => setPorta(null)}>trocar assunto</button>
+          <div className="small ink"><b>Você é o lead</b> <span className="faint">· teste, nada é salvo no Kommo</span></div>
+          {lab && <button className="link" onClick={recomecar}>recomeçar</button>}
         </div>
         <div className="chat" aria-live="polite">
-          {!lab ? <Esqueleto linhas={3} /> : lab.mensagens.map((m, i) => <div key={i} className={`bolha ${m.dir}`}>{m.text}</div>)}
+          {!lab ? <p className="small muted" style={{ margin: 'auto', textAlign: 'center', maxWidth: 340 }}>Escreva a primeira mensagem como um lead escreveria: “oi”, “vi o anúncio”, “levaram meu carro”. A {CLIENTE.agente} responde como no WhatsApp.</p> : lab.mensagens.map((m, i) => <div key={i} className={`bolha ${m.dir}`}>{m.text}</div>)}
           {enviando && <div className="bolha out faint">digitando…</div>}
           <div ref={fim} />
         </div>
         <form onSubmit={enviar} className="pad-sm row" style={{ borderTop: '1px solid var(--line-soft)' }}>
-          <input className="campo grow" value={texto} onChange={e => setTexto(e.target.value)} placeholder={lab?.finalizado ? 'Conversa encerrada. Troque o assunto para recomeçar.' : 'Escreva como o lead escreveria…'} disabled={!lab || enviando || lab.finalizado} maxLength={600} />
-          <button className="btn primary" disabled={!lab || enviando || !texto.trim() || lab.finalizado} aria-label="Enviar"><Send size={14} /></button>
+          <input className="campo grow" value={texto} onChange={e => setTexto(e.target.value)} placeholder={lab?.finalizado ? 'Conversa encerrada. Clique em recomeçar.' : 'Escreva como o lead escreveria…'} disabled={enviando || !!lab?.finalizado} maxLength={600} />
+          <button className="btn primary" disabled={enviando || !texto.trim() || !!lab?.finalizado} aria-label="Enviar"><Send size={14} /></button>
         </form>
         {erro && <p className="small bad pad-sm">{erro}</p>}
       </div>
@@ -121,7 +98,7 @@ function Laboratorio({ aoCorrigir }: { aoCorrigir: (ex: { lead: string; gabi: st
             <p className="muted" style={{ marginTop: 4 }}>{travas.join(' · ')}. A primeira versão foi barrada e reescrita antes de sair.</p>
           </div>
         )}
-        {lab && lab.mensagens.length > 3 && (
+        {lab && lab.mensagens.length > 1 && (
           <button className="btn" onClick={() => aoCorrigir({ lead: ultimaLead, gabi: ultimaGabi })} style={{ width: '100%', justifyContent: 'center' }}>
             <MessageSquarePlus size={14} /> A última resposta ficou torta? Ensinar
           </button>

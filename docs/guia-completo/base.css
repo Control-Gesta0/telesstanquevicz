@@ -84,15 +84,15 @@
   .capa .assina img { height: 16pt; }
 
   /* conversa (WhatsApp) */
-  .zap { background: #efeae2; border: 1px solid #e2dccf; border-radius: 9pt; padding: 8pt 9pt; display: flex; flex-direction: column; gap: 4pt; break-inside: avoid; }
-  .zap .msg { max-width: 90%; padding: 4pt 7pt; border-radius: 7pt; font-size: 8.4pt; line-height: 1.33; color: #111b21; white-space: pre-wrap; box-shadow: 0 1px 0 rgba(0,0,0,.06); }
+  .zap { background: #efeae2; border: 1px solid #e2dccf; border-radius: 9pt; padding: 7pt 8pt; display: flex; flex-direction: column; gap: 3.5pt; break-inside: avoid; }
+  .zap .msg { max-width: 92%; padding: 3.5pt 7pt; border-radius: 7pt; font-size: 8.1pt; line-height: 1.3; color: #111b21; white-space: pre-wrap; box-shadow: 0 1px 0 rgba(0,0,0,.06); }
   .zap .in { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 2pt; }
   .zap .out { align-self: flex-start; background: #fff; border-top-left-radius: 2pt; }
   .zap .quem { display: block; font-family: 'JetBrains Mono', monospace; font-size: 6.4pt; letter-spacing: .08em; text-transform: uppercase; color: #667781; margin-bottom: 1.5pt; }
   .zap .corte { align-self: center; font-family: 'JetBrains Mono', monospace; font-size: 6.6pt; color: #54656f; background: #fff8; border-radius: 5pt; padding: 1.5pt 7pt; }
   .kommo { border: 1px solid var(--line); border-radius: 8pt; background: #fffdf3; padding: 9pt 11pt; font-size: 8.8pt; white-space: pre-wrap; line-height: 1.42; break-inside: avoid; }
   .kommo .t { font-family: 'JetBrains Mono', monospace; font-size: 6.8pt; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 4pt; white-space: normal; }
-  .lado { display: grid; grid-template-columns: 1.45fr .75fr; gap: 12pt; align-items: start; }
+  .lado { display: grid; grid-template-columns: 1.65fr .7fr; gap: 12pt; align-items: start; }
   figure { margin: 8pt 0 0; break-inside: avoid; text-align: center; }
   figure img { max-width: 100%; max-height: 96mm; width: auto; display: inline-block; border: 1px solid var(--line); border-radius: 6pt; }
   figcaption { text-align: left; font-size: 8pt; color: var(--muted); margin-top: 3pt; }

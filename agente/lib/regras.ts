@@ -12,7 +12,7 @@ export const REGRAS_CLIENTE: Array<{ regra: string; re: RegExp }> = [
   { regra: 'percentual de desconto', re: /\d{1,3}\s?%|\bpor cento\b/i },
   { regra: 'dado de pagamento', re: /\bchave pix\b|\bcnpj\b|\bag[eê]ncia\s*:|\bconta( corrente)?\s*:|48\.?463\.?900|\bboleto (segue|abaixo|em anexo)\b/i },
   { regra: 'link na mensagem', re: /https?:\/\/|www\.|\.com\.br\b|\bcalendly\b|meet\.google/i },
-  { regra: 'resíduo de chatbot', re: /\bfico [àa] disposi[cç][aã]o\b|\bespero ter ajudado\b|\b[óo]tima pergunta\b|\bexcelente pergunta\b|\bqualquer d[uú]vida,? (é|e) s[oó] chamar\b/i },
+  { regra: 'resíduo de chatbot', re: /\bfico [àa] disposi[cç][aã]o\b|\bespero ter ajudado\b|\b[óo]tima pergunta\b|\bexcelente pergunta\b|\bqualquer d[uú]vida,? (é|e) s[oó] chamar\b|^\s*(perfeito|[óo]timo|excelente|maravilha)\b[!,.]/i },
 ]
 
 /**

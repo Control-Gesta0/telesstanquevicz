@@ -4,24 +4,28 @@
     "porta": "Financiamento de veículo",
     "mensagens": [
       {
+        "dir": "in",
+        "text": "oi"
+      },
+      {
         "dir": "out",
-        "text": "Oi, aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta qual é o seu caso, pode ser por texto ou áudio. Se preferir, responde só com o número:\n\n1. Dívida com banco (cartão, cheque especial, empréstimo)\n2. Financiamento de veículo\n3. Busca e apreensão do veículo\n9. Outro assunto"
+        "text": "Oi! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Com quem eu falo, e o que você está procurando? Pode ser por texto ou áudio."
       },
       {
         "dir": "in",
-        "text": "2"
+        "text": "Marcos"
       },
       {
         "dir": "out",
-        "text": "Certo. Por qual banco ou financeira foi feito o financiamento do veículo?"
+        "text": "Prazer, Marcos. Me conta um pouco do seu caso: o que está acontecendo?"
       },
       {
         "dir": "in",
-        "text": "foi pelo banco pan, financiei em 48 vezes"
+        "text": "meu carro é financiado pelo banco pan, em 48 vezes, e a parcela tá pesada"
       },
       {
         "dir": "out",
-        "text": "Quantas parcelas já foram pagas?"
+        "text": "Entendi. E quantas parcelas já foram pagas?"
       },
       {
         "dir": "in",
@@ -29,7 +33,7 @@
       },
       {
         "dir": "out",
-        "text": "Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet. Tenho quinta às 14h, sexta às 9h15 ou sexta às 14h, qual fica melhor?"
+        "text": "Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet, e eu tenho estes horários: quinta, 15/10, às 14h, sexta, 16/10, às 9h15, ou sexta, 16/10, às 14h. Qual fica melhor para você?"
       },
       {
         "dir": "in",
@@ -53,12 +57,16 @@
       },
       {
         "dir": "out",
-        "text": "Pronto, ficou marcado para quinta, 15/10, às 14h, pelo Google Meet com o Dr. Carlos Eduardo. O link chega no seu e-mail marcos.exemplo@gmail.com. Se não quiser aparecer, pode entrar com a câmera fechada."
+        "text": "Pronto, ficou marcado para quinta, 15/10, às 14h, pelo Google Meet com o Dr. Carlos Eduardo. O link chega no seu e-mail, e você pode entrar com a câmera fechada."
       }
     ],
     "eventos": [
-      "Anotou: Banco ou financeira do veículo = foi pelo banco pan",
+      "Ainda não deu para saber o assunto: perguntou de novo, sem menu.",
+      "Anotou: Nome = Marcos",
+      "Ainda não deu para saber o assunto: perguntou de novo, sem menu.",
+      "Anotou: Banco ou financeira do veículo = meu carro é financiado pelo banco pan",
       "Anotou: Total de parcelas do financiamento = 48",
+      "Entendeu o assunto: Financiamento de veículo.",
       "Anotou: Parcelas já pagas = 20",
       "Anotou: Valor de cada parcela = 1150",
       "Buscou horários na agenda (no teste, a agenda é de mentira).",
@@ -77,12 +85,13 @@
       "Tentou marcar a reunião (no teste, nada é reservado no Calendly)."
     ],
     "travas": [],
-    "custo": 0.0718,
+    "custo": 0.0653,
     "finalizado": {
       "motivo": "qualificado",
-      "resumo": "Pessoa interessada em financiamento de veículo, pelo Banco Pan, com 48 parcelas, 20 pagas e parcela de R$ 1.150. Nome completo: Marcos Pereira da Silva. E-mail informado para confirmação da reunião sem custo com o Dr. Carlos Eduardo.",
-      "em": "2026-10-15T13:25:34.673Z"
+      "resumo": "Marcos procura orientação sobre financiamento de veículo com Banco Pan. Informou contrato de 48 parcelas, 20 já pagas, parcela de R$ 1.150, e quer conversar sobre o caso sem custo.",
+      "em": "2026-10-15T13:57:32.200Z"
     },
+    "portaFinal": "rcv",
     "reuniao": {
       "iso": "2026-10-15T17:00:00.000Z",
       "label": "quinta, 15/10, às 14h",
@@ -91,7 +100,8 @@
       "joinUrl": "https://meet.google.com/fake-link"
     },
     "respostas": [
-      "• Banco ou financeira do veículo: foi pelo banco pan",
+      "• Nome: Marcos",
+      "• Banco ou financeira do veículo: meu carro é financiado pelo banco pan",
       "• Total de parcelas do financiamento: 48",
       "• Parcelas já pagas: 20",
       "• Valor de cada parcela: 1150",
@@ -104,16 +114,20 @@
     "porta": "Busca e apreensão do veículo",
     "mensagens": [
       {
+        "dir": "in",
+        "text": "Olá, vi o anúncio sobre busca e apreensão de veículo"
+      },
+      {
         "dir": "out",
-        "text": "Oi, aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta qual é o seu caso, pode ser por texto ou áudio. Se preferir, responde só com o número:\n\n1. Dívida com banco (cartão, cheque especial, empréstimo)\n2. Financiamento de veículo\n3. Busca e apreensão do veículo\n9. Outro assunto"
+        "text": "Oi! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados.  \nCom quem eu falo?"
       },
       {
         "dir": "in",
-        "text": "3"
+        "text": "Rafael"
       },
       {
         "dir": "out",
-        "text": "Entendi, vamos ver isso rápido. O veículo já foi apreendido?"
+        "text": "Rafael, entendi, vamos ver isso rápido. O veículo já foi apreendido?"
       },
       {
         "dir": "in",
@@ -121,7 +135,7 @@
       },
       {
         "dir": "out",
-        "text": "A reunião sem custo com o Dr. Carlos Eduardo pode ser por Google Meet, e como o prazo de defesa pode já estar correndo, o ideal é falar com o advogado o quanto antes. Tenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15 ou sexta, 16/10, às 14h, qual fica melhor?"
+        "text": "Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet, e como o prazo de defesa pode já estar correndo, o ideal é falar com ele o quanto antes.  \nTenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15, ou sexta, 16/10, às 14h. Qual fica melhor para você?"
       },
       {
         "dir": "in",
@@ -129,22 +143,26 @@
       },
       {
         "dir": "out",
-        "text": "Se tiver o mandado aí, manda uma foto por aqui que eu já deixo para o advogado. Tenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15 ou sexta, 16/10, às 14h, qual fica melhor?"
+        "text": "Se tiver o mandado aí, manda uma foto por aqui que eu já deixo para o advogado.  \nE me diz, qual desses horários fica melhor para você?"
       }
     ],
     "eventos": [
+      "Entendeu o assunto: Busca e apreensão do veículo.",
+      "Anotou: Nome = Rafael",
       "Anotou: Veículo já apreendido = foi sim, levaram ontem de manhã",
-      "Anotou: Data da apreensão = foi sim, levaram ontem de manhã",
+      "Anotou: Data da apreensão = levaram ontem de manhã",
       "Buscou horários na agenda (no teste, a agenda é de mentira).",
       "Anotou: Recebeu cópia do mandado = deixaram o mandado sim, tá aqui comigo"
     ],
     "travas": [],
-    "custo": 0.033100000000000004,
+    "custo": 0.0356,
     "finalizado": null,
+    "portaFinal": "dba",
     "reuniao": null,
     "respostas": [
+      "• Nome: Rafael",
       "• Veículo já apreendido: foi sim, levaram ontem de manhã",
-      "• Data da apreensão: foi sim, levaram ontem de manhã",
+      "• Data da apreensão: levaram ontem de manhã",
       "• Recebeu cópia do mandado: deixaram o mandado sim, tá aqui comigo"
     ]
   },
@@ -153,24 +171,20 @@
     "porta": "Dívida com banco (cartão, cheque especial, empréstimo)",
     "mensagens": [
       {
+        "dir": "in",
+        "text": "boa tarde, sou a Ana"
+      },
+      {
         "dir": "out",
-        "text": "Oi, aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta qual é o seu caso, pode ser por texto ou áudio. Se preferir, responde só com o número:\n\n1. Dívida com banco (cartão, cheque especial, empréstimo)\n2. Financiamento de veículo\n3. Busca e apreensão do veículo\n9. Outro assunto"
+        "text": "Oi, Ana! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio."
       },
       {
         "dir": "in",
-        "text": "1"
+        "text": "tenho um empréstimo no santander, tá uns 35 mil e estou com 4 parcelas atrasadas"
       },
       {
         "dir": "out",
-        "text": "Certo. Essa dívida é de cartão, cheque especial ou empréstimo?"
-      },
-      {
-        "dir": "in",
-        "text": "empréstimo no santander, tá uns 35 mil"
-      },
-      {
-        "dir": "out",
-        "text": "Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet. Tenho quinta às 14h, sexta às 9h15 ou sexta às 14h, qual fica melhor?"
+        "text": "Dá para conversar sem custo com o Dr. Carlos Eduardo por Google Meet. Tenho quinta, 15/10, às 14h, sexta, 16/10, às 9h15 ou sexta, 16/10, às 14h, qual fica melhor?"
       },
       {
         "dir": "in",
@@ -178,52 +192,56 @@
       },
       {
         "dir": "out",
-        "text": "A proposta de honorários depende do caso, e quem passa é o advogado na reunião. A reunião não tem custo nem compromisso, qual horário você prefere?"
+        "text": "A proposta de honorários depende do caso, e quem passa é o advogado na reunião. A reunião não tem custo nem compromisso, qual horário fica melhor?"
       },
       {
         "dir": "in",
-        "text": "tenho 4 parcelas atrasadas"
+        "text": "então pode ser sexta às 9h15"
       },
       {
         "dir": "out",
-        "text": "Entendi. Dá para conversar sem custo com o Dr. Carlos Eduardo pelo Google Meet, qual desses horários fica melhor pra você?"
+        "text": "Me envia seu nome completo?"
       }
     ],
     "eventos": [
-      "Anotou: Tipo de dívida (e banco, se disser) = empréstimo no santander",
+      "Anotou: Nome = Ana",
+      "Se apresentou e perguntou o nome e o que a pessoa procura (sem menu).",
+      "Anotou: Tipo de dívida (e banco, se disser) = tenho um empréstimo no santander",
       "Anotou: Valor aproximado da dívida = tá uns 35 mil",
+      "Anotou: Parcelas em atraso = estou com 4 parcelas atrasadas",
+      "Entendeu o assunto: Dívida com banco (cartão, cheque especial, empréstimo).",
       "Buscou horários na agenda (no teste, a agenda é de mentira).",
-      "Anotou: Parcelas em atraso = tenho 4 parcelas atrasadas"
+      "Tentou marcar a reunião (no teste, nada é reservado no Calendly)."
     ],
-    "travas": [],
-    "custo": 0.0342,
+    "travas": [
+      "resíduo de chatbot: Perfeito,"
+    ],
+    "custo": 0.032,
     "finalizado": null,
+    "portaFinal": "rcpcc",
     "reuniao": null,
     "respostas": [
-      "• Tipo de dívida (e banco, se disser): empréstimo no santander",
+      "• Nome: Ana",
+      "• Tipo de dívida (e banco, se disser): tenho um empréstimo no santander",
       "• Valor aproximado da dívida: tá uns 35 mil",
-      "• Parcelas em atraso: tenho 4 parcelas atrasadas"
+      "• Parcelas em atraso: estou com 4 parcelas atrasadas"
     ]
   },
   {
     "id": "fora-escopo",
-    "porta": "Dívida com banco (cartão, cheque especial, empréstimo)",
+    "porta": "Outro assunto",
     "mensagens": [
       {
-        "dir": "out",
-        "text": "Oi, aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta qual é o seu caso, pode ser por texto ou áudio. Se preferir, responde só com o número:\n\n1. Dívida com banco (cartão, cheque especial, empréstimo)\n2. Financiamento de veículo\n3. Busca e apreensão do veículo\n9. Outro assunto"
-      },
-      {
         "dir": "in",
-        "text": "1"
+        "text": "oi, aqui é o Paulo"
       },
       {
         "dir": "out",
-        "text": "Certo. Essa dívida é de cartão, cheque especial ou empréstimo?"
+        "text": "Oi, Paulo! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio."
       },
       {
         "dir": "in",
-        "text": "na verdade é sobre uma causa trabalhista, fui demitido sem receber"
+        "text": "é sobre a pensão do meu filho, quero revisar o valor"
       },
       {
         "dir": "out",
@@ -231,57 +249,45 @@
       }
     ],
     "eventos": [
-      "Pararia de atender: o lead passa para a equipe.",
-      "Gravaria no card: Desqualificado.",
-      "Deixaria no card a nota com o resumo do caso."
+      "Anotou: Nome = Paulo",
+      "Se apresentou e perguntou o nome e o que a pessoa procura (sem menu).",
+      "Recusaria com respeito: o assunto não é bancário. Marcaria \"Desqualificado robô\" no card e pararia de atender."
     ],
     "travas": [],
-    "custo": 0.0154,
+    "custo": 0.0042,
     "finalizado": {
       "motivo": "fora_do_escopo",
-      "resumo": "Pessoa informou que o assunto é trabalhista, não bancário. Disse que foi demitida sem receber e busca orientação sobre esse caso. O escritório atua só com questões bancárias.",
-      "em": "2026-10-15T13:25:56.643Z"
+      "resumo": "assunto não bancário",
+      "em": "2026-10-15T14:03:43.266Z"
     },
+    "portaFinal": "",
     "reuniao": null,
     "respostas": []
   },
   {
     "id": "ja-cliente",
-    "porta": "Dívida com banco (cartão, cheque especial, empréstimo)",
+    "porta": "Outro assunto",
     "mensagens": [
-      {
-        "dir": "out",
-        "text": "Oi, aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta qual é o seu caso, pode ser por texto ou áudio. Se preferir, responde só com o número:\n\n1. Dívida com banco (cartão, cheque especial, empréstimo)\n2. Financiamento de veículo\n3. Busca e apreensão do veículo\n9. Outro assunto"
-      },
-      {
-        "dir": "in",
-        "text": "1"
-      },
-      {
-        "dir": "out",
-        "text": "Certo. Essa dívida é de cartão, cheque especial ou empréstimo?"
-      },
       {
         "dir": "in",
         "text": "oi, eu já sou cliente de vocês, queria saber como está meu processo"
       },
       {
         "dir": "out",
-        "text": "Certo, vou passar para a equipe do escritório e alguém continua com você por aqui."
+        "text": "Oi! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Esse assunto quem vê é a equipe do escritório, e alguém continua a conversa com você por aqui."
       }
     ],
     "eventos": [
-      "Pararia de atender: o lead passa para a equipe.",
-      "Criaria tarefa para SDR: Assumir o atendimento: pediu humano.",
-      "Deixaria no card a nota com o resumo do caso."
+      "Passaria para a equipe: o assunto não é um dos três que ela atende (tarefa \"Assumir o atendimento\" para o SDR)."
     ],
     "travas": [],
-    "custo": 0.0106,
+    "custo": 0.0021,
     "finalizado": {
-      "motivo": "pediu_humano",
-      "resumo": "Pessoa já informa que é cliente do escritório e quer saber como está o processo dela. Como já é atendimento ativo, a equipe responsável deve ver o caso por aqui.",
-      "em": "2026-10-15T13:26:00.366Z"
+      "motivo": "porta_sem_agente",
+      "resumo": "assunto fora dos três que a Gabi atende",
+      "em": "2026-10-15T14:03:45.638Z"
     },
+    "portaFinal": "",
     "reuniao": null,
     "respostas": []
   }

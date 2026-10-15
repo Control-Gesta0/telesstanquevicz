@@ -19,6 +19,8 @@ export type { Alerta, Campo, CampoTipo, Etapa, Porta } from './crm-map-types'
 const VALOR = /\d|mil|milh|cem\b|duzent|trezent|quatrocent|quinhent|reais|r\$/i
 
 const CAMPOS = {
+  // Primeiro contato (todas as portas): a Gabi chama a pessoa pelo nome que ela disser
+  nome: { key: 'nome', id: 0, name: 'Nome', type: 'text', sinal: /[a-zà-ú]{2,}/i, pergunta: 'Com quem eu falo?' },
   // RCPCC
   tipoDivida: { key: 'tipoDivida', id: 0, name: 'Tipo de dívida (e banco, se disser)', type: 'text', sinal: /cart[aã]o|cheque|empr[eé]st|financ|consig|limite|fatura|cr[eé]dito|d[ií]vida|banco|ita[uú]|bradesco|santander|caixa|nubank|inter\b|brasil|sicredi|sicoob|c6|pan\b|bmg|agibank|mercado pago|picpay|neon|original|safra|banrisul/i, pergunta: 'Essa dívida é de cartão, cheque especial ou empréstimo?' },
   valorDivida: { key: 'valorDivida', id: 0, name: 'Valor aproximado da dívida', type: 'text', sinal: VALOR, pergunta: 'Mais ou menos quanto está a dívida hoje, somando tudo?' },
@@ -54,44 +56,41 @@ export const CRM_MAP = {
     {
       id: 'rcpcc',
       label: 'Dívida com banco (cartão, cheque especial, empréstimo)',
-      menu: 1,
+      menu: null,
       ativa: true,
       promptFile: 'rcpcc.md',
       prioridade: 1,
       nichoEnumId: 744545,
       sinais: /\b(juros|cart[aã]o|cheque especial|empr[eé]stimos?|d[ií]vidas?|bancos?|serasa|nome sujo|negativad[oa]|fatura|conta corrente|limite|endividad[oa]|superendivid)/i,
-      roteiro: ['tipoDivida', 'valorDivida', 'atraso', 'nomeCompleto', 'email'],
+      roteiro: ['nome', 'tipoDivida', 'valorDivida', 'atraso', 'nomeCompleto', 'email'],
       obrigatorios: ['tipoDivida', 'valorDivida', 'nomeCompleto', 'email'],
       antesDeAgendar: ['tipoDivida', 'valorDivida'],
-      abertura: 'Certo. Essa dívida é de cartão, cheque especial ou empréstimo?',
     },
     {
       id: 'rcv',
       label: 'Financiamento de veículo',
-      menu: 2,
+      menu: null,
       ativa: true,
       promptFile: 'rcv.md',
       prioridade: 2,
       nichoEnumId: 744547,
       sinais: /\b(carro|ve[ií]culo|moto|caminh[aã]o|caminhonete|financiei|financiad[oa]|financiamento do (carro|ve[ií]culo)|parcela do carro)\b/i,
-      roteiro: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela', 'contrato', 'nomeCompleto', 'email'],
+      roteiro: ['nome', 'bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela', 'contrato', 'nomeCompleto', 'email'],
       obrigatorios: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela', 'nomeCompleto', 'email'],
       antesDeAgendar: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela'],
-      abertura: 'Certo. Por qual banco ou financeira foi feito o financiamento do veículo?',
     },
     {
       id: 'dba',
       label: 'Busca e apreensão do veículo',
-      menu: 3,
+      menu: null,
       ativa: true,
       promptFile: 'dba.md',
       prioridade: 3,
       nichoEnumId: 744543,
       sinais: /busca e apreens|apreend|guinch|levaram (meu|o) (carro|ve[ií]culo|moto)|tomaram (meu|o) (carro|ve[ií]culo|moto)|mandado|oficial de justi/i,
-      roteiro: ['apreendido', 'dataApreensao', 'mandado', 'valorDividaDba', 'nomeCompleto', 'email'],
+      roteiro: ['nome', 'apreendido', 'dataApreensao', 'mandado', 'valorDividaDba', 'nomeCompleto', 'email'],
       obrigatorios: ['apreendido', 'nomeCompleto', 'email'],
       antesDeAgendar: ['apreendido'],
-      abertura: 'Entendi, vamos ver isso rápido. O veículo já foi apreendido?',
       avisoAoAgendar: 'Na mesma mensagem dos horários, diga em uma frase que o prazo de defesa pode já estar correndo e que por isso o ideal é falar com o advogado o quanto antes. Ofereça primeiro o horário mais cedo.',
     },
     {
@@ -106,13 +105,24 @@ export const CRM_MAP = {
     },
   ] as Porta[],
 
-  menu: {
-    outros: 9,
-    portaPadraoOutros: 'geral',
-    classificarTextoLivre: true,
-    texto: 'Oi, aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta qual é o seu caso, pode ser por texto ou áudio. Se preferir, responde só com o número:\n\n1. Dívida com banco (cartão, cheque especial, empréstimo)\n2. Financiamento de veículo\n3. Busca e apreensão do veículo\n9. Outro assunto',
-    pedirResumo: 'Certo. Me conta em uma ou duas frases o que está acontecendo.',
-    naoEntendi: 'Não consegui entender qual é o caso. Pode responder só com o número: 1, 2, 3 ou 9?',
+  /**
+   * Primeiro contato SEM MENU NUMERADO (decisão do mestre, 15/10/2026): a Gabi se apresenta,
+   * pergunta o nome e o que a pessoa procura e entende pelo texto (palavra-chave em código;
+   * se não bastar, triagem por IA em lib/triagem.ts). Textos fixos: zero variação, zero token.
+   */
+  abertura: {
+    semNome: 'Oi! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Com quem eu falo, e o que você está procurando? Pode ser por texto ou áudio.',
+    comNome: 'Oi, {nome}! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.',
+    entender: 'Me conta um pouco mais do seu caso: o que está acontecendo?',
+    entenderComNome: 'Prazer, {nome}. Me conta um pouco do seu caso: o que está acontecendo?',
+    areas: '{nomeVirgula}o escritório cuida de dívida com banco, financiamento de veículo e busca e apreensão de veículo. O seu caso tem a ver com algum desses?',
+    /** primeira resposta que não é a abertura (fora do escopo, equipe): ela se apresenta antes */
+    apresentacao: 'Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados.',
+    /** assunto que não é bancário: recusa com respeito e marca Desqualificado robô (igual à regra da Gabi) */
+    foraDoEscopo: 'Entendi. Esse tipo de caso fica fora do que o escritório atende, porque a gente trabalha só com questões bancárias. Obrigada por explicar, e boa sorte com o seu caso.',
+    /** depois disso sem entender o assunto, passa para a equipe (porta outros) */
+    maxTentativas: 3,
+    portaOutros: 'geral',
   },
 
   finalizar: {
@@ -137,6 +147,13 @@ export const CRM_MAP = {
       nome: 'pagamento',
       re: /\bpix\b|boleto|pagar a entrada|dados banc|n[uú]mero da conta|link (de|do|pra|para) pagamento|chave/i,
       aviso: 'O lead falou de pagamento. Você nunca envia PIX, conta, boleto ou link de pagamento. Diga que a equipe manda os dados certos por aqui e chame finalizar_atendimento(pediu_humano).',
+    },
+    {
+      nome: 'assunto não bancário',
+      re: /trabalhist|rescis[aã]o|demiti|demiss[aã]o|\bfgts\b|carteira assinada|hora extra|\bpens[aã]o\b|div[oó]rcio|guarda d[oa]s? (meu|minha|filh|crian)|\binss\b|aposentadori|\bloas\b|aux[ií]lio[- ]doen|invent[aá]rio|heran[cç]a|despejo|aluguel|criminal|multa de tr[aâ]nsito/i,
+      aviso: 'O lead citou um assunto que pode não ser bancário. Se o caso dele É esse assunto (trabalhista, família, INSS, aluguel...), diga com respeito que o escritório atua só com questões bancárias e chame finalizar_atendimento(fora_do_escopo). Se ele só mencionou de passagem e o caso é uma dívida com banco (ex.: consignado descontado da aposentadoria, perdeu o emprego e atrasou as parcelas), siga o roteiro.',
+      // recusou com o texto padrão e não finalizou: o código finaliza (o card não fica aberto com a Gabi calada)
+      finaliza: { motivo: 'fora_do_escopo', seResposta: /fica fora do que o escrit[oó]rio atende|s[oó] com quest[oõ]es banc[aá]rias/i },
     },
   ] as Alerta[],
 

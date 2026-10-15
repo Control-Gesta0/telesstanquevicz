@@ -1,16 +1,17 @@
 import crypto from 'crypto'
 import { adoptToken, currentToken, debounceAndClaim, releaseLock, renewLock } from './buffer'
 import { CONFIG } from './config'
-import { logExec } from './execlog'
+import { emptyUsage, logExec } from './execlog'
 import {
   alreadyAnswered, appendMessage, getHistory, humanSpokeRecently, lastInbound, markAnswered, type ChatMsg,
 } from './history'
-import { CRM_MAP } from './crm-map'
+import { CRM_MAP, portaById } from './crm-map'
 import { fieldValue, getLead, leadTags } from './kommo'
 import { createBrain } from './llm'
 import { kommoPort } from './port'
 import { respostasDoFormulario } from './roteamento'
-import { rotear } from './router'
+import { rotearTurno } from './triagem'
+import { comApresentacao } from './router'
 import { agendarFollowup, cancelarFollowup } from './followup'
 import { clearState, getState, patchState } from './state'
 import { aplicarFinalizacao, type ToolCtx } from './tools'
@@ -77,22 +78,38 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
       const textoTurno = bloco.map(m => m.text).join('\n')
       const state = await getState(leadId)
 
-      // 1. Roteador em código
-      const rota = rotear(state, textoTurno)
+      // 1. Roteador: palavra-chave em código; se não bastar, triagem por IA. Sem menu numerado.
+      //    Antes de entender o assunto, lê TUDO o que o lead já disse ("Marcos" + "é do meu carro").
+      const usoTriagem = emptyUsage()
+      const textoDoLead = state.porta ? textoTurno : history.filter(m => m.dir === 'in').slice(-6).map(m => m.text).join('\n')
+      const rota = await rotearTurno(state, textoDoLead, usoTriagem)
+      if (rota.tipo === 'triagem') return
       if (rota.tipo === 'mensagem') {
         await patchState(leadId, rota.patch)
         const detail = await enviar(leadId, rota.texto)
         await markAnswered(leadId, target.id)
-        await logExec({ tipo: 'menu', leadId, nome, ms: Date.now() - t0, detalhe: `${detail} · ${rota.texto.slice(0, 60)}` })
+        await logExec({ tipo: 'menu', leadId, nome, ms: Date.now() - t0, usage: usoTriagem.calls ? usoTriagem : undefined, detalhe: `${detail} · ${rota.texto.slice(0, 60)}` })
         await agendarFollowup(leadId, 0).catch(e => console.error('[followup] falha ao agendar:', e))
+        return
+      }
+      if (rota.tipo === 'encerrar') {
+        // Assunto que não é bancário: recusa com respeito e encerra (Desqualificado robô, sem tarefa)
+        const geral = portaById(CRM_MAP.abertura.portaOutros)!
+        await patchState(leadId, { ...rota.patch, porta: geral.id, portaEm: target.ts })
+        const ctxFora: ToolCtx = { port: kommoPort(leadId), porta: geral, gateTag: CONFIG.gateTag, leadText: textoDoLead, lastLeadText: textoTurno, lastAgentText: '' }
+        await aplicarFinalizacao(ctxFora, rota.motivo, `Assunto fora do escopo (não bancário). O lead disse: ${textoDoLead.slice(0, 300)}`)
+        const detail = await enviar(leadId, rota.texto)
+        await markAnswered(leadId, target.id)
+        await logExec({ tipo: 'finalizou', leadId, nome, ms: Date.now() - t0, usage: usoTriagem.calls ? usoTriagem : undefined, detalhe: `fora do escopo · ${detail}` })
+        await cancelarFollowup(leadId).catch(() => {})
         return
       }
       const porta = rota.porta
       if (rota.travou) {
         // RCPCC: o que o lead já respondeu no formulário do anúncio não é perguntado de novo
         const form = porta.id === 'rcpcc' ? respostasDoFormulario(CRM_MAP.negocio.formulario.campos.map(id => fieldValue(lead, id))) : {}
-        const respostas = { ...form, ...(state.respostas || {}) }
-        await patchState(leadId, { porta: porta.id, portaEm: bloco[0]?.ts ?? target.ts, aguardandoResumo: false, ...(Object.keys(respostas).length ? { respostas } : {}) })
+        const respostas = { ...form, ...(state.respostas || {}), ...(rota.patch?.respostas || {}) }
+        await patchState(leadId, { porta: porta.id, portaEm: bloco[0]?.ts ?? target.ts, ...(Object.keys(respostas).length ? { respostas } : {}) })
         console.log(`[roteador] lead ${leadId} → porta ${porta.id}${Object.keys(form).length ? ` · formulário: ${Object.keys(form).join(', ')}` : ''}`)
       }
       const portaEm = (await getState(leadId)).portaEm ?? 0
@@ -109,7 +126,8 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
 
       // 2. Porta sem agente: mensagem fixa e finaliza (sem LLM)
       if (!porta.ativa) {
-        const texto = porta.mensagemSemAgente || 'Anotei aqui. Alguém da equipe continua a conversa com você por aqui.'
+        const fixo = porta.mensagemSemAgente || 'Anotei aqui. Alguém da equipe continua a conversa com você por aqui.'
+        const texto = rota.travou ? comApresentacao(state, rota.patch?.respostas?.nome || state.respostas?.nome || '', fixo) : fixo
         await aplicarFinalizacao(ctx, 'porta_sem_agente', `Assunto: ${porta.label}. Primeira mensagem: ${textoTurno.slice(0, 300)}`)
         const detail = await enviar(leadId, texto)
         await markAnswered(leadId, target.id)
@@ -137,6 +155,7 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
 
       const detail = await enviar(leadId, reply.text)
       await markAnswered(leadId, target.id)
+      if (usoTriagem.calls) for (const k of ['input', 'cached', 'output', 'calls'] as const) reply.usage[k] += usoTriagem[k]
       await logExec({
         tipo: reply.handoff ? 'finalizou' : 'resposta', leadId, nome, porta: porta.id, ms: Date.now() - t0,
         tools: reply.toolsUsed, guard: reply.guard, usage: reply.usage, urgente: reply.urgente || undefined, detalhe: detail,

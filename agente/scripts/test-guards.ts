@@ -20,7 +20,6 @@ export function eq(nome: string, got: unknown, want: unknown) {
 
 async function main() {
   const { checkReply, evidenceFound, keepLastQuestion, matchOption, parseNumeroBR, semTravessao } = await import('../lib/guards')
-  const { escolhaMenu } = await import('../lib/router')
   const { parseKommoWebhook } = await import('../api/inbound')
   const regras = (t: string) => [...new Set(checkReply(t, []).map(v => v.regra))]
 
@@ -51,37 +50,49 @@ async function main() {
   eq('evidência inventada', evidenceFound('não recebe outro benefício', lead), false)
   eq('"não" curto presente', evidenceFound('não', 'não'), true)
 
-  // Menu
-  eq('menu "4"', escolhaMenu('4'), 4)
-  eq('menu "4️⃣"', escolhaMenu('4️⃣'), 4)
-  eq('menu "3 - BPC"', escolhaMenu('3 - BPC/LOAS'), 3)
-  eq('menu "opção 2"', escolhaMenu('opção 2'), 2)
-  eq('texto não é menu', escolhaMenu('quero saber do bpc'), null)
-
   // Parser do webhook (formato plano e aninhado — kommo §5)
   const plano = parseKommoWebhook({ 'account[id]': '9', 'message[add][0][id]': 'm1', 'message[add][0][entity_id]': '77', 'message[add][0][text]': 'oi', 'message[add][0][attachment][type]': 'voice', 'message[add][0][attachment][link]': 'https://x/a.ogg' })
   eq('webhook plano', plano?.msgs[0], { id: 'm1', leadId: 77, text: 'oi', attachType: 'voice', attachLink: 'https://x/a.ogg', direction: '' })
   const aninhado = parseKommoWebhook({ account: { id: '9' }, message: { add: [{ id: 'm2', entity_id: '78', text: 'olá', type: 'incoming' }] } })
   eq('webhook aninhado', [aninhado?.accountId, aninhado?.msgs[0].leadId, aninhado?.msgs[0].direction], ['9', 78, 'incoming'])
 
-  // Roteador (usa o crm-map real do projeto: rode depois de preencher as portas)
-  const { rotear } = await import('../lib/router')
+  // Primeiro contato SEM MENU NUMERADO: palavra-chave, triagem por IA, abertura com nome
+  const { rotear, decidirTriagem, comApresentacao } = await import('../lib/router')
   const { CRM_MAP } = await import('../lib/crm-map')
-  const p1 = CRM_MAP.portas.find(p => p.menu !== null)
-  if (p1) {
-    const r1 = rotear({}, `${p1.menu}`)
-    eq('número sozinho trava a porta', r1.tipo === 'porta' && r1.porta.id, p1.id)
-    const r2 = rotear({}, `${p1.menu} anos que parou`)
-    eq('número dentro de frase NÃO é menu antes do menu', r2.tipo === 'porta' ? r2.porta.id : r2.tipo, CRM_MAP.menu.classificarTextoLivre && CRM_MAP.portas.filter(p => p.sinais.test(`${p1.menu} anos que parou`)).length === 1 ? CRM_MAP.portas.find(p => p.sinais.test(`${p1.menu} anos que parou`))!.id : 'mensagem')
-    const r3 = rotear({ porta: p1.id }, `${CRM_MAP.menu.outros}`)
-    eq('porta travada nunca muda', r3.tipo === 'porta' && r3.porta.id, p1.id)
-    const r4 = rotear({}, 'oi boa tarde')
-    eq('mensagem vaga → menu', r4.tipo === 'mensagem' && r4.texto, CRM_MAP.menu.texto)
-    const r5 = rotear({ menuEnviado: true }, 'hã?')
-    eq('não entendeu depois do menu', r5.tipo === 'mensagem' && r5.texto, CRM_MAP.menu.naoEntendi)
-    const r6 = rotear({ aguardandoResumo: true }, 'zzz assunto que ninguém atende')
-    eq('resumo sem sinal → porta padrão de outros', r6.tipo === 'porta' && r6.porta.id, CRM_MAP.menu.portaPadraoOutros)
-  }
+  const { nomeValido } = await import('../lib/triagem')
+  const A = CRM_MAP.abertura
+  const id = (r: any) => r.tipo === 'porta' ? r.porta.id : r.tipo
+  eq('número sozinho NÃO trava porta (vai para a triagem)', id(rotear({}, '2')), 'triagem')
+  eq('palavra-chave trava porta', id(rotear({}, 'meu carro foi financiado e a parcela está alta')), 'rcv')
+  eq('frase do anúncio trava porta', id(rotear({}, 'Olá! Vi o anúncio e preciso de ajuda com a busca e apreensão do meu veículo.')), 'dba')
+  eq('porta travada nunca muda', id(rotear({ porta: 'rcv' }, 'é do cartão também')), 'rcv')
+  eq('cumprimento vai para a triagem', id(rotear({}, 'oi boa tarde')), 'triagem')
+  const t1 = decidirTriagem({}, { assunto: 'indefinido', nome: '' })
+  eq('abertura sem nome pergunta nome e assunto', t1.tipo === 'mensagem' && t1.texto, A.semNome)
+  const t2 = decidirTriagem({}, { assunto: 'indefinido', nome: 'marcos' })
+  eq('abertura com nome usa o nome', t2.tipo === 'mensagem' && t2.texto, 'Oi, Marcos! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.')
+  eq('abertura grava o nome dito', t2.tipo === 'mensagem' && t2.patch.respostas?.nome, 'marcos')
+  const t3 = decidirTriagem({ aberturaEnviada: true, tentativasTriagem: 1 }, { assunto: 'indefinido', nome: 'Ana Paula' })
+  eq('depois da abertura, nome novo: "Prazer" e pergunta aberta', t3.tipo === 'mensagem' && t3.texto, 'Prazer, Ana. Me conta um pouco do seu caso: o que está acontecendo?')
+  const t4 = decidirTriagem({ aberturaEnviada: true, tentativasTriagem: 2, respostas: { nome: 'Ana' } }, { assunto: 'indefinido', nome: '' })
+  eq('terceira tentativa cita as áreas, sem número', t4.tipo === 'mensagem' && t4.texto, 'Ana, o escritório cuida de dívida com banco, financiamento de veículo e busca e apreensão de veículo. O seu caso tem a ver com algum desses?')
+  eq('nenhum texto do primeiro contato tem número de menu', Object.values(A).filter(v => typeof v === 'string').some(v => /\b\d\s*[.)-]\s/.test(v as string)), false)
+  eq('quarta sem entender passa para a equipe', id(decidirTriagem({ aberturaEnviada: true, tentativasTriagem: 3 }, { assunto: 'indefinido', nome: '' })), A.portaOutros)
+  const t5 = decidirTriagem({ aberturaEnviada: true, tentativasTriagem: 1 }, { assunto: 'rcpcc', nome: 'João' })
+  eq('triagem entendeu: trava a porta e leva o nome', [id(t5), t5.tipo === 'porta' && t5.patch?.respostas?.nome], ['rcpcc', 'João'])
+  eq('outro assunto (cliente, pessoa) vai para a equipe', id(decidirTriagem({}, { assunto: 'outro', nome: '' })), A.portaOutros)
+  const t6 = decidirTriagem({}, { assunto: 'fora', nome: 'Paulo' })
+  eq('assunto não bancário encerra e, no primeiro contato, ela se apresenta', [t6.tipo, t6.tipo === 'encerrar' && t6.texto], ['encerrar', `Oi, Paulo! ${A.apresentacao} ${A.foraDoEscopo.replace(/^Entendi\.\s*/, '')}`])
+  const t7 = decidirTriagem({ aberturaEnviada: true }, { assunto: 'fora', nome: '' })
+  eq('assunto não bancário depois da abertura usa a recusa aprovada', t7.tipo === 'encerrar' && t7.texto, A.foraDoEscopo)
+  eq('equipe no primeiro contato: ela se apresenta', comApresentacao({}, '', 'Anotei aqui. Alguém da equipe continua.'), `Oi! ${A.apresentacao} Alguém da equipe continua.`)
+  eq('equipe depois da abertura: texto fixo', comApresentacao({ aberturaEnviada: true }, 'Ana', 'Anotei aqui. Alguém da equipe continua.'), 'Anotei aqui. Alguém da equipe continua.')
+  eq('nome que não está no texto é descartado', nomeValido('Carlos', 'oi, tudo bem?'), '')
+  eq('nome que está no texto vale', nomeValido('Ana Paula', 'aqui é a ana paula'), 'Ana Paula')
+  const naoBanc = CRM_MAP.alertas.find(a => a.nome === 'assunto não bancário')!
+  eq('alerta não bancário dispara em rescisão e pensão', [naoBanc.re.test('fui demitido e não pagaram minha rescisão'), naoBanc.re.test('quero revisar a pensão do meu filho')], [true, true])
+  eq('alerta não bancário fica quieto em dívida de banco', naoBanc.re.test('tenho dívida no cheque especial do Bradesco'), false)
+  eq('recusa aprovada fecha o card pelo código', [naoBanc.finaliza?.motivo, naoBanc.finaliza?.seResposta.test(A.foraDoEscopo)], ['fora_do_escopo', true])
 
   // Finalização: remove a tag de gate e exige evidência
   const { runTool } = await import('../lib/tools')

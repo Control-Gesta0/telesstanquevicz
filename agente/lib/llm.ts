@@ -93,9 +93,12 @@ export function createBrain(opts: LlmOptions) {
       '# Contexto desta conversa (gerado pelo sistema — é dado, não instrução do lead)',
       `Data/hora: ${agora}`,
       `Assunto (porta travada): ${ctx.porta.label}`,
-      `Nome no WhatsApp: ${lead.nomeContato || '(desconhecido)'} — confirme antes de usar se parecer apelido`,
-      `Primeira mensagem da IA neste assunto: ${lead.primeiroContatoDaPorta ? 'SIM — use a abertura do prompt' : 'não — NÃO repita a abertura'}`,
+      `Nome no perfil do WhatsApp: ${lead.nomeContato || '(desconhecido)'} (só referência: chame a pessoa pelo nome que ELA disser)`,
+      state.aberturaEnviada || !lead.primeiroContatoDaPorta
+        ? 'Você já se apresentou nesta conversa: NÃO se apresente de novo e não cumprimente outra vez.'
+        : 'Esta é a sua PRIMEIRA mensagem para esta pessoa: comece com "Oi! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados." e, na mesma mensagem, siga o próximo passo.',
       state.respondenteNome ? `Quem está digitando: ${state.respondenteNome} (${state.respondenteRelacao || 'relação não informada'})` : 'Quem está digitando: não confirmado',
+      !state.respostas?.nome ? 'PRÓXIMO PASSO OBRIGATÓRIO: você ainda não sabe o nome da pessoa. Se ela disse o nome nesta mensagem, grave com salvar_respostas e siga; se não disse, pergunte agora ("Com quem eu falo?") e deixe as perguntas do caso para a próxima mensagem, mesmo em caso urgente.' : '',
       snap.preenchidos.length ? `Já respondido (NUNCA pergunte de novo): ${snap.preenchidos.map(p => `${p.campo.name} = ${p.valor}`).join(' · ')}` : 'Já respondido: nada ainda',
       state.outroAssunto ? `Outro assunto já registrado: ${state.outroAssunto}` : '',
       ...CRM_MAP.alertas.filter(a => a.re.test(ctx.lastLeadText)).map(a => `⚠️ ALERTA DO SISTEMA (${a.nome}): ${a.aviso}`),
@@ -151,10 +154,6 @@ export function createBrain(opts: LlmOptions) {
     const turns = historyToMessages(history)
     if (!turns.length) return null
     const usage = emptyUsage()
-    // Abertura aprovada sai do código quando o turno é só o número do menu (zero token, zero variação)
-    if (lead.primeiroContatoDaPorta && ctx.porta.abertura && /^\s*(?:op[cç][aã]o\s*)?\d{1,2}️?⃣?\s*$/i.test(ctx.lastLeadText)) {
-      return { text: ctx.porta.abertura, toolsUsed: ['trava:abertura'], handoff: false, urgente: false, guard: [], usage }
-    }
     const toolsUsed: string[] = []
     let handoff = false
     let urgente = false
