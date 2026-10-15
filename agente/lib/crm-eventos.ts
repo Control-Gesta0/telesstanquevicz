@@ -1,6 +1,7 @@
 import { CRM_MAP } from './crm-map'
 import { logExec } from './execlog'
 import { addLeadNote, addLeadTags, getLead, leadTags, setLeadTags, updateLeadStatus } from './kommo'
+import { marcarEntradaFollowUp } from './funil-sdr'
 import { k, redis } from './redis'
 
 /**
@@ -66,6 +67,8 @@ export async function executar(m: MudancaEtapa): Promise<string> {
   if (!nome) return 'nenhuma'
   // Webhook repetido (o Kommo reenvia em falha) não age duas vezes
   if ((await redis.set(k('auto', nome, m.leadId, m.oldStatusId), '1', { nx: true, ex: 3600 })) !== 'OK') return 'duplicado'
+  // Entrada em Follow-up começa a contar os 5 dias (antes do teto de etiquetas: em massa também conta)
+  if (nome === 'etiquetaFollowUp') await marcarEntradaFollowUp(m.leadId).catch(e => console.error('[fu] entrada não registrada:', e))
   if (nome === 'etiquetaFollowUp' || nome === 'etiquetaVendaPerdida') return etiquetar(nome, m)
 
   const a = CRM_MAP.automacoes[nome]

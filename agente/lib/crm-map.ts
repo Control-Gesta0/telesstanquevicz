@@ -200,6 +200,14 @@ export const CRM_MAP = {
       etiquetaVendaPerdida: { em: { pipelineId: 9312103, statusId: 143, name: 'Venda perdida' }, tag: 'Desqualificado' },
     } as Record<string, { em: { pipelineId: number; statusId: number; name: string }; tag: string }>,
     limiteEtiquetas: { eventos: 120, janelaSeg: 600 },
+    /** Retorno do lead e Follow-up esgotado (saíram do Kommo em 15/10/2026, lib/funil-sdr.ts). */
+    sdr: {
+      pipelineId: 9299515,
+      /** lead escreveu: estas etapas voltam para Em atendimento; as outras ficam onde estão */
+      retorno: { de: [72104583, 72104595] as number[], para: 72186399 },
+      /** 5 dias em Follow-up sem mensagem do lead → perdido. Lote por volta do relógio (15 min). */
+      followUp: { statusId: 72104595, dias: 5, motivoPerda: 27720027, tag: 'Desqualificado', lote: 40 },
+    },
   },
 
   /**

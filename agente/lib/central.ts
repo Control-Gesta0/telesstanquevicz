@@ -111,9 +111,9 @@ const FUNIS = [
 
 /** Como o card chega em cada etapa. É o que a Central explica ao lado do número. */
 const PAPEL: Record<number, { papel: 'gabi' | 'automacao' | 'time'; como: string }> = {
-  72104583: { papel: 'gabi', como: 'Lead novo do WhatsApp. A Gabi atende aqui.' },
+  72104583: { papel: 'gabi', como: 'Lead novo do WhatsApp. A Gabi atende aqui; quando o lead escreve, vai sozinho para Em atendimento.' },
   72186399: { papel: 'gabi', como: 'Conversa em andamento com a Gabi ou com a equipe.' },
-  72104595: { papel: 'automacao', como: 'Não respondeu aos toques de retomada. Fica estacionado para a equipe.' },
+  72104595: { papel: 'automacao', como: 'Parou de responder. Se escrever, volta sozinho para Em atendimento; 5 dias sem resposta, vai para perdido.' },
   86825532: { papel: 'gabi', como: 'Reunião marcada pela Gabi ou pelo Calendly.' },
   72113011: { papel: 'time', como: 'Faltou à reunião. A equipe remarca.' },
   72186407: { papel: 'time', como: 'Entrada do CLOSER.' },
@@ -424,6 +424,7 @@ export function regras() {
       'Toque 1: 2 horas depois da última mensagem da Gabi sem resposta.',
       'Toque 2: perto de fechar a janela de 24 horas do WhatsApp.',
       `Sem resposta: o card vai para ${neg.etapaFollowUp.name}.`,
+      `${CRM_MAP.automacoes.sdr.followUp.dias} dias em ${neg.etapaFollowUp.name} sem resposta: perdido, com motivo Lead Desaparecido.`,
       'Só entre 8h e 20h. Se a pessoa responde, a retomada para na hora.',
     ],
     automacoes: [
@@ -433,7 +434,9 @@ export function regras() {
       { gatilho: 'Reunião cancelada no Calendly', efeito: 'Limpa a data e cria tarefa de reagendar.' },
       { gatilho: '24h e 2h antes da reunião', efeito: 'Lembrete pelo modelo aprovado do WhatsApp.' },
       { gatilho: 'Lead chegou por link rastreado', efeito: 'Grava De onde e a campanha no card.' },
-      { gatilho: 'Card entra em Follow-up', efeito: 'Põe a etiqueta "Follow up".' },
+      { gatilho: 'Lead escreve estando em Leads de entrada ou Follow-up', efeito: 'Card volta para Em atendimento. Reunião agendada e No-show ficam onde estão.' },
+      { gatilho: 'Card entra em Follow-up', efeito: 'Põe a etiqueta "Follow up" e começa a contar 5 dias.' },
+      { gatilho: '5 dias em Follow-up sem resposta', efeito: 'Vai para perdido (Lead Desaparecido) com a etiqueta "Desqualificado".' },
       { gatilho: 'Venda perdida no CLOSER', efeito: 'Põe a etiqueta "Desqualificado".' },
       { gatilho: `Mais de ${CRM_MAP.automacoes.limiteEmMassa.eventos} mudanças em ${CRM_MAP.automacoes.limiteEmMassa.janelaSeg / 60} min`, efeito: 'As automações pausam: é limpeza de funil, não venda.' },
     ],

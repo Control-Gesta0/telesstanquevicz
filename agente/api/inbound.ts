@@ -7,6 +7,7 @@ import { logExec } from '../lib/execlog'
 import { cancelarFollowup } from '../lib/followup'
 import { appendMessage, isEchoOfSent, markHumanSpoke, seenMessage } from '../lib/history'
 import { mediaKind, mediaToText } from '../lib/media'
+import { lidarComRetorno, registrarContato } from '../lib/funil-sdr'
 import { aplicarRastreio } from '../lib/rastreio'
 import { isResetCommand, resetLead } from '../lib/reset'
 import { getLead, leadTags } from '../lib/kommo'
@@ -92,6 +93,11 @@ async function ingest(msgs: InboundMsg[], webhookId: string): Promise<void> {
       // Rastreador de origem: roda para TODO lead (antes do gate), só quando a mensagem traz código.
       // O código sai do texto antes de qualquer outro uso.
       if (m.direction !== 'outgoing' && m.text) m.text = await aplicarRastreio(m.leadId, m.text)
+      // Retorno do lead (todo lead, com ou sem a Gabi): Leads de entrada ou Follow-up → Em atendimento
+      if (m.direction !== 'outgoing') {
+        await registrarContato(m.leadId).catch(() => {})
+        await lidarComRetorno(m.leadId).catch(e => console.error(`[retorno] lead ${m.leadId}:`, e))
+      }
       // Webhook da conta inteira: só guarda e processa conversa de lead que a IA atende (gate e sem humano).
       // Lead sem a tag não entra no Redis nem passa pela OpenAI (custo e LGPD).
       // (lead de teste passa sempre: o "reset" precisa chegar mesmo depois que a finalização tirou a tag)

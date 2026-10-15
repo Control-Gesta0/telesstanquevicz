@@ -96,6 +96,11 @@ export async function removeLeadTags(leadId: number, names: string[]): Promise<v
   if (still.length) throw new Error(`tags não removidas do lead ${leadId}: ${still.join(', ')}`)
 }
 
+/** Fecha como perdido com motivo (loss_reason_id). 143 = perdido em qualquer funil. */
+export async function perderLead(leadId: number, pipelineId: number, lossReasonId: number): Promise<void> {
+  await kommo('PATCH', `/api/v4/leads/${leadId}`, { status_id: 143, pipeline_id: pipelineId, loss_reason_id: lossReasonId })
+}
+
 export async function addLeadNote(leadId: number, text: string): Promise<void> {
   await kommo('POST', `/api/v4/leads/${leadId}/notes`, [{ note_type: 'common', params: { text } }])
 }

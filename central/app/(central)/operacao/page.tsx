@@ -42,6 +42,8 @@ function frase(e: Exec): string {
     if (e.tipo === 'finalizou') return 'Encerrou e passou para a equipe.'
     return `Respondeu${e.porta ? ` (${PORTA[e.porta] || e.porta})` : ''}.`
   }
+  if (/^retorno: /.test(d)) return `Lead respondeu: card voltou para Em atendimento${(d.match(/vinha de ([^)]+)/) || [])[1] ? ` (estava em ${(d.match(/vinha de ([^)]+)/) || [])[1]})` : ''}.`
+  if (/^follow-up esgotado/.test(d)) return 'Follow-up esgotado: 5 dias sem resposta, card foi para perdido (Lead Desaparecido).'
   if (/^reuniaoRealizada → /.test(d)) return 'Reunião realizada: card movido para CLOSER › Proposta.'
   if (/^contrato ?[pP]ago → |^contratoPago → /.test(d)) return 'Contrato pago: card movido para o Jurídico.'
   if (/PAUSADO/.test(d)) return 'Automação pausada: muitas mudanças de uma vez (limpeza de funil).'

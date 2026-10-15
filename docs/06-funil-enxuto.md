@@ -197,3 +197,28 @@ O Calendly teve **147 reuniões em 30 dias**; o campo "Reunião" do Kommo só te
 **Prova:** lead de teste 26201719 recebeu utm_source=facebook, utm_medium=paid_social, utm_campaign=rcv, utm_content, fbclid e De onde=Meta; o mesmo código reenviado foi ignorado (uso único). Lead fechado como perdido depois.
 
 **Falta:** `WHATSAPP_NUMERO` (número do WhatsApp do escritório) para os links redirecionarem; até lá respondem 503. "De onde" só tem Google, Meta e Instagram: site e YouTube ficam só na UTM, a não ser que se criem essas opções no campo.
+
+## SDR e CLOSER inteiros na Vercel (15/10/2026)
+
+Pedido do mestre: toda automação do SDR e do CLOSER roda na Vercel. Como a API do Kommo não mostra o conteúdo dos robôs, o inventário foi feito pelo que aconteceu nos cards (eventos de 120 dias antes de 13/10, autor 0 = robô ou integração).
+
+| O que o Kommo fazia | Agora |
+|---|---|
+| Lead escreveu → Em atendimento (de Follow-up, ganho, Reunião agendada, até DIRETORIA e JURÍDICO) | **Vercel** (`lib/funil-sdr.ts`, webhook add_message): só de **Leads de entrada e Follow-up**. Reunião agendada, No-show e outros funis ficam (decisão do mestre). |
+| ~5 dias em Follow-up sem resposta → perdido + etiqueta Desqualificado, sem motivo (100 de 100 perdidos do SDR) | **Vercel**: 5 dias sem mensagem do lead → perdido com motivo **Lead Desaparecido** (27720027), etiqueta e nota. Varredura no relógio de 15 min, 40 por volta. **Só para quem entrar em Follow-up a partir de 15/10**; o estoque (9.938) fica para decisão separada. |
+| Etiqueta "Follow up" ao entrar em Follow-up | **Vercel** (`lib/crm-eventos.ts`), teto de 120 por 10 min |
+| Etiqueta "Desqualificado" na venda perdida do CLOSER | **Vercel**, mesmo teto |
+| CLOSER "No show" → SDR No-show (67 de 69) | Extinta com a etapa; no-show agora é marcado no SDR |
+| CLOSER "Jurídico" → JURÍDICO contrato pago (49) | Já na Vercel desde 14/10: Venda ganha → JURÍDICO |
+| Robôs C - Com proposta, Aguardando documentos/assinatura/pagamento | **Ficam ligados**: nenhuma mensagem automática por etapa em 120 dias; o closer dispara pelo chat (decisão do mestre). |
+
+**Provas:** lead 26207065 (etiquetas: Kommo pôs antes; Vercel pôs quando a etiqueta foi tirada, e ignorou o evento repetido) e lead 26207191 (entrou em Follow-up → contagem; mensagem simulada → Em atendimento; 6 dias sem resposta → perdido, Lead Desaparecido, Desqualificado). Ambos fechados como perdido.
+
+**Privacidade:** para o retorno e os 5 dias, a Vercel guarda só a hora da última mensagem de cada lead (`ultimo-in`, 30 dias), nunca o texto. Conversa continua sendo guardada só de lead atendido pela Gabi.
+
+**Trava de massa:** passou a gravar uma linha por janela no diário (antes, uma por card: uma limpeza de mil cards apagaria o diário).
+
+### O que ainda precisa ser feito no Kommo (só pela tela)
+1. **Desligar** (Configurações › Salesbot) os 24 robôs do SDR: follow-up (4), classificação (14) e origem (6). Os 9 do CLOSER ficam.
+2. **Remover** no botão "Automatizar" dos funis os gatilhos que viraram Vercel: lead escreveu → Em atendimento; X dias em Follow-up → perdido; etiqueta Follow up; etiqueta Desqualificado no CLOSER perdido. Até lá, os dois rodam juntos (a Vercel confere o card e não duplica), mas o do Kommo continua tirando card de Reunião agendada quando o lead escreve.
+3. Os 10 do atendimento atual saem quando a Gabi entrar; os 2 de lembrete ficam (a Vercel usa).

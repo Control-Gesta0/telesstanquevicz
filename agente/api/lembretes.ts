@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Receiver } from '@upstash/qstash'
 import { CONFIG } from '../lib/config'
 import { logExec } from '../lib/execlog'
+import { filaFollowUp, varrerFollowUp } from '../lib/funil-sdr'
 import { previa, rodarLembretes } from '../lib/lembretes'
 
 /**
@@ -20,19 +21,18 @@ async function rawBody(req: VercelRequest): Promise<string> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
     if (String(req.query.secret || '') !== CONFIG.webhookSecret) return res.status(401).json({ error: 'unauthorized' })
-    return res.status(200).json({ ok: true, modo: process.env.LEMBRETES_MODO === 'ativo' ? 'ativo' : 'sombra', nota: 'GET não envia nada', ...(await previa()) })
+    return res.status(200).json({ ok: true, modo: process.env.LEMBRETES_MODO === 'ativo' ? 'ativo' : 'sombra', nota: 'GET não envia nada', ...(await previa()), followUp: await filaFollowUp() })
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' })
   const body = await rawBody(req)
   const receiver = new Receiver({ currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY || '', nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || '' })
   const valido = await receiver.verify({ signature: String(req.headers['upstash-signature'] || ''), body }).catch(() => false)
   if (!valido) return res.status(401).json({ error: 'assinatura inválida' })
-  try {
-    const r = await rodarLembretes()
-    return res.status(200).json({ ok: true, ...r })
-  } catch (e) {
-    const detalhe = (e instanceof Error ? e.message : String(e)).slice(0, 300)
-    await logExec({ tipo: 'erro', leadId: 0, detalhe: `lembretes: ${detalhe}` })
-    return res.status(500).json({ ok: false })
+  // O mesmo relógio de 15 min roda os lembretes e a varredura do Follow-up esgotado (independentes)
+  const [lem, fu] = await Promise.allSettled([rodarLembretes(), varrerFollowUp()])
+  for (const [nome, r] of [['lembretes', lem], ['follow-up esgotado', fu]] as const) {
+    if (r.status === 'rejected') await logExec({ tipo: 'erro', leadId: 0, detalhe: `${nome}: ${(r.reason instanceof Error ? r.reason.message : String(r.reason)).slice(0, 300)}` })
   }
+  const ok = lem.status === 'fulfilled' && fu.status === 'fulfilled'
+  return res.status(ok ? 200 : 500).json({ ok, lembretes: lem.status === 'fulfilled' ? lem.value : null, followUp: fu.status === 'fulfilled' ? fu.value : null })
 }

@@ -170,8 +170,8 @@
     <div class="topo"><h4>1 · Leads de entrada</h4><span><span class="chip c-gabi">Gabi</span> <span class="chip c-time">Equipe</span></span></div>
     <div class="grade">
       <div><div class="k">O que é</div><p>Lead novo que chegou pelo WhatsApp ou pelo formulário do anúncio.</p></div>
-      <div><div class="k">O que você faz</div><p>Se a Gabi está atendendo o lead, nada. Se não, faça o primeiro contato e arraste para Em atendimento.</p></div>
-      <div><div class="k">Sai para</div><p>Em atendimento, quando a conversa começa.</p></div>
+      <div><div class="k">O que você faz</div><p>Se a Gabi está atendendo o lead, nada. Se não, faça o primeiro contato.</p></div>
+      <div><div class="k">Sai para</div><p>Em atendimento: vai sozinho quando o lead escreve.</p></div>
     </div>
   </div>
 
@@ -187,9 +187,9 @@
   <div class="etapa">
     <div class="topo"><h4>3 · Follow-up</h4><span class="chip c-auto">Automático</span></div>
     <div class="grade">
-      <div><div class="k">O que é</div><p>Lead que parou de responder. Chega aqui depois dos dois toques de retomada da Gabi, ou arrastado pela equipe. O Kommo põe a etiqueta <span class="tag">Follow up</span>.</p></div>
-      <div><div class="k">O que você faz</div><p>Retomar com os modelos aprovados do WhatsApp. Passadas 24 horas da última mensagem do lead, só modelo aprovado é entregue. Ficar parado aqui é normal.</p></div>
-      <div><div class="k">Sai para</div><ul><li>Em atendimento: respondeu.</li><li>Perdido: desistiu (Lead Desaparecido ou Sem interesse).</li></ul></div>
+      <div><div class="k">O que é</div><p>Lead que parou de responder. Chega aqui depois dos dois toques de retomada da Gabi, ou arrastado pela equipe. Ganha a etiqueta <span class="tag">Follow up</span>.</p></div>
+      <div><div class="k">O que você faz</div><p>Retomar com os modelos aprovados do WhatsApp (passadas 24 horas da última mensagem do lead, só modelo aprovado é entregue). <b>5 dias sem resposta: o card vai sozinho para perdido</b> (Lead Desaparecido).</p></div>
+      <div><div class="k">Sai para</div><ul><li>Em atendimento: sozinho, quando o lead escreve.</li><li>Perdido: sozinho em 5 dias sem resposta, ou pela equipe (Sem interesse).</li></ul></div>
     </div>
   </div>
 
@@ -201,7 +201,7 @@
     <div class="topo"><h4>4 · Reunião agendada</h4><span><span class="chip c-gabi">Gabi</span> <span class="chip c-auto">Calendly</span></span></div>
     <div class="grade">
       <div><div class="k">O que é</div><p>Reunião marcada. O card tem os campos <b>Reunião</b> (data e hora) e <b>Link da Reunião</b>, preenchidos pelo Calendly ou pela Gabi.</p></div>
-      <div><div class="k">O que você faz</div><ul><li>Ler a nota da Gabi no card.</li><li>Conferir o responsável (regra de valor, seção 05).</li><li>Acima de R$ 50 mil: o SDR aquece o lead antes.</li><li>No dia: dar o desfecho.</li></ul></div>
+      <div><div class="k">O que você faz</div><ul><li>Ler a nota da Gabi no card.</li><li>Conferir o responsável (regra de valor, seção 05).</li><li>Acima de R$ 50 mil: o SDR aquece o lead antes.</li><li>No dia: dar o desfecho.</li><li>Se o lead escrever, o card não sai daqui.</li></ul></div>
       <div><div class="k">Sai para</div><ul><li><b>Ganho</b>: a reunião aconteceu.</li><li>No-show: o lead faltou.</li><li>Perdido: desmarcou e não quer remarcar.</li></ul></div>
     </div>
   </div>
@@ -218,6 +218,10 @@
   <div class="duas">
     <div class="etapa ganho"><div class="topo"><h4>Ganho no SDR</h4><span class="chip c-ok">reunião realizada</span></div><p style="margin-top: 5pt">Arraste para ganho <b>logo depois da reunião</b>. Em até 5 segundos o card vai para <b>CLOSER › Proposta</b>, com o mesmo responsável, a etiqueta <span class="tag">reuniao-realizada</span> e uma nota.</p></div>
     <div class="etapa perdido"><div class="topo"><h4>Perdido no SDR</h4><span class="chip c-bad">não vai ter reunião</span></div><p style="margin-top: 5pt">Escolha o motivo de perda. É aqui que se arquiva lead antigo ou sem resposta, <b>nunca no ganho</b>.</p></div>
+  </div>
+  <div class="caixa alt" style="margin-top: 8pt">
+    <h4>Marcou reunião fora do Calendly?</h4>
+    <p>Por telefone ou por mensagem, por exemplo: preencha à mão o campo <b>Reunião</b> com data e hora e arraste para Reunião agendada. Sem esse campo, o lembrete de 24 h e 2 h não sai.</p>
   </div>
   <div style="margin-top: 10pt">
     <div class="caixa alt">
@@ -236,7 +240,7 @@
 <!-- ═════════════ 03 · CLOSER ═════════════ -->
 <section class="pagina">
   <div class="sec-head"><div><div class="eyebrow">Funil CLOSER</div><h2>CLOSER: da reunião ao contrato pago</h2></div><div class="num">03</div></div>
-  <p class="lead">Objetivo do closer: transformar a reunião feita em contrato assinado e pago. As mensagens automáticas por etapa do CLOSER foram desligadas na reestruturação de 14/10: proposta, pedido de documentos e dados de pagamento saem pelas <b>respostas prontas</b> do Kommo, enviadas por você.</p>
+  <p class="lead">Objetivo do closer: transformar a reunião feita em contrato assinado e pago. Nenhuma mensagem sai sozinha quando o card muda de etapa no CLOSER. Os robôs de mensagem do closer (C - Com proposta, Aguardando documentos, Aguardando assinatura, Aguardando pagamento) continuam disponíveis: <b>dispare pelo chat do lead</b> quando precisar, ou use as respostas prontas.</p>
 
   <div class="etapa">
     <div class="topo"><h4>1 · Leads de entrada</h4><span class="chip c-time">Equipe</span></div>
@@ -311,8 +315,10 @@
       <tr><td>Lead cancela no Calendly</td><td>Se a data do card é a da reunião cancelada, ela é apagada. Nota com o motivo e <b>tarefa "Reagendar"</b> para o responsável.</td></tr>
       <tr><td>Faltam 24 h e 2 h para a reunião</td><td>Lembrete pelo modelo aprovado do WhatsApp, que chega mesmo fora da janela de 24 horas. Usa o campo Reunião do card.</td></tr>
       <tr><td>Lead parou de responder à Gabi</td><td>Até dois toques de retomada, entre 8h e 20h. Sem resposta, o card vai para Follow-up.</td></tr>
-      <tr><td>Card entra em Follow-up</td><td>O Kommo põe a etiqueta <span class="tag">Follow up</span>.</td></tr>
-      <tr><td>Venda perdida no CLOSER</td><td>O Kommo põe a etiqueta <span class="tag">Desqualificado</span>.</td></tr>
+      <tr><td>Lead escreve estando em Leads de entrada ou Follow-up</td><td>O card volta para Em atendimento. Reunião agendada, No-show e outros funis ficam onde estão.</td></tr>
+      <tr><td>Card entra em Follow-up</td><td>Etiqueta <span class="tag">Follow up</span> e começa a contar 5 dias.</td></tr>
+      <tr><td>5 dias em Follow-up sem resposta</td><td>Vai para perdido com motivo Lead Desaparecido, etiqueta <span class="tag">Desqualificado</span> e nota.</td></tr>
+      <tr><td>Venda perdida no CLOSER</td><td>Etiqueta <span class="tag">Desqualificado</span>.</td></tr>
       <tr><td>Lead chegou por link rastreado de anúncio</td><td>De onde e a campanha (UTM) são gravados no card.</td></tr>
     </tbody>
   </table>
@@ -324,10 +330,6 @@
   <div class="caixa alt" style="margin-top: 8pt">
     <h4>Se uma automação não rodar</h4>
     <p>O card fica parado em ganho ou Venda ganha. Espere um minuto e atualize a tela. Se continuar, mova à mão para o destino (CLOSER › Proposta ou JURÍDICO › contrato fechado/pago) e avise a Control Gestão: toda execução e toda falha ficam registradas.</p>
-  </div>
-  <div class="caixa alt" style="margin-top: 8pt">
-    <h4>Marcou reunião fora do Calendly?</h4>
-    <p>Por telefone ou por mensagem, por exemplo: preencha à mão o campo <b>Reunião</b> com data e hora e arraste para Reunião agendada. Sem esse campo, o lembrete de 24 h e 2 h não sai.</p>
   </div>
 </section>
 
@@ -427,10 +429,10 @@
     <tbody>
       <tr><td><span class="tag">ia-gabi</span></td><td>Equipe técnica (fase de teste)</td><td>A Gabi atende este lead. Na fase de teste, só leads com ela são atendidos.</td></tr>
       <tr><td><span class="tag">atendimento-humano</span></td><td>Equipe</td><td>A Gabi não responde este lead.</td></tr>
-      <tr><td><span class="tag">Follow up</span></td><td>Kommo, ao entrar em Follow-up</td><td>Lead em retomada.</td></tr>
+      <tr><td><span class="tag">Follow up</span></td><td>Automação, ao entrar em Follow-up</td><td>Lead em retomada.</td></tr>
       <tr><td><span class="tag">reuniao-realizada</span></td><td>Automação</td><td>Reunião feita; o card foi para o CLOSER.</td></tr>
       <tr><td><span class="tag">contrato-pago</span></td><td>Automação</td><td>Contrato pago; o card foi para o Jurídico.</td></tr>
-      <tr><td><span class="tag">Desqualificado</span></td><td>Kommo, na venda perdida</td><td>Não fechou no CLOSER.</td></tr>
+      <tr><td><span class="tag">Desqualificado</span></td><td>Automação</td><td>Venda perdida no CLOSER, ou 5 dias sem resposta em Follow-up.</td></tr>
     </tbody>
   </table>
 
@@ -471,7 +473,8 @@
       <tr><td>Lembretes 24 h e 2 h</td><td style="color: var(--warn)">em transição</td><td>Saem pelos robôs do Kommo enquanto a versão nova é conferida em paralelo. Na conferência de 13 e 14/10, o de 2 h não saiu em duas reuniões: no dia, confirme a presença por mensagem.</td></tr>
       <tr><td>Gabi no WhatsApp</td><td style="color: var(--warn)">em preparação</td><td>Entra em fase de teste só com leads de etiqueta <span class="tag">ia-gabi</span> e depois é ampliada aos poucos. Até lá, o atendimento segue como hoje.</td></tr>
       <tr><td>Origem pelos links de anúncio</td><td style="color: var(--warn)">em preparação</td><td>Começa quando os links entrarem nos anúncios.</td></tr>
-      <tr><td>Mensagens automáticas do CLOSER</td><td style="color: var(--muted)">desligadas</td><td>O closer envia pelas respostas prontas.</td></tr>
+      <tr><td>Retorno do lead e Follow-up esgotado</td><td style="color: var(--ok)">valendo</td><td>Desde 15/10. Os 5 dias contam para quem entrou em Follow-up a partir de 15/10; os cards que já estavam lá não são perdidos sozinhos.</td></tr>
+      <tr><td>Robôs de mensagem do CLOSER</td><td style="color: var(--ok)">disponíveis</td><td>O closer dispara pelo chat quando precisar. Nada sai sozinho por etapa.</td></tr>
     </tbody>
   </table>
   <div class="caixa dica" style="margin-top: 10pt"><p><b>Onde acompanhar:</b> o painel Central de IA (central-telesstanquevicz.vercel.app) mostra o funil, a agenda, as automações e os cards parados, sem mexer no Kommo. <b>Dúvida ou algo fora do lugar?</b> Fale com a Control Gestão: toda automação e toda resposta da Gabi ficam registradas com hora e motivo.</p></div>

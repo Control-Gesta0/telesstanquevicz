@@ -162,6 +162,14 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('perdido no SDR não põe Desqualificado', decidir({ leadId: 1, statusId: 143, pipelineId: 9299515, oldStatusId: 72104595, oldPipelineId: 9299515 }), null)
   eq('Follow-up de outro funil não dispara', decidir({ leadId: 1, statusId: 72104595, pipelineId: 9312103, oldStatusId: 72851523, oldPipelineId: 9312103 }), null)
   eq('evento repetido dentro do Follow-up não dispara', decidir({ leadId: 1, statusId: 72104595, pipelineId: 9299515, oldStatusId: 72104595, oldPipelineId: 9299515 }), null)
+  const FS = await import('../lib/funil-sdr')
+  eq('retorno: Leads de entrada e Follow-up voltam', [FS.deveVoltar({ pipeline_id: 9299515, status_id: 72104583 }), FS.deveVoltar({ pipeline_id: 9299515, status_id: 72104595 })], [true, true])
+  eq('retorno: Reunião agendada, No-show, perdido e outros funis ficam', [FS.deveVoltar({ pipeline_id: 9299515, status_id: 86825532 }), FS.deveVoltar({ pipeline_id: 9299515, status_id: 72113011 }), FS.deveVoltar({ pipeline_id: 9299515, status_id: 143 }), FS.deveVoltar({ pipeline_id: 9312147, status_id: 83784180 })], [false, false, false, false])
+  const D = 86400_000, T = Date.parse('2026-10-20T12:00:00Z')
+  eq('follow-up: 5 dias sem resposta perde', FS.venceu(T - 5 * D - 1, 0, T), 'perder')
+  eq('follow-up: 4 dias ainda espera', FS.venceu(T - 4 * D, 0, T), 'esperar')
+  eq('follow-up: respondeu há 2 dias reinicia a contagem', FS.venceu(T - 6 * D, T - 2 * D, T), 'reiniciar')
+  eq('follow-up: resposta antiga não salva', FS.venceu(T - 12 * D, T - 6 * D, T), 'perder')
 
   // Lembretes de reunião: 24h e 2h antes, janela de 30 min, nada para reunião passada
   const { lembretesDevidos } = await import('../lib/lembretes')
