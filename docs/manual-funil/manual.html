@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Manual do funil · SDR e CLOSER no Kommo · Teles &amp; Stanquevicz Advogados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 15mm 15mm 16mm; }
+  @page :first { margin: 0; }
+  :root { --ink: #0b1220; --body: #35415a; --muted: #5a6882; --faint: #8592a6; --line: #dde2e8; --soft: #f2f5f8; --cyan: #0e7490; --cyan2: #0891b2; --cyan-soft: #e6f6fa; --ok: #15803d; --ok-soft: #ecf8f0; --warn: #b45309; --warn-soft: #fff7ed; --bad: #b91c1c; --bad-soft: #fdf0f0; --purple: #6d28d9; --purple-soft: #f4effd; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: 'Space Grotesk', system-ui, sans-serif; color: var(--body); font-size: 9.5pt; line-height: 1.48; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; color: var(--ink); letter-spacing: -.015em; margin: 0; }
+  h2 { font-size: 20pt; font-weight: 700; line-height: 1.15; }
+  h3 { font-size: 12pt; font-weight: 700; margin-top: 12pt; break-after: avoid; }
+  h4 { font-size: 10.5pt; font-weight: 700; }
+  p { margin: 5pt 0 0; }
+  ul, ol { margin: 5pt 0 0; padding-left: 14pt; }
+  li { margin: 2.5pt 0; }
+  b, strong { color: var(--ink); font-weight: 600; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 7.5pt; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
+  .pagina { break-before: page; }
+  .sec-head { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 7pt; margin-bottom: 9pt; }
+  .sec-head .num { font-family: 'Manrope'; font-weight: 800; font-size: 28pt; color: #d7e9ee; line-height: .9; }
+  .lead { font-size: 10.8pt; margin-top: 5pt; }
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; }
+  .caixa { border: 1px solid var(--line); border-radius: 7pt; padding: 9pt 11pt; background: #fff; break-inside: avoid; }
+  .caixa.alt { background: var(--soft); border-color: #e3e8ee; }
+  .caixa.dica { background: var(--cyan-soft); border-color: #b9e3ec; }
+  .caixa.aviso { background: var(--warn-soft); border-color: #f3d3a8; }
+  .caixa.perigo { background: var(--bad-soft); border-color: #f2c4c4; }
+  .caixa h4 + p, .caixa h4 + ul { margin-top: 4pt; }
+  .caixa p:first-child, .caixa ul:first-child { margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 7pt; font-size: 9.1pt; }
+  tr { break-inside: avoid; }
+  th { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 6.8pt; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 500; padding: 5pt 7pt; border-bottom: 1px solid var(--line); }
+  td { padding: 6pt 7pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--ink); font-weight: 600; }
+  .chip { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 6.8pt; letter-spacing: .05em; text-transform: uppercase; padding: 1pt 5pt; border-radius: 4pt; border: 1px solid; vertical-align: 1pt; white-space: nowrap; }
+  .c-gabi { color: var(--cyan); border-color: #9edbe8; background: var(--cyan-soft); }
+  .c-auto { color: var(--purple); border-color: #cdb8f5; background: var(--purple-soft); }
+  .c-time { color: var(--muted); border-color: var(--line); background: var(--soft); }
+  .c-ok { color: var(--ok); border-color: #b7e2c4; background: var(--ok-soft); }
+  .c-bad { color: var(--bad); border-color: #f2c4c4; background: var(--bad-soft); }
+  .tag { font-family: 'JetBrains Mono', monospace; font-size: 8.4pt; color: var(--ink); background: var(--soft); border: 1px solid var(--line); border-radius: 4pt; padding: 0 4pt; white-space: nowrap; }
+
+  /* diagrama do funil */
+  .fluxo { margin-top: 10pt; border: 1px solid var(--line); border-radius: 9pt; padding: 11pt; background: #fbfcfd; }
+  .trilha { display: flex; align-items: stretch; gap: 0; }
+  .trilha + .trilha { margin-top: 9pt; }
+  .rotulo-funil { flex: 0 0 52pt; font-family: 'Manrope'; font-weight: 800; color: var(--ink); font-size: 10pt; display: flex; align-items: center; }
+  .col { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 6pt; background: #fff; padding: 6pt 6pt 7pt; font-size: 8.3pt; line-height: 1.3; position: relative; }
+  .col b { display: block; font-size: 8.8pt; margin-bottom: 3pt; }
+  .col .chip { font-size: 6.2pt; }
+  .seta { flex: 0 0 11pt; display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 10pt; }
+  .col.fim-ok { border-color: #b7e2c4; background: var(--ok-soft); }
+  .col.fim-bad { border-color: #f2c4c4; background: var(--bad-soft); }
+  .ponte { margin: 7pt 0 0 52pt; font-size: 8.4pt; color: var(--purple); display: flex; gap: 6pt; align-items: center; }
+  .ponte .linha { flex: 1; border-top: 1.5px dashed #cdb8f5; }
+
+  /* cartão de etapa */
+  .etapa { border: 1px solid var(--line); border-radius: 8pt; padding: 9pt 11pt; margin-top: 8pt; break-inside: avoid; background: #fff; }
+  .etapa .topo { display: flex; justify-content: space-between; align-items: baseline; gap: 8pt; }
+  .etapa .topo h4 { font-size: 11.5pt; }
+  .etapa .grade { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9pt; margin-top: 6pt; }
+  .etapa .grade .k { font-family: 'JetBrains Mono', monospace; font-size: 6.8pt; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin-bottom: 2pt; }
+  .etapa .grade ul { margin: 0; padding-left: 11pt; }
+  .etapa .grade p { margin: 0; }
+  .etapa.ganho { border-color: #b7e2c4; background: linear-gradient(180deg, var(--ok-soft), #fff 70%); }
+  .etapa.perdido { border-color: #f2c4c4; background: linear-gradient(180deg, var(--bad-soft), #fff 70%); }
+
+  .regra { display: flex; gap: 9pt; align-items: flex-start; padding: 7pt 0; border-bottom: 1px solid var(--line); break-inside: avoid; }
+  .regra .n { flex: 0 0 18pt; height: 18pt; border-radius: 99pt; background: var(--cyan2); color: #fff; font-family: 'Manrope'; font-weight: 700; font-size: 8.5pt; display: grid; place-items: center; }
+  .regra.nao .n { background: var(--bad); }
+  .rodape { font-size: 7.8pt; color: var(--faint); margin-top: 14pt; border-top: 1px solid var(--line); padding-top: 7pt; }
+
+  /* capa */
+  .capa { height: 297mm; width: 210mm; padding: 26mm 22mm 22mm; background: radial-gradient(130mm 90mm at 85% 0%, #dff4f8, transparent 70%), linear-gradient(180deg, #ffffff, #f4f7fa); display: flex; flex-direction: column; }
+  .capa .topo { display: flex; justify-content: space-between; }
+  .capa h1 { font-size: 36pt; line-height: 1.05; font-weight: 800; margin-top: 40mm; }
+  .capa h1 span { color: var(--cyan2); }
+  .capa .sub { font-size: 13.5pt; margin-top: 10pt; max-width: 140mm; }
+  .capa .cliente { margin-top: 14mm; font-family: 'Manrope'; font-weight: 700; color: var(--ink); font-size: 15pt; }
+  .capa .meta { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: var(--muted); margin-top: 4pt; }
+  .capa .indice { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5pt 18pt; font-size: 10pt; border-top: 1px solid var(--line); padding-top: 12pt; }
+  .capa .indice div { display: flex; gap: 8pt; }
+  .capa .indice span { font-family: 'JetBrains Mono', monospace; color: var(--cyan2); font-size: 9pt; }
+  .capa .assina { display: flex; align-items: center; gap: 8pt; font-size: 8.5pt; color: var(--muted); margin-top: 12mm; }
+  .capa .assina img { height: 16pt; }
+</style>
+</head>
+<body>
+
+<!-- ═════════════ CAPA ═════════════ -->
+<section class="capa">
+  <div class="topo"><div class="eyebrow">Manual da equipe comercial</div><div class="eyebrow" style="color: var(--muted)">Kommo · outubro de 2026</div></div>
+  <h1>Como trabalhar o funil <span>SDR</span> e <span>CLOSER</span> no Kommo.</h1>
+  <p class="sub">O que significa cada etapa, o que você faz nela, o que acontece sozinho, como a Gabi entra no atendimento e o que nunca fazer.</p>
+  <div class="cliente">Teles &amp; Stanquevicz Advogados</div>
+  <div class="meta">Para SDR, closers e quem cuida do funil · versão de 15/10/2026</div>
+  <div class="indice">
+    <div><span>01</span> O funil numa página</div>
+    <div><span>05</span> A Gabi no atendimento</div>
+    <div><span>02</span> SDR: etapa por etapa</div>
+    <div><span>06</span> Campos, etiquetas e tarefas</div>
+    <div><span>03</span> CLOSER: etapa por etapa</div>
+    <div><span>07</span> Regras de ouro</div>
+    <div><span>04</span> O que acontece sozinho</div>
+    <div><span>08</span> Situação de hoje</div>
+  </div>
+  <div class="assina">Preparado pela <img src="img/logo-horizontal.png" alt="Control Gestão"></div>
+</section>
+
+<!-- ═════════════ 01 · O FUNIL NUMA PÁGINA ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Visão de conjunto</div><h2>O funil numa página</h2></div><div class="num">01</div></div>
+  <p class="lead">Dois funis enxutos, que cabem inteiros na tela. O <b>SDR</b> vai do primeiro contato até a reunião acontecer. O <b>CLOSER</b> vai da reunião feita até o contrato pago. Contrato pago segue sozinho para o <b>JURÍDICO</b>.</p>
+
+  <div class="fluxo">
+    <div class="trilha">
+      <div class="rotulo-funil">SDR</div>
+      <div class="col"><b>Leads de entrada</b>Lead novo <br><span class="chip c-gabi">Gabi</span></div><div class="seta">›</div>
+      <div class="col"><b>Em atendimento</b>Conversa em andamento <br><span class="chip c-gabi">Gabi</span> <span class="chip c-time">Equipe</span></div><div class="seta">›</div>
+      <div class="col"><b>Follow-up</b>Parou de responder <br><span class="chip c-auto">Automático</span></div><div class="seta">›</div>
+      <div class="col"><b>Reunião agendada</b>Data e link no card <br><span class="chip c-gabi">Gabi</span> <span class="chip c-auto">Calendly</span></div><div class="seta">›</div>
+      <div class="col"><b>No-show</b>Faltou <br><span class="chip c-time">Equipe</span></div><div class="seta">›</div>
+      <div class="col fim-ok"><b>Ganho</b>= reunião realizada</div>
+    </div>
+    <div class="ponte"><span>Ganho no SDR vai sozinho para CLOSER › Proposta, em até 5 segundos</span><span class="linha"></span><span>↓</span></div>
+    <div class="trilha" style="margin-top: 7pt">
+      <div class="rotulo-funil">CLOSER</div>
+      <div class="col"><b>Leads de entrada</b>Entrada direta <br><span class="chip c-time">Equipe</span></div><div class="seta">›</div>
+      <div class="col"><b>Proposta</b>Reunião feita, proposta em curso <br><span class="chip c-auto">Automático</span></div><div class="seta">›</div>
+      <div class="col"><b>Contrato</b>Documentos e assinatura <br><span class="chip c-time">Equipe</span></div><div class="seta">›</div>
+      <div class="col"><b>Pagamento</b>Assinado, falta pagar <br><span class="chip c-time">Equipe</span></div><div class="seta">›</div>
+      <div class="col fim-ok"><b>Venda ganha</b>= contrato pago</div>
+    </div>
+    <div class="ponte"><span>Venda ganha vai sozinha para JURÍDICO › contrato fechado/pago, em até 5 segundos</span><span class="linha"></span><span>↓</span></div>
+  </div>
+  <p style="font-size: 8.3pt; color: var(--muted)"><span class="chip c-gabi">Gabi</span> a assistente virtual atende ou coloca o card ali &nbsp; <span class="chip c-auto">Automático</span> o card chega sem ninguém arrastar &nbsp; <span class="chip c-time">Equipe</span> você move</p>
+
+  <h3>As três decisões que mais importam</h3>
+  <div class="tres" style="margin-top: 7pt">
+    <div class="caixa alt"><h4>Ganho no SDR</h4><p>Só quando <b>a reunião aconteceu</b>. O card vai para o CLOSER sozinho. Nunca use ganho para arquivar.</p></div>
+    <div class="caixa alt"><h4>Venda ganha no CLOSER</h4><p>Só quando <b>o contrato foi pago</b>. Preencha o valor antes. O card vai para o Jurídico sozinho.</p></div>
+    <div class="caixa alt"><h4>Perdido</h4><p>Para tudo que não segue. O motivo de perda é obrigatório e é ele que mostra onde o funil vaza.</p></div>
+  </div>
+
+  <h3>Motivos de perda cadastrados</h3>
+  <table>
+    <thead><tr><th>Quando o lead some ou desiste</th><th>Quando o caso não serve</th><th>Quando é questão de preço</th></tr></thead>
+    <tbody><tr>
+      <td style="font-weight: 400; color: var(--body)">Lead Desaparecido · Sem interesse · Falta de Prioridade · Desconfiado · fechou com o concorrente · Possui outra solução</td>
+      <td style="font-weight: 400; color: var(--body)">Solução não se aplica · Dívida Insuficiente · Renda Insuficiente · Desconhecido</td>
+      <td style="font-weight: 400; color: var(--body)">Preço · Honorários Iniciais · Orçamento insuficiente</td>
+    </tr></tbody>
+  </table>
+</section>
+
+<!-- ═════════════ 02 · SDR ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Funil SDR</div><h2>SDR: do primeiro contato à reunião</h2></div><div class="num">02</div></div>
+  <p class="lead">Objetivo do SDR: entender o caso com poucas perguntas e marcar a reunião de diagnóstico (30 minutos, Google Meet, com o Dr. Carlos Eduardo, sem custo para o lead).</p>
+
+  <div class="etapa">
+    <div class="topo"><h4>1 · Leads de entrada</h4><span><span class="chip c-gabi">Gabi</span> <span class="chip c-time">Equipe</span></span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Lead novo que chegou pelo WhatsApp ou pelo formulário do anúncio.</p></div>
+      <div><div class="k">O que você faz</div><p>Se a Gabi está atendendo o lead, nada. Se não, faça o primeiro contato e arraste para Em atendimento.</p></div>
+      <div><div class="k">Sai para</div><p>Em atendimento, quando a conversa começa.</p></div>
+    </div>
+  </div>
+
+  <div class="etapa">
+    <div class="topo"><h4>2 · Em atendimento</h4><span><span class="chip c-gabi">Gabi</span> <span class="chip c-time">Equipe</span></span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Conversa em andamento, com a Gabi ou com a equipe.</p></div>
+      <div><div class="k">O que você faz</div><ul><li>Entender o assunto: dívida com banco, financiamento de veículo ou busca e apreensão.</li><li>Pegar o valor aproximado da dívida.</li><li>Oferecer a reunião com horário do Calendly.</li></ul></div>
+      <div><div class="k">Sai para</div><ul><li>Reunião agendada: reunião marcada.</li><li>Follow-up: parou de responder.</li><li>Perdido: não é caso do escritório.</li></ul></div>
+    </div>
+  </div>
+
+  <div class="etapa">
+    <div class="topo"><h4>3 · Follow-up</h4><span class="chip c-auto">Automático</span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Lead que parou de responder. Chega aqui depois dos dois toques de retomada da Gabi, ou arrastado pela equipe. O Kommo põe a etiqueta <span class="tag">Follow up</span>.</p></div>
+      <div><div class="k">O que você faz</div><p>Retomar com os modelos aprovados do WhatsApp. Passadas 24 horas da última mensagem do lead, só modelo aprovado é entregue. Ficar parado aqui é normal.</p></div>
+      <div><div class="k">Sai para</div><ul><li>Em atendimento: respondeu.</li><li>Perdido: desistiu (Lead Desaparecido ou Sem interesse).</li></ul></div>
+    </div>
+  </div>
+
+</section>
+
+<section class="pagina">
+  <div class="eyebrow">Funil SDR · continuação</div>
+  <div class="etapa">
+    <div class="topo"><h4>4 · Reunião agendada</h4><span><span class="chip c-gabi">Gabi</span> <span class="chip c-auto">Calendly</span></span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Reunião marcada. O card tem os campos <b>Reunião</b> (data e hora) e <b>Link da Reunião</b>, preenchidos pelo Calendly ou pela Gabi.</p></div>
+      <div><div class="k">O que você faz</div><ul><li>Ler a nota da Gabi no card.</li><li>Conferir o responsável (regra de valor, seção 05).</li><li>Acima de R$ 50 mil: o SDR aquece o lead antes.</li><li>No dia: dar o desfecho.</li></ul></div>
+      <div><div class="k">Sai para</div><ul><li><b>Ganho</b>: a reunião aconteceu.</li><li>No-show: o lead faltou.</li><li>Perdido: desmarcou e não quer remarcar.</li></ul></div>
+    </div>
+  </div>
+
+  <div class="etapa">
+    <div class="topo"><h4>5 · No-show</h4><span class="chip c-time">Equipe</span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>O lead faltou à reunião.</p></div>
+      <div><div class="k">O que você faz</div><p>Remarcar. Se ele remarcar pelo Calendly, o card volta sozinho para Reunião agendada com a data nova.</p></div>
+      <div><div class="k">Sai para</div><ul><li>Reunião agendada: remarcou.</li><li>Perdido: não retornou (Lead Desaparecido).</li></ul></div>
+    </div>
+  </div>
+
+  <div class="duas">
+    <div class="etapa ganho"><div class="topo"><h4>Ganho no SDR</h4><span class="chip c-ok">reunião realizada</span></div><p style="margin-top: 5pt">Arraste para ganho <b>logo depois da reunião</b>. Em até 5 segundos o card vai para <b>CLOSER › Proposta</b>, com o mesmo responsável, a etiqueta <span class="tag">reuniao-realizada</span> e uma nota.</p></div>
+    <div class="etapa perdido"><div class="topo"><h4>Perdido no SDR</h4><span class="chip c-bad">não vai ter reunião</span></div><p style="margin-top: 5pt">Escolha o motivo de perda. É aqui que se arquiva lead antigo ou sem resposta, <b>nunca no ganho</b>.</p></div>
+  </div>
+  <div style="margin-top: 10pt">
+    <div class="caixa alt">
+      <h4>Rotina do SDR (Guilherme, Carla e SDR)</h4>
+      <ul>
+        <li><b>Ao abrir o dia:</b> tarefas do Kommo (Assumir o atendimento, Reagendar, Agendar à mão) e reuniões de hoje.</li>
+        <li><b>Depois de cada reunião:</b> ganho, No-show ou perdido.</li>
+        <li><b>Ao longo do dia:</b> Em atendimento, sem deixar conversa esfriar.</li>
+        <li><b>Uma vez por semana:</b> No-show para remarcar e Follow-up para retomar ou perder.</li>
+        <li><b>Antes de sair:</b> nenhuma reunião passada sem desfecho.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 03 · CLOSER ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Funil CLOSER</div><h2>CLOSER: da reunião ao contrato pago</h2></div><div class="num">03</div></div>
+  <p class="lead">Objetivo do closer: transformar a reunião feita em contrato assinado e pago. As mensagens automáticas por etapa do CLOSER foram desligadas na reestruturação de 14/10: proposta, pedido de documentos e dados de pagamento saem pelas <b>respostas prontas</b> do Kommo, enviadas por você.</p>
+
+  <div class="etapa">
+    <div class="topo"><h4>1 · Leads de entrada</h4><span class="chip c-time">Equipe</span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Lead que entrou direto no CLOSER, sem passar pelo SDR.</p></div>
+      <div><div class="k">O que você faz</div><p>Conferir se já teve reunião. Teve: arraste para Proposta. Não teve: devolva para o SDR marcar.</p></div>
+      <div><div class="k">Sai para</div><p>Proposta.</p></div>
+    </div>
+  </div>
+
+  <div class="etapa">
+    <div class="topo"><h4>2 · Proposta</h4><span class="chip c-auto">Automático</span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Reunião feita. Chega sozinho quando o SDR marca ganho, com a etiqueta <span class="tag">reuniao-realizada</span>. O responsável é o mesmo do SDR.</p></div>
+      <div><div class="k">O que você faz</div><ul><li>Ler a nota da Gabi e as Observações.</li><li>Enviar a proposta de honorários.</li><li>Acompanhar a resposta.</li></ul></div>
+      <div><div class="k">Sai para</div><ul><li>Contrato: aceitou.</li><li>Venda perdida: não fechou (motivo).</li></ul></div>
+    </div>
+  </div>
+
+  <div class="etapa">
+    <div class="topo"><h4>3 · Contrato</h4><span class="chip c-time">Equipe</span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Proposta aceita. Contrato enviado, aguardando documentos e assinatura.</p></div>
+      <div><div class="k">O que você faz</div><p>Pedir os documentos que faltam e cobrar a assinatura. Use uma tarefa com data para não esquecer.</p></div>
+      <div><div class="k">Sai para</div><ul><li>Pagamento: assinou.</li><li>Venda perdida: desistiu.</li></ul></div>
+    </div>
+  </div>
+
+</section>
+
+<section class="pagina">
+  <div class="eyebrow">Funil CLOSER · continuação</div>
+  <div class="etapa">
+    <div class="topo"><h4>4 · Pagamento</h4><span class="chip c-time">Equipe</span></div>
+    <div class="grade">
+      <div><div class="k">O que é</div><p>Contrato assinado, aguardando o pagamento da entrada.</p></div>
+      <div><div class="k">O que você faz</div><p>Enviar os dados de pagamento (só a equipe envia; a Gabi nunca manda PIX, boleto ou link) e confirmar o recebimento.</p></div>
+      <div><div class="k">Sai para</div><p>Venda ganha: pago.</p></div>
+    </div>
+  </div>
+
+  <div class="duas">
+    <div class="etapa ganho"><div class="topo"><h4>Venda ganha</h4><span class="chip c-ok">contrato pago</span></div><p style="margin-top: 5pt"><b>Preencha o valor da venda antes.</b> Em até 5 segundos o card vai para <b>JURÍDICO › contrato fechado/pago</b>, com o mesmo responsável, a etiqueta <span class="tag">contrato-pago</span> e uma nota com data e valor.</p></div>
+    <div class="etapa perdido"><div class="topo"><h4>Venda perdida</h4><span class="chip c-bad">não fechou</span></div><p style="margin-top: 5pt">Escolha o motivo de perda (Preço, Honorários Iniciais, Sem interesse…). O Kommo põe a etiqueta <span class="tag">Desqualificado</span>.</p></div>
+  </div>
+
+  <div class="caixa dica" style="margin-top: 9pt"><p><b>Por que o card sai do CLOSER na venda ganha:</b> no Kommo um card vive num funil só. A venda fica registrada na etiqueta <span class="tag">contrato-pago</span>, na nota e no histórico, e é assim que os relatórios contam contratos.</p></div>
+  <div style="margin-top: 10pt">
+    <div class="caixa alt">
+      <h4>Rotina do closer</h4>
+      <ul>
+        <li><b>Ao abrir o dia:</b> cards novos em Proposta (etiqueta reuniao-realizada).</li>
+        <li><b>Proposta:</b> enviar a proposta e anotar o retorno.</li>
+        <li><b>Contrato:</b> cobrar documentos e assinatura, com tarefa datada.</li>
+        <li><b>Pagamento:</b> confirmar o pagamento e preencher o valor.</li>
+        <li><b>Contrato pago:</b> Venda ganha. O Jurídico recebe sozinho.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 04 · O QUE ACONTECE SOZINHO ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Automações</div><h2>O que acontece sozinho</h2></div><div class="num">04</div></div>
+  <p class="lead">Estas regras rodam fora do Kommo, num servidor da operação, e conferem o card antes de agir: se ele já mudou de lugar, não fazem nada. Você não precisa ligar nem desligar nada.</p>
+  <table>
+    <thead><tr><th style="width: 34%">Quando</th><th>O que acontece</th></tr></thead>
+    <tbody>
+      <tr><td>Card vai para ganho no SDR</td><td>Em até 5 s vai para CLOSER › Proposta, com etiqueta <span class="tag">reuniao-realizada</span> e nota. Responsável mantido.</td></tr>
+      <tr><td>Card vai para Venda ganha no CLOSER</td><td>Em até 5 s vai para JURÍDICO › contrato fechado/pago, com etiqueta <span class="tag">contrato-pago</span> e nota com data e valor. Responsável mantido.</td></tr>
+      <tr><td>Lead marca reunião no Calendly</td><td>O card ganha Reunião (data e hora) e Link da Reunião e vai para Reunião agendada, se estiver no SDR e não for ganho. Vale também para card em No-show ou perdido: quem marca, voltou. Uma nota registra.</td></tr>
+      <tr><td>Lead cancela no Calendly</td><td>Se a data do card é a da reunião cancelada, ela é apagada. Nota com o motivo e <b>tarefa "Reagendar"</b> para o responsável.</td></tr>
+      <tr><td>Faltam 24 h e 2 h para a reunião</td><td>Lembrete pelo modelo aprovado do WhatsApp, que chega mesmo fora da janela de 24 horas. Usa o campo Reunião do card.</td></tr>
+      <tr><td>Lead parou de responder à Gabi</td><td>Até dois toques de retomada, entre 8h e 20h. Sem resposta, o card vai para Follow-up.</td></tr>
+      <tr><td>Card entra em Follow-up</td><td>O Kommo põe a etiqueta <span class="tag">Follow up</span>.</td></tr>
+      <tr><td>Venda perdida no CLOSER</td><td>O Kommo põe a etiqueta <span class="tag">Desqualificado</span>.</td></tr>
+      <tr><td>Lead chegou por link rastreado de anúncio</td><td>De onde e a campanha (UTM) são gravados no card.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caixa perigo" style="margin-top: 11pt">
+    <h4>Trava de movimentação em massa</h4>
+    <p>Se mais de 20 cards forem para ganho ou Venda ganha em 10 minutos, as automações pausam. É proteção contra limpeza de funil feita no lugar errado: em 30 dias, mais de mil "vendas ganhas" eram arrasto em massa. <b>Os cards pausados ficam onde estão e precisam ser movidos à mão.</b> Para limpar o funil, use sempre <b>perdido com motivo</b>.</p>
+  </div>
+  <div class="caixa alt" style="margin-top: 8pt">
+    <h4>Se uma automação não rodar</h4>
+    <p>O card fica parado em ganho ou Venda ganha. Espere um minuto e atualize a tela. Se continuar, mova à mão para o destino (CLOSER › Proposta ou JURÍDICO › contrato fechado/pago) e avise a Control Gestão: toda execução e toda falha ficam registradas.</p>
+  </div>
+  <div class="caixa alt" style="margin-top: 8pt">
+    <h4>Marcou reunião fora do Calendly?</h4>
+    <p>Por telefone ou por mensagem, por exemplo: preencha à mão o campo <b>Reunião</b> com data e hora e arraste para Reunião agendada. Sem esse campo, o lembrete de 24 h e 2 h não sai.</p>
+  </div>
+</section>
+
+<!-- ═════════════ 05 · A GABI ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Atendimento</div><h2>A Gabi no atendimento</h2></div><div class="num">05</div></div>
+  <p class="lead">A Gabi é a assistente virtual do escritório no WhatsApp. Ela responde na hora, faz poucas perguntas, oferece horários reais do Calendly e marca a reunião. Quando o caso pede uma pessoa, ela passa para a equipe com o resumo pronto.</p>
+
+  <div class="duas" style="margin-top: 9pt">
+    <div class="caixa alt">
+      <h4>O que ela pergunta</h4>
+      <ul>
+        <li><b>Dívida com banco:</b> tipo (cartão, cheque especial, empréstimo), valor aproximado, parcelas em atraso.</li>
+        <li><b>Financiamento de veículo:</b> banco, total de parcelas, parcelas pagas, valor da parcela, se tem o contrato.</li>
+        <li><b>Busca e apreensão:</b> se já foi apreendido, quando, se recebeu o mandado, quanto falta pagar.</li>
+      </ul>
+      <p>Ela pula o que o lead já contou, inclusive no formulário do anúncio.</p>
+    </div>
+    <div class="caixa alt">
+      <h4>O que ela nunca faz</h4>
+      <ul>
+        <li>Prometer resultado ou percentual de desconto.</li>
+        <li>Falar de honorários (isso é na reunião).</li>
+        <li>Mandar PIX, boleto, conta ou link.</li>
+        <li>Pedir CPF ou número de processo.</li>
+        <li>Dar parecer ou dizer se a pessoa tem direito.</li>
+        <li>Dizer que marcou antes de o Calendly confirmar.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Quem recebe o lead que marcou reunião</h3>
+  <table>
+    <thead><tr><th>Valor da dívida</th><th>Responsável</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr><td>Abaixo de R$ 50 mil</td><td>Alterna entre <b>Guilherme</b> e <b>Carla</b></td><td>Divide a agenda por igual.</td></tr>
+      <tr><td>R$ 50 mil ou mais, ou sem valor</td><td><b>SDR</b></td><td>Caso maior: o SDR aquece o lead antes da reunião.</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 8.5pt; color: var(--muted)">No financiamento de veículo, o valor é o que falta pagar: (parcelas totais menos parcelas pagas) vezes o valor da parcela.</p>
+
+  <h3>O que ela deixa no card</h3>
+  <ul>
+    <li><b>Nota "🤖 Gabi (IA) finalizou"</b> com o resumo do caso e cada resposta. Leia antes de falar com o lead.</li>
+    <li>Etapa Reunião agendada, responsável pela regra acima, campo <b>Nichos</b>, data e link da reunião.</li>
+    <li>Uma <b>tarefa</b> para o responsável: "Reunião marcada pela IA…", ou "Agendar a reunião à mão…" se a reserva falhou.</li>
+  </ul>
+
+</section>
+
+<section class="pagina">
+  <div class="eyebrow">A Gabi no atendimento · continuação</div>
+  <h3 style="margin-top: 6pt">Quando ela passa para a equipe</h3>
+  <p>Ela encerra e cria a tarefa <b>"Assumir o atendimento"</b> para o SDR quando o lead pede uma pessoa, já é cliente do escritório, fala de pagamento, já tem outro advogado no caso ou é menor de idade. Se a pessoa conta uma <b>emergência</b> (fome, remédio, despejo, internação), a tarefa vem marcada como URGENTE, com prazo de 15 minutos. Assunto que não é bancário: ela se despede com respeito e marca <b>Desqualificado robô</b>; fechar como perdido fica com a equipe.</p>
+
+  <h3>Como a Gabi para num lead</h3>
+  <div class="tres" style="margin-top: 6pt">
+    <div class="caixa dica"><h4>Você respondeu</h4><p>Se alguém da equipe escreve para o lead pelo Kommo, a Gabi fica <b>6 horas</b> sem responder aquele lead.</p></div>
+    <div class="caixa dica"><h4>Etiqueta atendimento-humano</h4><p>Ponha <span class="tag">atendimento-humano</span> no card e a Gabi não responde mais aquele lead.</p></div>
+    <div class="caixa dica"><h4>Depois que ela encerra</h4><p>Ela tira a própria etiqueta <span class="tag">ia-gabi</span> e não volta a responder. O lead é da equipe.</p></div>
+  </div>
+
+  <h3 style="margin-top: 16pt">Tarefas que chegam sozinhas</h3>
+  <table>
+    <thead><tr><th style="width: 32%">Tarefa</th><th style="width: 22%">Para quem</th><th>O que fazer</th></tr></thead>
+    <tbody>
+      <tr><td>Reunião marcada pela IA</td><td>Responsável do lead</td><td>Ler a nota e se preparar. Acima de R$ 50 mil, aquecer o lead.</td></tr>
+      <tr><td>Agendar a reunião à mão</td><td>Responsável do lead</td><td>O lead aceitou, mas a reserva não fechou. Marque no Calendly e confirme com ele.</td></tr>
+      <tr><td>Assumir o atendimento</td><td>SDR</td><td>A Gabi passou o lead (pediu pessoa, cliente, pagamento…). Responda pelo Kommo.</td></tr>
+      <tr><td>… (URGENTE)</td><td>SDR</td><td>O lead relatou uma emergência. Prazo de 15 minutos.</td></tr>
+      <tr><td>Reagendar</td><td>Responsável do lead</td><td>O lead cancelou no Calendly. Ofereça nova data no mesmo dia.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═════════════ 06 · CAMPOS, ETIQUETAS E TAREFAS ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Card do lead</div><h2>Campos, etiquetas e tarefas</h2></div><div class="num">06</div></div>
+  <h3 style="margin-top: 0">Campos que importam</h3>
+  <table>
+    <thead><tr><th style="width: 24%">Campo</th><th style="width: 26%">Quem preenche</th><th>Para que serve</th></tr></thead>
+    <tbody>
+      <tr><td>Reunião</td><td>Calendly ou Gabi; à mão se marcar por fora</td><td>Data e hora da reunião. Os lembretes de 24 h e 2 h saem por ele.</td></tr>
+      <tr><td>Link da Reunião</td><td>Calendly ou Gabi</td><td>Link do Google Meet.</td></tr>
+      <tr><td>Nichos</td><td>Gabi, no lead que marcou; equipe ajusta</td><td>RCPCC (dívida com banco), RCV (financiamento), DBA (busca e apreensão) e os demais nichos.</td></tr>
+      <tr><td>Desqualificado</td><td>Gabi ("Desqualificado robô") ou equipe ("Desqualificado")</td><td>Marca lead que não é caso do escritório.</td></tr>
+      <tr><td>De onde e UTMs</td><td>Automático (link rastreado de anúncio)</td><td>Origem e campanha do lead. Não apague.</td></tr>
+      <tr><td>Observações</td><td>Equipe</td><td>Anotações da equipe. A Gabi nunca escreve aqui.</td></tr>
+      <tr><td>Venda (valor)</td><td>Closer</td><td>Valor do contrato. Preencha antes da Venda ganha.</td></tr>
+      <tr><td>Resposta IA (agente)</td><td>Sistema</td><td>Campo técnico do envio da Gabi. <b>Não edite.</b></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Etiquetas</h3>
+  <table>
+    <thead><tr><th style="width: 24%">Etiqueta</th><th style="width: 26%">Quem põe</th><th>Significa</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag">ia-gabi</span></td><td>Equipe técnica (fase de teste)</td><td>A Gabi atende este lead. Na fase de teste, só leads com ela são atendidos.</td></tr>
+      <tr><td><span class="tag">atendimento-humano</span></td><td>Equipe</td><td>A Gabi não responde este lead.</td></tr>
+      <tr><td><span class="tag">Follow up</span></td><td>Kommo, ao entrar em Follow-up</td><td>Lead em retomada.</td></tr>
+      <tr><td><span class="tag">reuniao-realizada</span></td><td>Automação</td><td>Reunião feita; o card foi para o CLOSER.</td></tr>
+      <tr><td><span class="tag">contrato-pago</span></td><td>Automação</td><td>Contrato pago; o card foi para o Jurídico.</td></tr>
+      <tr><td><span class="tag">Desqualificado</span></td><td>Kommo, na venda perdida</td><td>Não fechou no CLOSER.</td></tr>
+    </tbody>
+  </table>
+
+
+</section>
+
+<!-- ═════════════ 07 · REGRAS DE OURO ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Regras de ouro</div><h2>O que sempre fazer e o que nunca fazer</h2></div><div class="num">07</div></div>
+  <h3 style="margin-top: 0">Sempre</h3>
+  <div class="regra"><div class="n">1</div><div><b>Toda reunião tem desfecho no mesmo dia.</b> Ganho (aconteceu), No-show (faltou) ou perdido. Hoje há cerca de 490 cards em Reunião agendada sem mudança há mais de uma semana: reuniões que já passaram e ficaram sem desfecho. Isso esconde a taxa real de comparecimento.</div></div>
+  <div class="regra"><div class="n">2</div><div><b>Leia a nota da Gabi antes de falar com o lead.</b> Ela já fez as perguntas: não pergunte de novo o que está lá.</div></div>
+  <div class="regra"><div class="n">3</div><div><b>Marcou fora do Calendly, preencha o campo Reunião.</b> Sem a data, o lembrete não sai e o lead pode faltar.</div></div>
+  <div class="regra"><div class="n">4</div><div><b>Preencha o valor antes da Venda ganha.</b> É o valor que vai na nota do Jurídico e nos relatórios.</div></div>
+  <div class="regra"><div class="n">5</div><div><b>Trate as tarefas do dia.</b> "Assumir o atendimento" e "Reagendar" esfriam rápido. A URGENTE tem 15 minutos.</div></div>
+  <div class="regra"><div class="n">6</div><div><b>Sempre escolha o motivo de perda.</b> É ele que mostra onde o funil vaza.</div></div>
+
+  <h3>Nunca</h3>
+  <div class="regra nao"><div class="n">✕</div><div><b>Usar ganho para arquivar.</b> Ganho no SDR manda o card para o CLOSER. Para arquivar, perdido com motivo.</div></div>
+  <div class="regra nao"><div class="n">✕</div><div><b>Arrastar dezenas de cards de uma vez para ganho ou Venda ganha.</b> As automações pausam e os cards ficam parados.</div></div>
+  <div class="regra nao"><div class="n">✕</div><div><b>Pedir à Gabi que mande dados de pagamento.</b> PIX, boleto e conta saem só da equipe.</div></div>
+  <div class="regra nao"><div class="n">✕</div><div><b>Editar "Resposta IA (agente)" ou apagar De onde e UTMs.</b> O primeiro é do envio da Gabi; os outros dizem de qual anúncio o lead veio.</div></div>
+  <div class="regra nao"><div class="n">✕</div><div><b>Criar, renomear ou apagar etapa por conta própria.</b> As automações e a Gabi usam o código de cada etapa. Peça à Control Gestão, que ajusta e confere antes.</div></div>
+  <div class="regra nao"><div class="n">✕</div><div><b>Mandar mensagem livre a quem não fala há mais de 24 horas.</b> O WhatsApp oficial só entrega modelo aprovado fora dessa janela.</div></div>
+</section>
+
+<!-- ═════════════ 08 · ROTINA E HOJE ═════════════ -->
+<section class="pagina">
+  <div class="sec-head"><div><div class="eyebrow">Onde estamos</div><h2>Situação de hoje</h2></div><div class="num">08</div></div>
+  <h3 style="margin-top: 0">Em 15 de outubro de 2026</h3>
+  <table>
+    <thead><tr><th style="width: 36%">Peça</th><th style="width: 16%">Estado</th><th>Observação</th></tr></thead>
+    <tbody>
+      <tr><td>Funil enxuto SDR e CLOSER</td><td style="color: var(--ok)">valendo</td><td>Etapas antigas apagadas em 14/10. Os leads do antigo "dia" estão em Follow-up.</td></tr>
+      <tr><td>Ganho no SDR → Proposta</td><td style="color: var(--ok)">valendo</td><td>Desde 14/10.</td></tr>
+      <tr><td>Venda ganha → Jurídico</td><td style="color: var(--ok)">valendo</td><td>Desde 14/10.</td></tr>
+      <tr><td>Calendly atualizando o card</td><td style="color: var(--ok)">valendo</td><td>Marcou, cancelou e remarcou chegam sozinhos ao card.</td></tr>
+      <tr><td>Lembretes 24 h e 2 h</td><td style="color: var(--warn)">em transição</td><td>Saem pelos robôs do Kommo enquanto a versão nova é conferida em paralelo. Na conferência de 13 e 14/10, o de 2 h não saiu em duas reuniões: no dia, confirme a presença por mensagem.</td></tr>
+      <tr><td>Gabi no WhatsApp</td><td style="color: var(--warn)">em preparação</td><td>Entra em fase de teste só com leads de etiqueta <span class="tag">ia-gabi</span> e depois é ampliada aos poucos. Até lá, o atendimento segue como hoje.</td></tr>
+      <tr><td>Origem pelos links de anúncio</td><td style="color: var(--warn)">em preparação</td><td>Começa quando os links entrarem nos anúncios.</td></tr>
+      <tr><td>Mensagens automáticas do CLOSER</td><td style="color: var(--muted)">desligadas</td><td>O closer envia pelas respostas prontas.</td></tr>
+    </tbody>
+  </table>
+  <div class="caixa dica" style="margin-top: 10pt"><p><b>Onde acompanhar:</b> o painel Central de IA (central-telesstanquevicz.vercel.app) mostra o funil, a agenda, as automações e os cards parados, sem mexer no Kommo. <b>Dúvida ou algo fora do lugar?</b> Fale com a Control Gestão: toda automação e toda resposta da Gabi ficam registradas com hora e motivo.</p></div>
+  <div class="rodape">Manual do funil SDR e CLOSER · Teles &amp; Stanquevicz Advogados · Preparado pela Control Gestão em 15/10/2026. Vale para o funil enxuto de 14/10/2026; se as etapas mudarem, este manual é atualizado.</div>
+</section>
+
+</body>
+</html>
