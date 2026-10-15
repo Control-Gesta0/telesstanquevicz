@@ -70,7 +70,7 @@ async function main() {
   const t1 = decidirTriagem({}, { assunto: 'indefinido', nome: '' })
   eq('abertura sem nome pergunta nome e assunto', t1.tipo === 'mensagem' && t1.texto, A.semNome)
   const t2 = decidirTriagem({}, { assunto: 'indefinido', nome: 'marcos' })
-  eq('abertura com nome usa o nome', t2.tipo === 'mensagem' && t2.texto, 'Oi, Marcos! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.')
+  eq('abertura com nome usa o nome', t2.tipo === 'mensagem' && t2.texto, 'Oi, Marcos! Aqui é a Stela, da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.')
   eq('abertura grava o nome dito', t2.tipo === 'mensagem' && t2.patch.respostas?.nome, 'marcos')
   const t3 = decidirTriagem({ aberturaEnviada: true, tentativasTriagem: 1 }, { assunto: 'indefinido', nome: 'Ana Paula' })
   eq('depois da abertura, nome novo: "Prazer" e pergunta aberta', t3.tipo === 'mensagem' && t3.texto, 'Prazer, Ana. Me conta um pouco do seu caso: o que está acontecendo?')

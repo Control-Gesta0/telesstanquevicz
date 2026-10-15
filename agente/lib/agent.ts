@@ -93,7 +93,7 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
         return
       }
       if (rota.tipo === 'encerrar') {
-        // Assunto que não é bancário: recusa com respeito e encerra (Desqualificado robô, sem tarefa)
+        // Assunto que parece não bancário: não recusa; etiqueta "Conferir escopo" e tarefa para a equipe conferir
         const geral = portaById(CRM_MAP.abertura.portaOutros)!
         await patchState(leadId, { ...rota.patch, porta: geral.id, portaEm: target.ts })
         const ctxFora: ToolCtx = { port: kommoPort(leadId), porta: geral, gateTag: CONFIG.gateTag, leadText: textoDoLead, lastLeadText: textoTurno, lastAgentText: '' }

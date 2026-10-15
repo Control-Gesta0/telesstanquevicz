@@ -3,7 +3,7 @@ import { parseNumeroBR } from './guards'
 
 /**
  * Quem recebe o lead qualificado — regra do escritório (07/10/2026), em CÓDIGO:
- *   dívida abaixo de R$ 50 mil → Guilherme ou Carla, alternando
+ *   dívida abaixo de R$ 50 mil → CLOSER 1 ou CLOSER 2, alternando
  *   R$ 50 mil ou mais, ou valor desconhecido → SDR, que aquece antes da reunião
  * Arquivo puro (sem rede) para rodar em `npm test`.
  */
@@ -50,14 +50,14 @@ export function valorDoCaso(portaId: string, respostas: Record<string, string> =
 
 export interface Escolha { userId: number; nome: string; regra: string }
 
-/** `vez` é um contador crescente (Redis INCR) para alternar Guilherme e Carla. */
+/** `vez` é um contador crescente (Redis INCR) para alternar CLOSER 1 e CLOSER 2. */
 export function escolherResponsavel(valor: number | null, vez: number): Escolha {
   const r = CRM_MAP.negocio.responsaveis
   const fmt = (n: number) => `R$ ${Math.round(n).toLocaleString('pt-BR')}`
   if (valor === null) return { userId: r.acima, nome: r.nomes[r.acima], regra: 'valor da dívida não informado → SDR aquece antes da reunião' }
   if (valor >= r.limite) return { userId: r.acima, nome: r.nomes[r.acima], regra: `dívida de ${fmt(valor)} (≥ ${fmt(r.limite)}) → SDR aquece antes da reunião` }
   const userId = r.abaixo[Math.abs(vez) % r.abaixo.length]
-  return { userId, nome: r.nomes[userId], regra: `dívida de ${fmt(valor)} (< ${fmt(r.limite)}) → rodízio Guilherme/Carla` }
+  return { userId, nome: r.nomes[userId], regra: `dívida de ${fmt(valor)} (< ${fmt(r.limite)}) → rodízio CLOSER 1/CLOSER 2` }
 }
 
 /**

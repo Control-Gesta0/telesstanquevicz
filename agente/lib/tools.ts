@@ -221,12 +221,29 @@ export function describeOpen(porta: Porta, s: Snapshot, state: LeadState = {}): 
     const falta = s.abertos.filter(c => c.key === 'nomeCompleto' || c.key === 'email').map(c => c.name)
     if (state.horarioEscolhido) return falta.length ? `Horário escolhido (${state.horarioEscolhido.label}), ainda não reservado. Peça agora: ${falta[0]}. Depois chame agendar_reuniao.` : `Tudo pronto: chame agendar_reuniao para reservar ${state.horarioEscolhido.label}.`
     if (state.horariosOferecidos?.length) return `Horários já oferecidos: ${state.horariosOferecidos.map(h => h.label).join(' · ')}. Quando o lead escolher, chame agendar_reuniao. Se ele pedir outro dia ou período, chame ver_horarios de novo.`
-    return `Qualificação completa. Próximo passo: explique em uma frase que a reunião é sem custo, por Google Meet, com o Dr. Carlos Eduardo, chame ver_horarios e ofereça os horários. Não peça nome nem e-mail antes de o lead escolher o horário.${porta.avisoAoAgendar ? ` ${porta.avisoAoAgendar}` : ''}`
+    return `Qualificação completa. Próximo passo: explique em uma frase que a reunião é sem custo, por Google Meet, com um dos nossos especialistas, chame ver_horarios e ofereça os horários. Não peça nome nem e-mail antes de o lead escolher o horário.${porta.avisoAoAgendar ? ` ${porta.avisoAoAgendar}` : ''}`
   }
+  const pronto = porta.conferenciaAntesDaReuniao && porta.obrigatorios.every(key => state.respostas?.[key] || (state.semResposta || []).includes(key))
+  if (pronto || (porta.conferenciaAntesDaReuniao && !s.abertos.length)) return 'Roteiro COMPLETO. Chame finalizar_atendimento(qualificado) e, depois, diga em uma frase que vai passar para a equipe consultar o processo e que em seguida chamam por aqui para confirmar a reunião com um dos nossos especialistas. Não ofereça horário.'
   if (!s.abertos.length) return 'Roteiro COMPLETO — faça o fechamento previsto no prompt e chame finalizar_atendimento(qualificado).'
   const prox = s.abertos[0]
   const opc = prox.options ? ` (grave com uma destas opções EXATAS: ${prox.options.map(o => o.value).join(' | ')})` : ''
   return `Faltam ${s.abertos.length}. Próximo assunto do roteiro → ${prox.name}${prox.pergunta ? ` ("${prox.pergunta}")` : ''}${opc}. Se o lead já respondeu algo em aberto, grave com salvar_respostas ANTES de perguntar.`
+}
+
+/**
+ * O texto parece um nome de pessoa? (ex.: "Maria Aparecida Souza", "meu nome é João Lima").
+ * Devolve o nome limpo, ou '' se não parece. `minPalavras` = 2 para nome completo.
+ */
+export function pareceNome(texto: string, minPalavras = 1): string {
+  const limpo = (texto || '').trim()
+    .replace(/^(meu nome( completo)? (é|e)|me chamo|sou (o|a)|aqui (é|e) (o|a)|é|e)\s+/i, '')
+    .replace(/[.!,;]+$/, '').replace(/\s+/g, ' ').trim()
+  if (!/^[\p{L}' .-]{2,80}$/u.test(limpo)) return ''
+  const palavras = limpo.split(' ').filter(w => w.length > 1 || /^[a-z]$/i.test(w))
+  if (palavras.length < minPalavras || palavras.length > 6) return ''
+  if (/\b(n[aã]o|sim|ok|oi|ol[aá]|bom dia|boa tarde|boa noite|obrigad[oa]|pode|quero|tenho|meu|minha|carro|d[ií]vida|banco|parcela|segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo|manh[aã]|tarde|noite|hora|hor[aá]rio|amanh[aã]|hoje|primeir[oa]|segund[oa]|[uú]ltim[oa]|esse|essa|melhor)\b/i.test(limpo)) return ''
+  return limpo
 }
 
 // ---------- Execução ----------
@@ -256,7 +273,7 @@ function coerce(campo: Campo, raw: string, atual?: number[]): { values: KommoFie
 /**
  * Regras do escritório ao finalizar (em CÓDIGO, nunca pelo modelo):
  *  qualificado → AGENDAR REUNIÃO · responsável pelo valor da dívida · Nichos · tarefa
- *  fora_do_escopo → Desqualificado = "Desqualificado robô" (fechar como perdido é do time)
+ *  fora_do_escopo → etiqueta "Conferir escopo" e tarefa: a equipe confere antes de dispensar
  *  demais (menos desistiu) → tarefa para o humano padrão assumir
  * Falha numa escrita não derruba a resposta ao lead: vira linha ⚠️ na nota.
  */
@@ -272,7 +289,18 @@ async function efeitosDoNegocio(ctx: ToolCtx, motivo: string, urgente: boolean):
   const noFunil = lead.pipelineId === neg.pipelineId && !CRM_MAP.etapasProtegidas.includes(lead.statusId)
   const agoraS = Math.floor(Date.now() / 1000)
 
-  if (motivo === 'qualificado') {
+  if (motivo === 'qualificado' && porta.conferenciaAntesDaReuniao) {
+    // Sem reunião ainda: a equipe confere (ex.: processo e tese) e confirma com o lead
+    const conf = porta.conferenciaAntesDaReuniao
+    if (porta.nichoEnumId) await tenta('gravar Nichos', () => port.writeFields([{ field_id: neg.nicho.fieldId, values: [{ enum_id: porta.nichoEnumId }] }]))
+    if (noFunil) {
+      if (lead.statusId !== CRM_MAP.automacoes.sdr.retorno.para) await tenta('mover etapa', () => port.moveStage(CRM_MAP.automacoes.sdr.retorno.para, neg.pipelineId))
+      await tenta('trocar responsável', () => port.setResponsible(neg.responsavelPadrao))
+      linhas.push(`Etapa: Em atendimento · Responsável: ${neg.responsaveis.nomes[neg.responsavelPadrao] || neg.responsavelPadrao} (conferência antes da reunião)`)
+    }
+    await tenta('criar tarefa', () => port.addTask(conf.tarefa, neg.responsavelPadrao, agoraS + conf.prazoMin * 60, neg.tarefaTipo))
+    linhas.push(`Tarefa: ${conf.tarefa}`)
+  } else if (motivo === 'qualificado') {
     const formulario = neg.formulario.campos.map(id => lead.fields[id]?.value)
     const valor = valorDoCaso(porta.id, state.respostas, formulario)
     const vez = valor !== null && valor < neg.responsaveis.limite ? await port.nextTurn() : 0
@@ -295,10 +323,11 @@ async function efeitosDoNegocio(ctx: ToolCtx, motivo: string, urgente: boolean):
     linhas.push(`Tarefa: ${tarefa}`)
     if (state.reuniao) linhas.push(`Reunião: ${state.reuniao.label}${state.reuniao.joinUrl ? ` · ${state.reuniao.joinUrl}` : ''}`)
   } else if (motivo === 'fora_do_escopo') {
-    if (!CRM_MAP.camposProibidos.includes(neg.desqualificado.fieldId)) {
-      await tenta('marcar Desqualificado', () => port.writeFields([{ field_id: neg.desqualificado.fieldId, values: [{ enum_id: neg.desqualificado.enumRobo }] }]))
-    }
-    linhas.push(`Desqualificado: ${neg.desqualificado.valorRobo} (fechar como perdido fica com o time)`)
+    // Não dispensa sozinha: etiqueta e tarefa para a equipe conferir (Desqualificado só depois, pela equipe)
+    const c = neg.conferirEscopo
+    await tenta('pôr etiqueta', () => port.addTags([c.tag]))
+    await tenta('criar tarefa', () => port.addTask(c.tarefa, neg.responsavelPadrao, agoraS + c.prazoMin * 60, neg.tarefaTipo))
+    linhas.push(`Etiqueta: ${c.tag} · Tarefa: ${c.tarefa}`)
   } else if (motivo !== 'desistiu') {
     const tarefa = `Assumir o atendimento: ${motivo.replace(/_/g, ' ')}${urgente ? ' (URGENTE)' : ''}.`
     await tenta('criar tarefa', () => port.addTask(tarefa, neg.responsavelPadrao, agoraS + (urgente ? 900 : 1800), neg.tarefaTipo))
@@ -320,7 +349,7 @@ export async function aplicarFinalizacao(ctx: ToolCtx, motivo: string, resumoRaw
     const linhas = snapshot(porta, state).preenchidos.map(p => `• ${p.campo.name}: ${p.valor}`)
     const quem = state.respondenteNome ? `\nQuem conversou: ${state.respondenteNome} (${state.respondenteRelacao || '—'})` : ''
     const outro = state.outroAssunto ? `\nOutro assunto citado: ${state.outroAssunto}` : ''
-    await port.addNote(`🤖 Gabi (IA) finalizou: ${porta.label} · ${motivo}${urgente ? ' · URGENTE' : ''}\n\n${resumo}${quem}${outro}\n\n${linhas.join('\n')}${negocio.length ? `\n\n${negocio.join('\n')}` : ''}`)
+    await port.addNote(`🤖 Stela (IA) finalizou: ${porta.label} · ${motivo}${urgente ? ' · URGENTE' : ''}\n\n${resumo}${quem}${outro}\n\n${linhas.join('\n')}${negocio.length ? `\n\n${negocio.join('\n')}` : ''}`)
   }
   await port.patchState({ finalizado: { motivo, resumo, em: new Date().toISOString() } })
 }
@@ -352,6 +381,8 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           if (!evidenceFound(ev, ctx.leadText)) { erros.push(`${campo.name}: a evidência "${ev}" não aparece no que o lead escreveu — NÃO invente; pergunte`); continue }
           if (campo.sinal && !campo.sinal.test(ev) && !naoSei && !respondeuPergunta) { erros.push(`${campo.name}: a evidência "${ev}" não fala deste assunto — NÃO invente; pergunte`); continue }
           if (/n[aã]o sabe/i.test(valor) && !naoSei) { erros.push(`${campo.name}: "Não sabe" só quando o lead disser que não sabe`); continue }
+          // "não informado" = o lead ainda não respondeu: não se grava, pergunta-se (eval de 15/10/2026)
+          if (/n[aã]o (informad|mencionad|especificad|dit[oa]|identificad|citad|respondid)|desconhecid|indefinid|^\s*(-|—|n\/?a|nenhum)\s*$/i.test(valor) && !naoSei) { erros.push(`${campo.name}: o lead ainda não respondeu isso — NÃO grave; pergunte`); continue }
           if (naoSei && campo.type !== 'select' && campo.type !== 'multiselect') {
             semResposta.add(key)
             salvos.push(`${campo.name} = (não sabe)`)
@@ -359,6 +390,15 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           }
           // Texto: guarda as PALAVRAS DO LEAD. Se o modelo resumiu ("Outra pessoa da família"), vale a evidência literal.
           // Texto guarda as PALAVRAS DO LEAD (a evidência literal), nunca o resumo do modelo
+          if (key === 'nome' || key === 'nomeCompleto') {
+            const min = key === 'nomeCompleto' ? 2 : 1
+            // a evidência inteira pode ser uma frase ("sou a Ana Souza, tenho dívida…"): vale o valor, se ele estiver dentro dela
+            const n = pareceNome(ev, min) || (valor && ev.toLowerCase().includes(valor.toLowerCase()) ? pareceNome(valor, min) : '')
+            if (!n) { erros.push(`${campo.name}: "${ev}" não é um nome de pessoa — pergunte o nome`); continue }
+            respostas[key] = n
+            salvos.push(`${campo.name} = ${n}`)
+            continue
+          }
           const bruto = campo.type === 'text' || campo.type === 'textarea' ? ev : valor
           const c = coerce(campo, bruto, lead.fields[campo.id]?.enumIds)
           if ('error' in c) { erros.push(c.error); continue }
@@ -385,7 +425,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         const citado = `${input.assunto || ''} ${input.evidencia || ''}`
         if (!evidenceFound(String(input.evidencia || ''), ctx.leadText)) return err('Não registrado: o lead não citou esse assunto.')
         // Só vale assunto de OUTRA área atendida (sinal de outra porta). Renda, saúde, dúvida do roteiro NÃO são outro assunto.
-        if (!classificar(citado).some(p => p.id !== porta.id)) return err('Não registrado: não é outro caso bancário. Se o assunto da pessoa não é bancário (trabalhista, família, INSS, aluguel...), recuse com respeito e chame finalizar_atendimento(fora_do_escopo). Se faz parte do caso atual, responda dentro do roteiro.')
+        if (!classificar(citado).some(p => p.id !== porta.id)) return err('Não registrado: não é outro caso bancário. Dúvida sobre honorários, sobre a reunião ou sobre o caso atual: responda dentro do roteiro. Só se o assunto da pessoa parecer não ser bancário (trabalhista, família, INSS, aluguel...), chame finalizar_atendimento(fora_do_escopo) e diga que a equipe vai dar uma olhada, sem recusar.')
         await port.patchState({ outroAssunto: String(input.assunto || '').slice(0, 200) })
         return ok('Registrado para a equipe. Diga ao lead que a equipe também verá esse assunto e SIGA o roteiro atual.')
       }
@@ -398,7 +438,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           // "Não sabe" só vale se foi registrado por salvar_respostas com a fala do lead — nunca declarado na finalização
           const sem = new Set(state.semResposta || [])
           const faltando = porta.obrigatorios.filter(key => !state.respostas?.[key] && !(sem.has(key) && !campoByKey(key)?.options))
-          if (faltando.length) return err(`Ainda falta: ${faltando.map(key => campoByKey(key)?.name || key).join('; ')}. ${describeOpen(porta, snapshot(porta, state), state)} Se o lead disse que não sabe, grave com salvar_respostas usando a fala dele como evidência.`)
+          if (faltando.length) return err(`NÃO encerre e não diga que vai passar para a equipe. Ainda falta: ${faltando.map(key => campoByKey(key)?.name || key).join('; ')}. ${describeOpen(porta, snapshot(porta, state), state)} Se o lead disse que não sabe, grave com salvar_respostas usando a fala dele como evidência.`)
         } else {
           const ev = String(input.evidencia || '')
           const sinal = SINAL_MOTIVO[motivo]
@@ -441,8 +481,14 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         if (ev && evidenceFound(ev, ctx.leadText)) escolhido = casarEscolha(ev, oferecidos) || escolhido
         if (!escolhido) return err(`Não deu para saber qual horário o lead escolheu. Pergunte de novo citando as opções: ${oferecidos.map(o => o.label).join(' · ')}.`)
         await port.patchState({ horarioEscolhido: escolhido })
-        const nome = state.respostas?.nomeCompleto || ''
-        const email = (state.respostas?.email || '').match(/\S+@\S+\.\S+/)?.[0]?.replace(/[.,;]+$/, '') || ''
+        // O lead acabou de mandar o nome completo ou o e-mail e o modelo não gravou: aproveita, sem inventar
+        const respostas = { ...(state.respostas || {}) }
+        if (!respostas.nomeCompleto && pareceNome(ctx.lastLeadText, 2)) respostas.nomeCompleto = pareceNome(ctx.lastLeadText, 2)
+        const emailLead = ctx.lastLeadText.match(/\S+@\S+\.\S+/)?.[0]?.replace(/[.,;]+$/, '')
+        if (!respostas.email && emailLead) respostas.email = emailLead
+        if (respostas.nomeCompleto !== state.respostas?.nomeCompleto || respostas.email !== state.respostas?.email) await port.patchState({ respostas })
+        const nome = respostas.nomeCompleto || ''
+        const email = (respostas.email || '').match(/\S+@\S+\.\S+/)?.[0]?.replace(/[.,;]+$/, '') || ''
         const falta = [!nome ? 'nome completo' : '', !email ? 'e-mail' : ''].filter(Boolean)
         if (falta.length) return ok(`Horário guardado (${escolhido.label}), ainda NÃO reservado. Peça agora: ${falta[0]}. Grave com salvar_respostas e chame agendar_reuniao de novo.`)
         const motivo = `${porta.label}${input.observacao ? ` · ${String(input.observacao).slice(0, 120)}` : ''}`
@@ -456,7 +502,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           if (reserva.joinUrl) writes.push({ field_id: neg.reuniao.linkFieldId, values: [{ value: reserva.joinUrl }] })
           await port.writeFields(writes).catch(e => console.error('[agenda] falha ao gravar a data no card:', e))
           await aplicarFinalizacao(ctx, 'qualificado', String(input.resumo || ''))
-          return ok(`Reunião MARCADA na agenda: ${reserva.label}, por Google Meet, com o Dr. Carlos Eduardo. Confirme ao lead o dia e a hora, diga que o link chega no e-mail ${email} e que dá para entrar com a câmera fechada. Encerre sem pergunta.`, { handoff: true })
+          return ok(`Reunião MARCADA na agenda: ${reserva.label}, por Google Meet, com um dos nossos especialistas. Confirme ao lead o dia e a hora, diga que o link chega no e-mail ${email} e que dá para entrar com a câmera fechada. Encerre sem pergunta.`, { handoff: true })
         } catch (e) {
           if (e instanceof CalendlyError && e.ocupado) {
             await port.patchState({ horariosOferecidos: oferecidos.filter(o => o.iso !== escolhido!.iso), horarioEscolhido: undefined })

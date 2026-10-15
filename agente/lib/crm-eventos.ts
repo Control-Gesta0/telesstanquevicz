@@ -1,6 +1,6 @@
 import { CRM_MAP } from './crm-map'
 import { logExec } from './execlog'
-import { addLeadNote, addLeadTags, getLead, leadTags, setLeadTags, updateLeadStatus } from './kommo'
+import { addLeadNote, addLeadTags, addLeadTask, getLead, leadTags, setLeadTags, updateLeadResponsible, updateLeadStatus, type KommoLead } from './kommo'
 import { marcarEntradaFollowUp } from './funil-sdr'
 import { k, redis } from './redis'
 
@@ -69,6 +69,11 @@ export async function executar(m: MudancaEtapa): Promise<string> {
   if ((await redis.set(k('auto', nome, m.leadId, m.oldStatusId), '1', { nx: true, ex: 3600 })) !== 'OK') return 'duplicado'
   // Entrada em Follow-up começa a contar os 5 dias (antes do teto de etiquetas: em massa também conta)
   if (nome === 'etiquetaFollowUp') await marcarEntradaFollowUp(m.leadId).catch(e => console.error('[fu] entrada não registrada:', e))
+  if (nome === 'etiquetaVendaPerdida') {
+    // Motivo "Retomar depois": volta para o Follow-up do SDR em vez de ganhar Desqualificado
+    const lead = await getLead(m.leadId)
+    if (lead.loss_reason_id === CRM_MAP.automacoes.retomarDepois.motivoPerda) return retomarDepois(m, lead)
+  }
   if (nome === 'etiquetaFollowUp' || nome === 'etiquetaVendaPerdida') return etiquetar(nome, m)
 
   const a = CRM_MAP.automacoes[nome]
@@ -99,4 +104,21 @@ async function etiquetar(nome: 'etiquetaFollowUp' | 'etiquetaVendaPerdida', m: M
   await setLeadTags(m.leadId, [...leadTags(lead), e.tag])
   await redis.incr(k('auto', nome, 'dia', new Date().toISOString().slice(0, 10))).catch(() => {})
   return `etiqueta ${e.tag}`
+}
+
+/** CLOSER › Venda perdida com motivo "Retomar depois" → SDR › Follow-up, responsável SDR, tarefa e nota. */
+async function retomarDepois(m: MudancaEtapa, lead: KommoLead): Promise<string> {
+  const a = CRM_MAP.automacoes.retomarDepois
+  if (await emMassa('retomarDepois', m.leadId, CRM_MAP.automacoes.limiteEmMassa, `Os cards desta janela ficam em ${a.de.name}: mova à mão os que forem de verdade.`)) return 'pausado (massa)'
+  if (lead.pipeline_id !== a.de.pipelineId || lead.status_id !== a.de.statusId) return 'fora da etapa'
+  await updateLeadStatus(m.leadId, a.para.statusId, a.para.pipelineId)
+  await updateLeadResponsible(m.leadId, a.responsavel).catch(e => console.error('[retomar] responsável falhou:', e))
+  if (!leadTags(lead).some(t => t.toLowerCase() === a.tag.toLowerCase())) await addLeadTags(m.leadId, [a.tag]).catch(e => console.error('[retomar] tag falhou:', e))
+  await marcarEntradaFollowUp(m.leadId).catch(e => console.error('[retomar] entrada não registrada:', e))
+  const agoraS = Math.floor(Date.now() / 1000)
+  await addLeadTask(m.leadId, a.tarefa, a.responsavel, agoraS + a.prazoHoras * 3600).catch(e => console.error('[retomar] tarefa falhou:', e))
+  const quando = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' })
+  await addLeadNote(m.leadId, a.nota.replace('{quando}', quando)).catch(e => console.error('[retomar] nota falhou:', e))
+  await logExec({ tipo: 'automacao', leadId: m.leadId, nome: lead.name, detalhe: `retomarDepois → ${a.para.name}` })
+  return `movido para ${a.para.name}`
 }

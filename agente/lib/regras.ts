@@ -20,7 +20,7 @@ export const REGRAS_CLIENTE: Array<{ regra: string; re: RegExp }> = [
  *  - valor em R$ que o lead não disse (honorário ou desconto inventado);
  *  - "está marcado" sem a reserva confirmada pelo Calendly.
  */
-export function checarContexto(text: string, ctx: { leadText: string; reuniaoMarcada: boolean }): Array<{ regra: string; trecho: string }> {
+export function checarContexto(text: string, ctx: { leadText: string; reuniaoMarcada: boolean; encerrado?: boolean }): Array<{ regra: string; trecho: string }> {
   const out: Array<{ regra: string; trecho: string }> = []
   const digitosLead = new Set((ctx.leadText.match(/\d+/g) || []).map(n => n.replace(/^0+/, '')))
   for (const m of text.matchAll(/r\$\s?([\d.,]+)|\b(\d+(?:[.,]\d+)?)\s?mil\b/gi)) {
@@ -32,6 +32,11 @@ export function checarContexto(text: string, ctx: { leadText: string; reuniaoMar
     // "para deixar a reunião marcada" é legítimo e não pode cair na trava.
     const marcado = text.match(/\b(est[aá]|ficou|foi|j[aá] est[aá])\s+(marcad[oa]|agendad[oa]|reservad[oa]|confirmad[oa])\b|\b(j[aá] )?(deixei|marquei|agendei|reservei)\b(?![^.?!]*\?)/i)
     if (marcado) out.push({ regra: 'disse que marcou sem reserva', trecho: marcado[0] })
+  }
+  if (ctx.encerrado === false) {
+    // "Vou passar para a equipe" só vale com o atendimento encerrado (tarefa criada). Sem isso, é promessa falsa.
+    const passou = text.match(/\b(vou|j[aá]) pass(ar|ei) (o seu caso |o caso |seu caso )?(para|pra|à|a) (a )?(nossa )?equipe\b/i)
+    if (passou) out.push({ regra: 'disse que passou para a equipe sem encerrar', trecho: passou[0] })
   }
   return out
 }

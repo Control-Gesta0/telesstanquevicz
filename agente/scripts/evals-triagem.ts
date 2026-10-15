@@ -33,7 +33,7 @@ const FLUXOS: Array<{ id: string; msgs: string[]; checa: (respostas: string[], e
       /^prazer, marcos/i.test(r[1]) ? '' : '2ª resposta deveria cumprimentar o Marcos e perguntar do caso',
       e.porta === 'rcv' ? '' : `deveria entender financiamento de veículo (veio ${e.porta})`,
       !/com quem eu falo/i.test(r[2]) ? '' : '3ª resposta não deveria perguntar o nome de novo',
-      !/aqui é a gabi/i.test(r[2]) ? '' : '3ª resposta não deveria se apresentar de novo',
+      !/aqui é a stela/i.test(r[2]) ? '' : '3ª resposta não deveria se apresentar de novo',
     ],
   },
   {
@@ -51,18 +51,18 @@ const FLUXOS: Array<{ id: string; msgs: string[]; checa: (respostas: string[], e
     msgs: ['Olá! Vi o anúncio e preciso de ajuda com a busca e apreensão do meu veículo.'],
     checa: (r, e) => [
       e.porta === 'dba' ? '' : `deveria entender busca e apreensão (veio ${e.porta})`,
-      /gabi/i.test(r[0]) && /com quem eu falo/i.test(r[0]) ? '' : 'deveria se apresentar e perguntar o nome',
+      /stela/i.test(r[0]) && /com quem eu falo/i.test(r[0]) ? '' : 'deveria se apresentar e perguntar o nome',
     ],
   },
   {
     id: 'assunto de fora',
     msgs: ['oi, meu nome é Paulo, é sobre pensão alimentícia'],
-    checa: (r, e) => [e.state?.finalizado?.motivo === 'fora_do_escopo' ? '' : `deveria encerrar como fora do escopo (veio ${e.state?.finalizado?.motivo})`, /fora do que o escrit[oó]rio atende/i.test(r[0]) ? '' : 'deveria recusar com respeito', /^Oi, Paulo! Aqui é a Gabi/.test(r[0]) ? '' : 'deveria se apresentar e usar o nome'],
+    checa: (r, e) => [e.state?.finalizado?.motivo === 'fora_do_escopo' ? '' : `deveria encerrar como fora do escopo (veio ${e.state?.finalizado?.motivo})`, /equipe dar uma olhada/i.test(r[0]) && !/fora do que o escrit/i.test(r[0]) ? '' : 'deveria passar para a equipe conferir, sem recusar', /^Oi, Paulo! Aqui é a Stela/.test(r[0]) ? '' : 'deveria se apresentar e usar o nome'],
   },
   {
     id: 'já é cliente',
     msgs: ['oi, já sou cliente de vocês e queria saber do meu processo'],
-    checa: (r, e) => [e.state?.finalizado?.motivo === 'porta_sem_agente' ? '' : `deveria passar para a equipe (veio ${e.state?.finalizado?.motivo})`, /aqui é a gabi/i.test(r[0]) ? '' : 'deveria se apresentar na primeira mensagem'],
+    checa: (r, e) => [e.state?.finalizado?.motivo === 'porta_sem_agente' ? '' : `deveria passar para a equipe (veio ${e.state?.finalizado?.motivo})`, /aqui é a stela/i.test(r[0]) ? '' : 'deveria se apresentar na primeira mensagem'],
   },
 ]
 
@@ -93,7 +93,7 @@ async function main() {
     const erros = [...f.checa(respostas, { porta: w.porta, state: w.state }), ...respostas.map((x, i) => /^\s*\d\s*[.)-]\s/m.test(x) ? `resposta ${i + 1} tem lista numerada` : '')].filter(Boolean)
     if (erros.length) falhas++
     console.log(`${erros.length ? '❌' : '✅'} ${f.id}`)
-    f.msgs.forEach((m, i) => console.log(`   LEAD: ${m}\n   GABI: ${respostas[i]}`))
+    f.msgs.forEach((m, i) => console.log(`   LEAD: ${m}\n   STELA: ${respostas[i]}`))
     for (const e of erros) console.log(`   ⛔ ${e}`)
   }
   console.log(falhas ? `\n❌ ${falhas} reprovado(s)` : '\n✅ Primeiro contato aprovado')

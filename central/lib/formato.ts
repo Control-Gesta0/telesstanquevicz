@@ -34,7 +34,7 @@ export function daquiA(iso: string, agora = Date.now()): string {
   return d === 1 ? 'amanhã' : `em ${d} dias`
 }
 
-/** Nome das ferramentas da Gabi em português de dono. */
+/** Nome das ferramentas da Stela em português de dono. */
 export const FERRAMENTA: Record<string, string> = {
   salvar_respostas: 'anotou respostas',
   ver_horarios: 'buscou horários',

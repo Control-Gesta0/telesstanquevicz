@@ -63,6 +63,19 @@ export function historyToMessages(history: ChatMsg[]): Msg[] {
   return turns
 }
 
+/**
+ * Busca e apreensão: a primeira resposta sobre o caso (já sabendo o nome) começa pelo acolhimento.
+ * Em código porque o modelo esquecia (eval de 15/10/2026). Uma vez só por conversa. Puro: testado.
+ */
+export function acolher(frase: string | undefined, anteriores: string[], texto: string, handoff: boolean): string {
+  if (!frase || handoff) return texto
+  const norm = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ')
+  const chave = norm(frase).trim()
+  if (norm(texto).includes(chave) || anteriores.some(t => norm(t).includes(chave))) return texto
+  if (/aqui (é|e) a stela|com quem eu falo/i.test(texto)) return texto
+  return `${frase} ${texto}`
+}
+
 export function createBrain(opts: LlmOptions) {
   const openai = new OpenAI({ apiKey: opts.apiKey })
 
@@ -96,7 +109,7 @@ export function createBrain(opts: LlmOptions) {
       `Nome no perfil do WhatsApp: ${lead.nomeContato || '(desconhecido)'} (só referência: chame a pessoa pelo nome que ELA disser)`,
       state.aberturaEnviada || !lead.primeiroContatoDaPorta
         ? 'Você já se apresentou nesta conversa: NÃO se apresente de novo e não cumprimente outra vez.'
-        : 'Esta é a sua PRIMEIRA mensagem para esta pessoa: comece com "Oi! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados." e, na mesma mensagem, siga o próximo passo.',
+        : 'Esta é a sua PRIMEIRA mensagem para esta pessoa: comece com "Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados." e, na mesma mensagem, siga o próximo passo.',
       state.respondenteNome ? `Quem está digitando: ${state.respondenteNome} (${state.respondenteRelacao || 'relação não informada'})` : 'Quem está digitando: não confirmado',
       !state.respostas?.nome ? 'PRÓXIMO PASSO OBRIGATÓRIO: você ainda não sabe o nome da pessoa. Se ela disse o nome nesta mensagem, grave com salvar_respostas e siga; se não disse, pergunte agora ("Com quem eu falo?") e deixe as perguntas do caso para a próxima mensagem, mesmo em caso urgente.' : '',
       snap.preenchidos.length ? `Já respondido (NUNCA pergunte de novo): ${snap.preenchidos.map(p => `${p.campo.name} = ${p.valor}`).join(' · ')}` : 'Já respondido: nada ainda',
@@ -126,7 +139,7 @@ export function createBrain(opts: LlmOptions) {
   async function enforce(messages: Msg[], bruto: string, usage: Usage, handoff: boolean, ctx: ToolCtx): Promise<{ text: string; guard: string[] }> {
     const lastLead = ctx.lastLeadText
     const reuniaoMarcada = !!(await ctx.port.getState()).reuniao
-    const checkReplyCtx = (t: string): Violation[] => [...checkReply(t), ...checarContexto(t, { leadText: ctx.leadText, reuniaoMarcada })]
+    const checkReplyCtx = (t: string): Violation[] => [...checkReply(t), ...checarContexto(t, { leadText: ctx.leadText, reuniaoMarcada, encerrado: handoff })]
     const text = semTravessao(bruto)
     const marca = text !== bruto ? ['travessão: trocado em código'] : []
     const v1 = checkReplyCtx(text)
@@ -148,6 +161,11 @@ export function createBrain(opts: LlmOptions) {
       text: handoff ? CRM_MAP.textoSeguroFinal : CRM_MAP.textoSeguro,
       guard: [...marca, ...v1.map(v => `${v.regra}: ${v.trecho}`), ...v2.map(v => `2ª: ${v.regra}: ${v.trecho}`), 'fallback'],
     }
+  }
+
+  function comAcolhimento(ctx: ToolCtx, turns: Msg[], texto: string, handoff: boolean): string {
+    const anteriores = turns.filter(m => m.role === 'assistant' && typeof m.content === 'string').map(m => m.content as string)
+    return acolher(ctx.porta.acolhimento, anteriores, texto, handoff)
   }
 
   async function generateReply(ctx: ToolCtx, lead: LeadContext, history: ChatMsg[]): Promise<AgentReply | null> {
@@ -181,9 +199,10 @@ export function createBrain(opts: LlmOptions) {
       }
       const text = (choice.message?.content || '').trim()
       if (!text) break
-      const safe = await enforce(messages, text, usage, handoff, ctx)
+      // Encerramento garantido ANTES das travas: a resposta já é o texto padrão daquele caso
+      // (ex.: "vou passar para a equipe dar uma olhada") e o modelo esqueceu de finalizar.
       if (!handoff) {
-        const alerta = CRM_MAP.alertas.find(a => a.finaliza && a.re.test(ctx.lastLeadText) && a.finaliza.seResposta.test(safe.text))
+        const alerta = CRM_MAP.alertas.find(a => a.finaliza && a.re.test(ctx.lastLeadText) && a.finaliza.seResposta.test(text))
         if (alerta?.finaliza) {
           await aplicarFinalizacao(ctx, alerta.finaliza.motivo, `Finalizado pelo código (alerta: ${alerta.nome}). Última mensagem do lead: ${ctx.lastLeadText.slice(0, 300)}`, alerta.finaliza.motivo === 'urgencia')
           handoff = true
@@ -191,7 +210,8 @@ export function createBrain(opts: LlmOptions) {
           toolsUsed.push(`trava:finalizou-${alerta.finaliza.motivo}`)
         }
       }
-      return { text: safe.text, toolsUsed, handoff, urgente, guard: safe.guard, usage }
+      const safe = await enforce(messages, text, usage, handoff, ctx)
+      return { text: comAcolhimento(ctx, turns, safe.text, handoff), toolsUsed, handoff, urgente, guard: safe.guard, usage }
     }
 
     // Tools já mexeram no CRM: nunca deixar o lead em silêncio

@@ -11,7 +11,7 @@ export interface LeadState {
   porta?: string
   /** ts (ms) da 1ª mensagem do bloco que travou a porta — o cérebro só vê a conversa daí em diante */
   portaEm?: number
-  /** a Gabi já se apresentou (abertura do primeiro contato) */
+  /** a Stela já se apresentou (abertura do primeiro contato) */
   aberturaEnviada?: boolean
   /** quantas mensagens do lead passaram sem dar para entender o assunto */
   tentativasTriagem?: number

@@ -17,7 +17,7 @@ const DESTINOS: Array<{ id: Exclude<Aba, 'mapa'>; Icon: typeof GitBranch; cor: s
   { id: 'funil', Icon: GitBranch, cor: '#06b6d4', titulo: 'Funil e etapas', texto: 'As etapas do SDR e do CLOSER e como o card chega em cada uma.' },
   { id: 'distribuicao', Icon: Users, cor: '#a78bfa', titulo: 'Agenda e distribuição', texto: 'Reunião, horários oferecidos e quem recebe cada lead.' },
   { id: 'automacoes', Icon: Zap, cor: '#a78bfa', titulo: 'Automações', texto: 'O que anda sozinho no funil e na agenda.' },
-  { id: 'retomada', Icon: RotateCcw, cor: '#22c55e', titulo: 'Retomada', texto: 'Quando e como a Gabi volta a chamar quem parou de responder.' },
+  { id: 'retomada', Icon: RotateCcw, cor: '#22c55e', titulo: 'Retomada', texto: 'Quando e como a Stela volta a chamar quem parou de responder.' },
   { id: 'sistema', Icon: Server, cor: '#3b82f6', titulo: 'Sistema', texto: 'O que está ligado, as fontes de dados e a versão.' },
   { id: 'seguranca', Icon: KeyRound, cor: '#f59e0b', titulo: 'Acesso e segurança', texto: 'Senha, sessão e o que fica protegido.' },
 ]
@@ -106,7 +106,7 @@ function Seguranca() {
       'Depois de 8 senhas erradas seguidas, o acesso daquele aparelho fica bloqueado por 15 minutos.',
       'A Central só lê o Kommo. Ela não apaga nem edita card. O que muda no funil são as automações descritas aqui, que conferem o card antes de agir.',
       'Nomes aparecem só pelo primeiro nome. Telefone, e-mail e CPF são retirados antes de chegar na tela.',
-      'O teste da Gabi em Ensinar roda num funil de mentira: nada é gravado no Kommo e nenhuma reunião é marcada.',
+      'O teste da Stela em Ensinar roda num funil de mentira: nada é gravado no Kommo e nenhuma reunião é marcada.',
       'Para trocar a senha, peça à equipe técnica. A senha nunca fica guardada em texto: só a versão embaralhada dela.',
     ]} />
   )

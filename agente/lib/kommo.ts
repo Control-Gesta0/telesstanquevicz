@@ -44,6 +44,7 @@ export interface KommoLead {
   pipeline_id: number
   responsible_user_id?: number
   price?: number
+  loss_reason_id?: number | null
   custom_fields_values?: KommoFieldValue[] | null
   _embedded?: { tags?: Array<{ id: number; name: string }>; contacts?: Array<{ id: number; is_main?: boolean }> }
 }

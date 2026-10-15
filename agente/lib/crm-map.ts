@@ -19,7 +19,7 @@ export type { Alerta, Campo, CampoTipo, Etapa, Porta } from './crm-map-types'
 const VALOR = /\d|mil|milh|cem\b|duzent|trezent|quatrocent|quinhent|reais|r\$/i
 
 const CAMPOS = {
-  // Primeiro contato (todas as portas): a Gabi chama a pessoa pelo nome que ela disser
+  // Primeiro contato (todas as portas): a Stela chama a pessoa pelo nome que ela disser
   nome: { key: 'nome', id: 0, name: 'Nome', type: 'text', sinal: /[a-zà-ú]{2,}/i, pergunta: 'Com quem eu falo?' },
   // RCPCC
   tipoDivida: { key: 'tipoDivida', id: 0, name: 'Tipo de dívida (e banco, se disser)', type: 'text', sinal: /cart[aã]o|cheque|empr[eé]st|financ|consig|limite|fatura|cr[eé]dito|d[ií]vida|banco|ita[uú]|bradesco|santander|caixa|nubank|inter\b|brasil|sicredi|sicoob|c6|pan\b|bmg|agibank|mercado pago|picpay|neon|original|safra|banrisul/i, pergunta: 'Essa dívida é de cartão, cheque especial ou empréstimo?' },
@@ -88,10 +88,11 @@ export const CRM_MAP = {
       prioridade: 3,
       nichoEnumId: 744543,
       sinais: /busca e apreens|apreend|guinch|levaram (meu|o) (carro|ve[ií]culo|moto)|tomaram (meu|o) (carro|ve[ií]culo|moto)|mandado|oficial de justi/i,
-      roteiro: ['nome', 'apreendido', 'dataApreensao', 'mandado', 'valorDividaDba', 'nomeCompleto', 'email'],
-      obrigatorios: ['apreendido', 'nomeCompleto', 'email'],
-      antesDeAgendar: ['apreendido'],
-      avisoAoAgendar: 'Na mesma mensagem dos horários, diga em uma frase que o prazo de defesa pode já estar correndo e que por isso o ideal é falar com o advogado o quanto antes. Ofereça primeiro o horário mais cedo.',
+      // pedido do Dr. (15/10/2026): antes de marcar, a Gabi (SDR) consulta o processo, vê se tem tese e confirma a reunião
+      roteiro: ['nome', 'apreendido', 'dataApreensao', 'mandado', 'nomeCompleto'],
+      obrigatorios: ['apreendido', 'mandado', 'nomeCompleto'],
+      acolhimento: 'Entendi, vamos ver isso rápido.',
+      conferenciaAntesDaReuniao: { tarefa: 'Busca e apreensão: consultar o processo, ver se tem tese e confirmar a reunião com o lead.', prazoMin: 30 },
     },
     {
       id: 'geral',
@@ -106,20 +107,20 @@ export const CRM_MAP = {
   ] as Porta[],
 
   /**
-   * Primeiro contato SEM MENU NUMERADO (decisão do mestre, 15/10/2026): a Gabi se apresenta,
+   * Primeiro contato SEM MENU NUMERADO (decisão do mestre, 15/10/2026): a Stela se apresenta,
    * pergunta o nome e o que a pessoa procura e entende pelo texto (palavra-chave em código;
    * se não bastar, triagem por IA em lib/triagem.ts). Textos fixos: zero variação, zero token.
    */
   abertura: {
-    semNome: 'Oi! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Com quem eu falo, e o que você está procurando? Pode ser por texto ou áudio.',
-    comNome: 'Oi, {nome}! Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.',
+    semNome: 'Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo, e o que você está procurando? Pode ser por texto ou áudio.',
+    comNome: 'Oi, {nome}! Aqui é a Stela, da Teles & Stanquevicz Advogados. Me conta o que você está procurando? Pode ser por texto ou áudio.',
     entender: 'Me conta um pouco mais do seu caso: o que está acontecendo?',
     entenderComNome: 'Prazer, {nome}. Me conta um pouco do seu caso: o que está acontecendo?',
     areas: '{nomeVirgula}o escritório cuida de dívida com banco, financiamento de veículo e busca e apreensão de veículo. O seu caso tem a ver com algum desses?',
     /** primeira resposta que não é a abertura (fora do escopo, equipe): ela se apresenta antes */
-    apresentacao: 'Aqui é a Gabi, assistente virtual da Teles & Stanquevicz Advogados.',
-    /** assunto que não é bancário: recusa com respeito e marca Desqualificado robô (igual à regra da Gabi) */
-    foraDoEscopo: 'Entendi. Esse tipo de caso fica fora do que o escritório atende, porque a gente trabalha só com questões bancárias. Obrigada por explicar, e boa sorte com o seu caso.',
+    apresentacao: 'Aqui é a Stela, da Teles & Stanquevicz Advogados.',
+    /** assunto que parece não bancário: NÃO recusa (pedido do Dr., 15/10/2026). Passa para a equipe conferir antes de dispensar */
+    foraDoEscopo: 'Entendi. Vou passar o seu caso para a nossa equipe dar uma olhada, e alguém continua a conversa com você por aqui.',
     /** depois disso sem entender o assunto, passa para a equipe (porta outros) */
     maxTentativas: 3,
     portaOutros: 'geral',
@@ -136,7 +137,7 @@ export const CRM_MAP = {
     {
       nome: 'banco de montadora',
       re: BANCO_MONTADORA,
-      aviso: 'O lead citou um banco de montadora. O escritório não atende financiamento feito por banco de montadora. Se ficou claro que o financiamento é desse banco, explique com respeito que esse caso fica fora do que o escritório atende e chame finalizar_atendimento(fora_do_escopo). Se ele citou só a marca do carro, pergunte por qual banco ou financeira foi feito.',
+      aviso: 'O lead citou um banco de montadora. O escritório não costuma atender financiamento feito por banco de montadora, mas quem decide é a equipe. Se ficou claro que o financiamento é desse banco, NÃO recuse: diga que vai passar o caso para a equipe dar uma olhada e chame finalizar_atendimento(fora_do_escopo). Se ele citou só a marca do carro, pergunte por qual banco ou financeira foi feito.',
     },
     {
       nome: 'cliente do escritório',
@@ -151,9 +152,9 @@ export const CRM_MAP = {
     {
       nome: 'assunto não bancário',
       re: /trabalhist|rescis[aã]o|demiti|demiss[aã]o|\bfgts\b|carteira assinada|hora extra|\bpens[aã]o\b|div[oó]rcio|guarda d[oa]s? (meu|minha|filh|crian)|\binss\b|aposentadori|\bloas\b|aux[ií]lio[- ]doen|invent[aá]rio|heran[cç]a|despejo|aluguel|criminal|multa de tr[aâ]nsito/i,
-      aviso: 'O lead citou um assunto que pode não ser bancário. Se o caso dele É esse assunto (trabalhista, família, INSS, aluguel...), diga com respeito que o escritório atua só com questões bancárias e chame finalizar_atendimento(fora_do_escopo). Se ele só mencionou de passagem e o caso é uma dívida com banco (ex.: consignado descontado da aposentadoria, perdeu o emprego e atrasou as parcelas), siga o roteiro.',
-      // recusou com o texto padrão e não finalizou: o código finaliza (o card não fica aberto com a Gabi calada)
-      finaliza: { motivo: 'fora_do_escopo', seResposta: /fica fora do que o escrit[oó]rio atende|s[oó] com quest[oõ]es banc[aá]rias/i },
+      aviso: 'O lead citou um assunto que pode não ser bancário. Se o caso dele É esse assunto (trabalhista, família, INSS, aluguel...), NÃO recuse: diga que vai passar o caso para a equipe dar uma olhada e chame finalizar_atendimento(fora_do_escopo). Se ele só mencionou de passagem e o caso é uma dívida com banco (ex.: consignado descontado da aposentadoria, perdeu o emprego e atrasou as parcelas), siga o roteiro.',
+      // passou para a equipe com o texto padrão e não finalizou: o código finaliza (o card não fica aberto com a Stela calada)
+      finaliza: { motivo: 'fora_do_escopo', seResposta: /equipe dar uma olhada|fica fora do que o escrit[oó]rio atende|s[oó] com quest[oõ]es banc[aá]rias/i },
     },
   ] as Alerta[],
 
@@ -173,14 +174,16 @@ export const CRM_MAP = {
     formulario: { campos: [1047061, 1047063, 1047065, 1047067] },
     responsaveis: {
       limite: 50000,
-      /** abaixo do limite: alterna Guilherme e Carla */
+      /** abaixo do limite: alterna CLOSER 1 (Guilherme) e CLOSER 2 (Claudia) */
       abaixo: [11719359, 13015432],
       /** do limite para cima, ou valor desconhecido: SDR aquece antes da reunião */
       acima: 11719355,
-      nomes: { 11719359: 'Guilherme', 13015432: 'Carla', 11719355: 'SDR' } as Record<number, string>,
+      nomes: { 11719359: 'CLOSER 1', 13015432: 'CLOSER 2', 11719355: 'Gabi (SDR)' } as Record<number, string>,
     },
     /** tipo de tarefa do Kommo: 1 = Follow-up */
     tarefaTipo: 1,
+    /** fora do escopo: a equipe confere antes de dispensar (pedido do Dr., 15/10/2026). Sem Desqualificado robô. */
+    conferirEscopo: { tag: 'Conferir escopo', tarefa: 'Conferir escopo: a IA entendeu que o assunto não é bancário. Confira a conversa antes de dispensar.', prazoMin: 60 },
     /** humano que recebe "pediu humano", "outro assunto" e falhas */
     responsavelPadrao: 11719355,
   },
@@ -217,6 +220,21 @@ export const CRM_MAP = {
       etiquetaVendaPerdida: { em: { pipelineId: 9312103, statusId: 143, name: 'Venda perdida' }, tag: 'Desqualificado' },
     } as Record<string, { em: { pipelineId: number; statusId: number; name: string }; tag: string }>,
     limiteEtiquetas: { eventos: 120, janelaSeg: 600 },
+    /**
+     * CLOSER › Venda perdida com o motivo "Retomar depois (volta ao SDR)" → SDR › Follow-up, com a Gabi (SDR).
+     * Pedido do Dr. (15/10/2026): a venda pode não fechar na reunião e fechar depois. Lá vale a regra
+     * dos 5 dias em Follow-up. Sem a etiqueta Desqualificado.
+     */
+    retomarDepois: {
+      de: { pipelineId: 9312103, statusId: 143, name: 'Venda perdida' },
+      motivoPerda: 39348516,
+      para: { pipelineId: 9299515, statusId: 72104595, name: 'SDR › Follow-up' },
+      responsavel: 11719355,
+      tag: 'Follow up',
+      tarefa: 'Retomar: a venda não fechou na reunião, mas pode fechar depois. Ver a nota do especialista e retomar o contato.',
+      prazoHoras: 24,
+      nota: 'Venda perdida no CLOSER em {quando} com o motivo "Retomar depois". Voltou para SDR › Follow-up pela automação, com a Gabi (SDR).',
+    },
     /** Retorno do lead e Follow-up esgotado (saíram do Kommo em 15/10/2026, lib/funil-sdr.ts). */
     sdr: {
       pipelineId: 9299515,
@@ -287,7 +305,7 @@ export const CRM_MAP = {
     opcoes: 3,
   },
 
-  textoSeguro: 'Entendi. Isso quem avalia é o advogado na reunião. Posso te fazer mais uma pergunta rápida?',
+  textoSeguro: 'Entendi. Isso quem avalia é o especialista na reunião. Posso te fazer mais uma pergunta rápida?',
   textoSeguroFinal: 'Obrigada, anotei tudo. A equipe do escritório segue com você por aqui.',
 
   midia: {

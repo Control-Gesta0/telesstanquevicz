@@ -32,7 +32,7 @@ export async function registrarContato(leadId: number): Promise<void> {
   await redis.set(k('ultimo-in', leadId), Date.now(), { ex: 30 * 86400 })
 }
 
-/** Chamado a cada mensagem que o lead manda (qualquer lead, com ou sem a Gabi). */
+/** Chamado a cada mensagem que o lead manda (qualquer lead, com ou sem a Stela). */
 export async function lidarComRetorno(leadId: number): Promise<string> {
   // Rajada de mensagens (texto + áudio + foto) vira uma conferência só
   if ((await redis.set(k('retorno', leadId), '1', { nx: true, ex: 120 })) !== 'OK') return 'recente'

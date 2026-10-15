@@ -113,10 +113,10 @@ const FUNIS = [
 
 /** Como o card chega em cada etapa. É o que a Central explica ao lado do número. */
 const PAPEL: Record<number, { papel: 'gabi' | 'automacao' | 'time'; como: string }> = {
-  72104583: { papel: 'gabi', como: 'Lead novo do WhatsApp. A Gabi atende aqui; quando o lead escreve, vai sozinho para Em atendimento.' },
-  72186399: { papel: 'gabi', como: 'Conversa em andamento com a Gabi ou com a equipe.' },
+  72104583: { papel: 'gabi', como: 'Lead novo do WhatsApp. A Stela atende aqui; quando o lead escreve, vai sozinho para Em atendimento.' },
+  72186399: { papel: 'gabi', como: 'Conversa em andamento com a Stela ou com a equipe.' },
   72104595: { papel: 'automacao', como: 'Parou de responder. Se escrever, volta sozinho para Em atendimento; 5 dias sem resposta, vai para perdido.' },
-  86825532: { papel: 'gabi', como: 'Reunião marcada pela Gabi ou pelo Calendly.' },
+  86825532: { papel: 'gabi', como: 'Reunião marcada pela Stela ou pelo Calendly.' },
   72113011: { papel: 'time', como: 'Faltou à reunião. A equipe remarca.' },
   72186407: { papel: 'time', como: 'Entrada do CLOSER.' },
   72851523: { papel: 'automacao', como: 'Chega sozinho quando a reunião é marcada como realizada no SDR.' },
@@ -354,8 +354,8 @@ export interface Item { id: string; nome: string; ok: boolean; estado: string; o
 export function prontidao(env: Record<string, string | undefined>): Item[] {
   const gate = (env.GATE_TAG || '').trim()
   return [
-    { id: 'gabi', nome: 'Gabi respondendo no WhatsApp', ok: !!Number(env.KOMMO_BOT_ID || 0), estado: Number(env.KOMMO_BOT_ID || 0) ? 'ligada' : 'pronta, aguardando o robô de envio', oQueFalta: Number(env.KOMMO_BOT_ID || 0) ? undefined : 'Criar no Kommo o robô que envia a resposta da Gabi.' },
-    { id: 'rampa', nome: 'Quem a Gabi atende', ok: true, estado: gate ? `fase de teste: só leads com a etiqueta ${gate}` : 'todos os leads novos' },
+    { id: 'gabi', nome: 'Stela respondendo no WhatsApp', ok: !!Number(env.KOMMO_BOT_ID || 0), estado: Number(env.KOMMO_BOT_ID || 0) ? 'ligada' : 'pronta, aguardando o robô de envio', oQueFalta: Number(env.KOMMO_BOT_ID || 0) ? undefined : 'Criar no Kommo o robô que envia a resposta da Stela.' },
+    { id: 'rampa', nome: 'Quem a Stela atende', ok: true, estado: gate ? `fase de teste: só leads com a etiqueta ${gate}` : 'todos os leads novos' },
     { id: 'retomada', nome: 'Retomada de quem parou de responder', ok: !!(env.QSTASH_TOKEN && env.SELF_URL), estado: env.QSTASH_TOKEN && env.SELF_URL ? 'ligada' : 'desligada' },
     { id: 'lembretes', nome: 'Lembretes de reunião (24h e 2h)', ok: env.LEMBRETES_MODO === 'ativo', estado: env.LEMBRETES_MODO === 'ativo' ? 'enviando' : 'modo sombra: confere sem enviar', oQueFalta: env.LEMBRETES_MODO === 'ativo' ? undefined : 'Desligar o disparo por data dos robôs de lembrete no Kommo e trocar para envio pela Vercel.' },
     { id: 'calendly', nome: 'Calendly atualizando o Kommo', ok: !!env.CALENDLY_WEBHOOK_KEY, estado: env.CALENDLY_WEBHOOK_KEY ? 'ligado' : 'desligado' },
@@ -417,13 +417,13 @@ export function regras() {
       'Busca e apreensão com urgência: a equipe é avisada na hora.',
     ],
     agenda: {
-      reuniao: 'Reunião de diagnóstico sem custo, 30 minutos, Google Meet, com o Dr. Carlos Eduardo.',
-      opcoes: `A Gabi oferece ${CRM_MAP.calendly.opcoes} horários reais do Calendly, com pelo menos ${CRM_MAP.calendly.antecedenciaMinHoras}h de antecedência, nos próximos ${CRM_MAP.calendly.diasAFrente} dias.`,
+      reuniao: 'Reunião de diagnóstico sem custo, 30 minutos, Google Meet, com um dos nossos especialistas.',
+      opcoes: `A Stela oferece ${CRM_MAP.calendly.opcoes} horários reais do Calendly, com pelo menos ${CRM_MAP.calendly.antecedenciaMinHoras}h de antecedência, nos próximos ${CRM_MAP.calendly.diasAFrente} dias.`,
       distribuicao: `Dívida abaixo de R$ ${r.limite.toLocaleString('pt-BR')}: vai alternando entre ${nomes(r.abaixo)}. A partir disso, ou sem valor informado: ${nomes([r.acima])}, que aquece o lead antes da reunião.`,
       etapa: `Reunião marcada: o card vai para ${neg.etapaQualificado.name} com data e link preenchidos.`,
     },
     retomada: [
-      'Toque 1: 2 horas depois da última mensagem da Gabi sem resposta.',
+      'Toque 1: 2 horas depois da última mensagem da Stela sem resposta.',
       'Toque 2: perto de fechar a janela de 24 horas do WhatsApp.',
       `Sem resposta: o card vai para ${neg.etapaFollowUp.name}.`,
       `${CRM_MAP.automacoes.sdr.followUp.dias} dias em ${neg.etapaFollowUp.name} sem resposta: perdido, com motivo Lead Desaparecido.`,
@@ -439,7 +439,10 @@ export function regras() {
       { gatilho: 'Lead escreve estando em Leads de entrada ou Follow-up', efeito: 'Card volta para Em atendimento. Reunião agendada e No-show ficam onde estão.' },
       { gatilho: 'Card entra em Follow-up', efeito: 'Põe a etiqueta "Follow up" e começa a contar 5 dias.' },
       { gatilho: '5 dias em Follow-up sem resposta', efeito: 'Vai para perdido (Lead Desaparecido) com a etiqueta "Desqualificado".' },
-      { gatilho: 'Venda perdida no CLOSER', efeito: 'Põe a etiqueta "Desqualificado".' },
+      { gatilho: 'Venda perdida no CLOSER com o motivo "Retomar depois (volta ao SDR)"', efeito: 'Volta para SDR › Follow-up, com a Gabi (SDR), etiqueta "Follow up", tarefa de retomar em 24 h e nota.' },
+      { gatilho: 'Venda perdida no CLOSER com outro motivo', efeito: 'Põe a etiqueta "Desqualificado".' },
+      { gatilho: 'Busca e apreensão atendida pela Stela', efeito: 'Card em Em atendimento, com a Gabi (SDR), e tarefa de consultar o processo e confirmar a reunião em 30 minutos.' },
+      { gatilho: 'Assunto que parece não bancário', efeito: 'Etiqueta "Conferir escopo" e tarefa para a Gabi (SDR) conferir antes de dispensar.' },
       { gatilho: `Mais de ${CRM_MAP.automacoes.limiteEmMassa.eventos} mudanças em ${CRM_MAP.automacoes.limiteEmMassa.janelaSeg / 60} min`, efeito: 'As automações pausam: é limpeza de funil, não venda.' },
     ],
   }
@@ -455,10 +458,10 @@ export interface PedidoEnsino { id: string; em: string; perfil: string; texto: s
  */
 export function destinoDaCorrecao(texto: string): { destino: string; explicacao: string } {
   const t = texto.toLowerCase()
-  if (/hor[aá]rio|agenda|dispon[ií]vel|calendly|dia da reuni/.test(t)) return { destino: 'agenda', explicacao: 'Horário é dado vivo: a Gabi lê do Calendly na hora. Mudou a disponibilidade? Ajuste no Calendly e ela já oferece os novos horários.' }
-  if (/r\$|\d+ ?mil|honor[aá]rio|pre[cç]o|valor d[aoe]s? (consulta|honor|servi)|quanto custa|desconto|percentual|%/.test(t)) return { destino: 'fora do escopo', explicacao: 'A Gabi não fala valores nem percentuais por decisão do escritório. Se quiser mudar essa regra, a equipe técnica revisa com você antes.' }
+  if (/hor[aá]rio|agenda|dispon[ií]vel|calendly|dia da reuni/.test(t)) return { destino: 'agenda', explicacao: 'Horário é dado vivo: a Stela lê do Calendly na hora. Mudou a disponibilidade? Ajuste no Calendly e ela já oferece os novos horários.' }
+  if (/r\$|\d+ ?mil|honor[aá]rio|pre[cç]o|valor d[aoe]s? (consulta|honor|servi)|quanto custa|desconto|percentual|%/.test(t)) return { destino: 'fora do escopo', explicacao: 'A Stela não fala valores nem percentuais por decisão do escritório. Se quiser mudar essa regra, a equipe técnica revisa com você antes.' }
   if (/etapa|funil|respons[aá]vel|mover|card|tarefa|etiqueta/.test(t)) return { destino: 'funil', explicacao: 'Isso é regra de funil, que roda em código. Vai como pedido para a equipe técnica, que testa no lead de teste antes de ligar.' }
-  return { destino: 'jeito de conversar', explicacao: 'Vira regra no jeito de conversar da Gabi. A equipe técnica escreve a regra, roda os cenários de teste e só publica se todos passarem.' }
+  return { destino: 'jeito de conversar', explicacao: 'Vira regra no jeito de conversar da Stela. A equipe técnica escreve a regra, roda os cenários de teste e só publica se todos passarem.' }
 }
 
 export async function listarEnsino(): Promise<PedidoEnsino[]> {
@@ -489,7 +492,7 @@ export async function atualizarEnsino(id: string, status: PedidoEnsino['status']
 // ─────────────────────────────── laboratório ───────────────────────────────
 
 interface Mundo {
-  /** vazio até a Gabi entender o assunto (o laboratório roteia como o atendimento real) */
+  /** vazio até a Stela entender o assunto (o laboratório roteia como o atendimento real) */
   porta: string
   statusId: number
   pipelineId: number
@@ -582,12 +585,12 @@ export async function laboratorio(p: { sessao?: string; porta?: string; msg?: st
     if (rota.tipo === 'encerrar') {
       Object.assign(w.state, rota.patch)
       w.state.finalizado = { motivo: rota.motivo, resumo: 'assunto não bancário', em: new Date().toISOString() }
-      eventos.push('Recusaria com respeito: o assunto não é bancário. Marcaria "Desqualificado robô" no card e pararia de atender.')
+      eventos.push('Passaria para a equipe conferir: o assunto parece não ser bancário. Poria a etiqueta "Conferir escopo", criaria tarefa para a Gabi (SDR) e pararia de atender.')
       return fechar(rota.texto, [], usdTriagem)
     }
     if (rota.tipo !== 'porta') return fechar(CRM_MAP.textoSeguro)
     if (!rota.porta.ativa) {
-      w.state.finalizado = { motivo: 'porta_sem_agente', resumo: 'assunto fora dos três que a Gabi atende', em: new Date().toISOString() }
+      w.state.finalizado = { motivo: 'porta_sem_agente', resumo: 'assunto fora dos três que a Stela atende', em: new Date().toISOString() }
       eventos.push('Passaria para a equipe: o assunto não é um dos três que ela atende (tarefa "Assumir o atendimento" para o SDR).')
       return fechar(comApresentacao(w.state, rota.patch?.respostas?.nome || w.state.respostas?.nome || '', rota.porta.mensagemSemAgente || CRM_MAP.textoSeguroFinal), [], usdTriagem)
     }

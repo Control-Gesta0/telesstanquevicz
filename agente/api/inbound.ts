@@ -93,7 +93,7 @@ async function ingest(msgs: InboundMsg[], webhookId: string): Promise<void> {
       // Rastreador de origem: roda para TODO lead (antes do gate), só quando a mensagem traz código.
       // O código sai do texto antes de qualquer outro uso.
       if (m.direction !== 'outgoing' && m.text) m.text = await aplicarRastreio(m.leadId, m.text)
-      // Retorno do lead (todo lead, com ou sem a Gabi): Leads de entrada ou Follow-up → Em atendimento
+      // Retorno do lead (todo lead, com ou sem a Stela): Leads de entrada ou Follow-up → Em atendimento
       if (m.direction !== 'outgoing') {
         await registrarContato(m.leadId).catch(() => {})
         await lidarComRetorno(m.leadId).catch(e => console.error(`[retorno] lead ${m.leadId}:`, e))

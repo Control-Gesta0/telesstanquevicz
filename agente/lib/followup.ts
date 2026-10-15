@@ -59,11 +59,11 @@ export async function agendarFollowup(leadId: number, depoisDe: 0 | 1 | 2): Prom
 
 /** Texto do toque. Puro (exportado para o teste). */
 export function textoDoToque(toque: 1 | 2, state: LeadState): string {
-  if (toque === 2) return 'Vou deixar aqui: a reunião com o Dr. Carlos Eduardo é sem custo e dá para fazer pelo celular, com a câmera fechada se preferir. Se fizer sentido, me responde que eu vejo um horário.'
+  if (toque === 2) return 'Vou deixar aqui: a reunião com um dos nossos especialistas é sem custo e dá para fazer pelo celular, com a câmera fechada se preferir. Se fizer sentido, me responde que eu vejo um horário.'
   const porta = portaById(state.porta)
   if (!porta || !porta.ativa) return 'Oi! Me conta qual é o seu caso, pode ser por texto ou áudio, que eu já te ajudo por aqui.'
   if (state.horariosOferecidos?.length && !state.reuniao) return 'Oi! Algum daqueles horários fica bom para você? Se preferir outro dia, me fala que eu vejo.'
-  if (prontoParaAgendar(porta, state)) return 'Oi! Quer que eu veja um horário para você conversar sem custo com o Dr. Carlos Eduardo?'
+  if (prontoParaAgendar(porta, state)) return 'Oi! Quer que eu veja um horário para você conversar sem custo com um dos nossos especialistas?'
   // Retomada não pergunta o nome: volta pelo caso ("Com quem eu falo?" no meio da conversa soa estranho)
   const pergunta = snapshot(porta, state).abertos.find(c => c.key !== 'nome')?.pergunta
   return pergunta ? `Oi! Só para a gente seguir com o seu caso: ${pergunta}` : 'Oi! Conseguiu ver minha última mensagem?'

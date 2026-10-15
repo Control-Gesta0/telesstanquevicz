@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Central de IA · Teles & Stanquevicz',
-  description: 'A Gabi e as automações do escritório, ao vivo.',
+  description: 'A Stela e as automações do escritório, ao vivo.',
   robots: { index: false, follow: false },
 }
 

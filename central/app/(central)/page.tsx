@@ -120,7 +120,7 @@ function Conteudo() {
       {foco === 'agir' && (
         <section className="grid g3">
           {[
-            { href: '/operacao', Icon: Activity, cor: '#06b6d4', titulo: 'Acompanhar a operação', texto: 'O que a Gabi e as automações fizeram agora, o funil e a agenda.' },
+            { href: '/operacao', Icon: Activity, cor: '#06b6d4', titulo: 'Acompanhar a operação', texto: 'O que a Stela e as automações fizeram agora, o funil e a agenda.' },
             { href: '/cerebro', Icon: GraduationCap, cor: '#a78bfa', titulo: `Testar e ensinar a ${CLIENTE.agente}`, texto: 'Converse como se fosse um lead, aponte o que ficou torto e diga como deveria ser.' },
             { href: '/resultados', Icon: BarChart3, cor: '#22c55e', titulo: 'Ver os resultados', texto: 'Reuniões, contratos, origem dos leads e quanto a IA custou.' },
           ].map(q => (

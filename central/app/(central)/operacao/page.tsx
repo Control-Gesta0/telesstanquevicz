@@ -108,13 +108,13 @@ function Agora() {
         <Vazio icon={Bot} titulo={`A ${CLIENTE.agente} ainda não responde no WhatsApp`} texto="Quando o robô de envio for ligado no Kommo, cada conversa aparece aqui em segundos, com o que ela anotou e o que fez no card. Enquanto isso, abaixo estão as automações que já rodam." />
       )}
       <div className="grid g3">
-        <Metric icon={Activity} label="Execuções nas últimas 24h" value={d ? num(d.metricas.h24.respostas + d.metricas.h24.automacoes + d.metricas.h24.agenda + d.metricas.h24.retomadas) : '—'} hint="Gabi, automações, agenda e retomada" />
+        <Metric icon={Activity} label="Execuções nas últimas 24h" value={d ? num(d.metricas.h24.respostas + d.metricas.h24.automacoes + d.metricas.h24.agenda + d.metricas.h24.retomadas) : '—'} hint="Stela, automações, agenda e retomada" />
         <Metric icon={CalendarDays} label="Reuniões hoje" value={ag ? num(ag.hoje) : '—'} color="#a78bfa" hint={ag ? `${num(ag.amanha)} amanhã` : undefined} />
         <Metric icon={RotateCcw} label="Retomadas agendadas" value={fila ? num(fila.total) : '—'} color="#22c55e" hint={fila?.proximas[0] ? `próxima ${daquiA(fila.proximas[0].em)}` : 'nenhuma na fila'} />
       </div>
       <section>
         <SectionTitle eyebrow="Agora" title="O que acabou de acontecer." description="Atualiza sozinho a cada 2 minutos. Clique numa linha para ver o detalhe." />
-        {visao.diario.ok ? <ListaExec execs={visao.diario.dados.recentes} vazio={<Vazio icon={Activity} titulo="Nada registrado ainda" texto="A primeira execução da Gabi ou de uma automação aparece aqui." />} /> : <ErroFonte fonte="O diário" erro={visao.diario.erro} />}
+        {visao.diario.ok ? <ListaExec execs={visao.diario.dados.recentes} vazio={<Vazio icon={Activity} titulo="Nada registrado ainda" texto="A primeira execução da Stela ou de uma automação aparece aqui." />} /> : <ErroFonte fonte="O diário" erro={visao.diario.erro} />}
       </section>
     </div>
   )
@@ -152,7 +152,7 @@ function Agenda({ diario }: { diario: DadosDiario | null }) {
               </tbody>
             </table>
           </div>
-        ) : <Vazio icon={CalendarDays} titulo="Nenhuma reunião futura" texto="Quando uma reunião for marcada pelo Calendly ou pela Gabi, ela aparece aqui com o responsável." />}
+        ) : <Vazio icon={CalendarDays} titulo="Nenhuma reunião futura" texto="Quando uma reunião for marcada pelo Calendly ou pela Stela, ela aparece aqui com o responsável." />}
       </section>
       <section className="panel pad">
         <div className="row top" style={{ gap: 14 }}>

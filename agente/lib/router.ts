@@ -2,7 +2,7 @@ import { CRM_MAP, portaById, type Porta } from './crm-map'
 import type { LeadState } from './state'
 
 /**
- * Roteador do primeiro contato. SEM MENU NUMERADO (decisão de 15/10/2026): a Gabi entende o que a
+ * Roteador do primeiro contato. SEM MENU NUMERADO (decisão de 15/10/2026): a Stela entende o que a
  * pessoa escreveu. Ordem: porta travada → palavra-chave inequívoca (código, zero token) → triagem
  * por IA (lib/triagem.ts) → abertura, pergunta aberta, áreas → equipe. A porta, travada, nunca muda.
  */
@@ -42,7 +42,7 @@ export function primeiroNome(nome: string): string {
   return p ? p[0].toUpperCase() + p.slice(1).toLowerCase() : ''
 }
 
-/** Primeira resposta da Gabi que não é a abertura (fora do escopo, equipe): ela se apresenta antes. */
+/** Primeira resposta da Stela que não é a abertura (fora do escopo, equipe): ela se apresenta antes. */
 export function comApresentacao(state: LeadState, nome: string, texto: string): string {
   if (state.aberturaEnviada) return texto
   const n = primeiroNome(nome)

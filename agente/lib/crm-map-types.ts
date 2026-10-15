@@ -45,6 +45,14 @@ export interface Porta {
   antesDeAgendar?: string[]
   /** frase obrigatória junto com a oferta de horários (ex.: urgência do DBA) */
   avisoAoAgendar?: string
+  /**
+   * A IA NÃO marca reunião nesta porta: com o roteiro completo, passa para a equipe conferir
+   * antes (ex.: busca e apreensão, a SDR consulta o processo e vê se tem tese). `tarefa` vai
+   * para o responsável padrão; o card fica em Em atendimento.
+   */
+  conferenciaAntesDaReuniao?: { tarefa: string; prazoMin: number }
+  /** frase de acolhimento garantida em código na primeira resposta sobre o caso (depois de saber o nome) */
+  acolhimento?: string
 }
 
 /** Detecção em CÓDIGO no turno do lead → aviso no contexto do modelo (o modelo age, o código garante que ele saiba). */

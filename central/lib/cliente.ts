@@ -2,7 +2,7 @@
 export const CLIENTE = {
   nome: 'Teles & Stanquevicz',
   nomeCompleto: 'Teles & Stanquevicz Advogados',
-  agente: 'Gabi',
+  agente: 'Stela',
   kommoUrl: 'https://telesstanquevicz.kommo.com',
   versao: 'CENTRAL V5',
 }

@@ -17,7 +17,7 @@ const PESO: Record<Tom, number> = { critico: 0, atencao: 1, oportunidade: 2, cal
 export const ETAPA_REUNIAO = 86825532
 const FUNIL_CLOSER = 9312103
 
-export function montarBriefing(v: Visao | null, agente = 'Gabi'): Briefing {
+export function montarBriefing(v: Visao | null, agente = 'Stela'): Briefing {
   if (!v) return { estado: 'verificando', saudacao: 'Estou conferindo as fontes da operação.', resumo: 'O resumo só aparece depois que Kommo, diário e agenda responderem. Até lá, nenhuma conclusão é inventada.', decisoes: [] }
 
   const decisoes: Decisao[] = []
@@ -131,7 +131,7 @@ export function montarRadar(f: DadosFunil | null): Sinal[] {
 
 export interface Resposta { resposta: string; evidencias: string[]; href?: string; rotulo?: string }
 
-export function responder(perguntaCrua: string, v: Visao | null, agente = 'Gabi'): Resposta {
+export function responder(perguntaCrua: string, v: Visao | null, agente = 'Stela'): Resposta {
   const q = perguntaCrua.toLowerCase()
   if (!v) return { resposta: 'Ainda estou lendo o Kommo e o diário.', evidencias: ['Espere as fontes responderem e pergunte de novo.'] }
   const m = v.diario.ok ? v.diario.dados.metricas : null

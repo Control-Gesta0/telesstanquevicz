@@ -37,10 +37,10 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('valor: "não sei"', parseValorAprox('não sei'), null)
   eq('RCV: saldo = parcelas que faltam × parcela', valorDoCaso('rcv', { parcelasTotal: '48', parcelasPagas: '2', valorParcela: '1360' }), 62560)
   eq('RCPCC: sem resposta usa a faixa do formulário', valorDoCaso('rcpcc', {}, ['entre_r$_50_mil_e_r$_100_mil', 'cartão_de_crédito']), 50000)
-  eq('< 50 mil: Guilherme na vez par', escolherResponsavel(30000, 0).nome, 'Guilherme')
-  eq('< 50 mil: Carla na vez ímpar', escolherResponsavel(30000, 1).nome, 'Carla')
-  eq('≥ 50 mil: SDR', escolherResponsavel(50000, 0).nome, 'SDR')
-  eq('sem valor: SDR', escolherResponsavel(null, 0).nome, 'SDR')
+  eq('< 50 mil: CLOSER 1 na vez par', escolherResponsavel(30000, 0).nome, 'CLOSER 1')
+  eq('< 50 mil: CLOSER 2 na vez ímpar', escolherResponsavel(30000, 1).nome, 'CLOSER 2')
+  eq('≥ 50 mil: SDR', escolherResponsavel(50000, 0).nome, 'Gabi (SDR)')
+  eq('sem valor: SDR', escolherResponsavel(null, 0).nome, 'Gabi (SDR)')
   eq('formulário deslocado é lido pelo conteúdo', respostasDoFormulario(['acima_de_r$_100_mil', 'com_parcelas_atrasadas_há_mais_de_90_dias', 'cartão_de_crédito', 'sim,_tenho_dívidas_bancárias']), {
     valorDivida: 'formulário: acima de r$ 100 mil', atraso: 'formulário: com parcelas atrasadas há mais de 90 dias', tipoDivida: 'formulário: cartão de crédito',
   })
@@ -71,12 +71,12 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   const { CRM_MAP, portaById } = await import('../lib/crm-map')
   const neg = CRM_MAP.negocio
   const mundo = (statusId: number, pipelineId = neg.pipelineId) => {
-    const w = { statusId, pipelineId, fields: {} as Record<number, { value?: unknown; enumIds: number[] }>, tags: new Set(['ia-gabi']), notes: [] as string[], tasks: [] as Array<[string, number]>, responsible: 0, state: {} as Record<string, any> }
+    const w = { statusId, pipelineId, fields: {} as Record<number, { value?: unknown; enumIds: number[] }>, tags: new Set(['ia-stela']), notes: [] as string[], tasks: [] as Array<[string, number]>, responsible: 0, state: {} as Record<string, any> }
     const port = {
       getLead: async () => ({ id: 1, statusId: w.statusId, pipelineId: w.pipelineId, fields: w.fields, tags: [...w.tags] }),
       writeFields: async (vs: Array<{ field_id: number; values: Array<{ value?: unknown; enum_id?: number }> }>) => { for (const v of vs) w.fields[v.field_id] = { value: v.values[0]?.value, enumIds: v.values.map(x => x.enum_id).filter((x): x is number => !!x) } },
       moveStage: async (s: number) => { w.statusId = s },
-      addTags: async () => {}, removeTags: async (t: string[]) => { t.forEach(x => w.tags.delete(x)) },
+      addTags: async (t: string[]) => { t.forEach(x => w.tags.add(x)) }, removeTags: async (t: string[]) => { t.forEach(x => w.tags.delete(x)) },
       addNote: async (n: string) => { w.notes.push(n) },
       setResponsible: async (u: number) => { w.responsible = u },
       addTask: async (t: string, u: number) => { w.tasks.push([t, u]) },
@@ -85,18 +85,18 @@ export default async function testesCliente(eq: Eq): Promise<number> {
     }
     return { w, port }
   }
-  const ctx = (port: unknown, portaId: string, lead: string) => ({ port, porta: portaById(portaId)!, gateTag: 'ia-gabi', leadText: lead, lastLeadText: lead, lastAgentText: '' }) as any
+  const ctx = (port: unknown, portaId: string, lead: string) => ({ port, porta: portaById(portaId)!, gateTag: 'ia-stela', leadText: lead, lastLeadText: lead, lastAgentText: '' }) as any
 
   let m = mundo(72186399)
   m.w.state = { porta: 'rcv', respostas: { bancoVeiculo: 'BV', parcelasTotal: '48', parcelasPagas: '2', valorParcela: '1360', nomeCompleto: 'Maria da Silva', email: 'maria@x.com' } }
   let out = await runTool(ctx(m.port, 'rcv', 'BV 48x 1.360'), 'finalizar_atendimento', { motivo: 'qualificado', resumo: 'RCV no BV.' })
-  eq('qualificado RCV ≥ 50 mil: etapa, SDR, Nichos, tarefa, sem gate', [out.handoff, m.w.statusId, m.w.responsible, m.w.fields[neg.nicho.fieldId]?.enumIds, m.w.tasks.length, m.w.tags.has('ia-gabi')], [true, neg.etapaQualificado.id, neg.responsaveis.acima, [744547], 1, false])
+  eq('qualificado RCV ≥ 50 mil: etapa, SDR, Nichos, tarefa, sem gate', [out.handoff, m.w.statusId, m.w.responsible, m.w.fields[neg.nicho.fieldId]?.enumIds, m.w.tasks.length, m.w.tags.has('ia-stela')], [true, neg.etapaQualificado.id, neg.responsaveis.acima, [744547], 1, false])
   eq('tarefa do SDR pede para aquecer o lead', /Aquecer|Agendar/.test(m.w.tasks[0]?.[0] || ''), true)
 
   m = mundo(72186399)
   m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão Itaú', valorDivida: 'uns 30 mil', nomeCompleto: 'João Souza', email: 'joao@x.com' } }
   await runTool(ctx(m.port, 'rcpcc', 'cartão Itaú uns 30 mil'), 'finalizar_atendimento', { motivo: 'qualificado', resumo: 'RCPCC.' })
-  eq('qualificado RCPCC < 50 mil: Carla na vez 1', m.w.responsible, 13015432)
+  eq('qualificado RCPCC < 50 mil: CLOSER 2 na vez 1', m.w.responsible, 13015432)
 
   m = mundo(72186403, 9312103)
   m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão', valorDivida: '30 mil', nomeCompleto: 'Ana Lima', email: 'ana@x.com' } }
@@ -105,7 +105,7 @@ export default async function testesCliente(eq: Eq): Promise<number> {
 
   m = mundo(72186399)
   out = await runTool(ctx(m.port, 'rcv', 'meu carro é financiado pelo banco toyota'), 'finalizar_atendimento', { motivo: 'fora_do_escopo', evidencia: 'financiado pelo banco toyota', resumo: 'Banco de montadora.' })
-  eq('fora do escopo: Desqualificado robô, sem mover, sem tarefa', [out.handoff, m.w.fields[neg.desqualificado.fieldId]?.enumIds, m.w.statusId, m.w.tasks.length], [true, [neg.desqualificado.enumRobo], 72186399, 0])
+  eq('fora do escopo: etiqueta Conferir escopo e tarefa, sem Desqualificado, sem mover', [out.handoff, m.w.tags.has(neg.conferirEscopo.tag), m.w.tasks.length, m.w.tasks[0]?.[1], m.w.fields[neg.desqualificado.fieldId], m.w.statusId], [true, true, 1, neg.responsavelPadrao, undefined, 72186399])
 
   m = mundo(72186399)
   out = await runTool(ctx(m.port, 'rcpcc', 'já sou cliente de vocês, quero saber do meu processo'), 'finalizar_atendimento', { motivo: 'pediu_humano', evidencia: 'já sou cliente de vocês, quero saber do meu processo', resumo: 'Cliente ativo.' })
@@ -113,16 +113,54 @@ export default async function testesCliente(eq: Eq): Promise<number> {
 
   // Agenda: oferecer, escolher, pedir dados, reservar (Calendly falso)
   m = mundo(72186399)
-  m.w.state = { porta: 'dba', respostas: { apreendido: 'levaram ontem' } }
-  out = await runTool(ctx(m.port, 'dba', 'levaram ontem'), 'ver_horarios', { periodo: 'qualquer', dia: '' })
+  m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão do itaú', valorDivida: 'uns 30 mil' } }
+  out = await runTool(ctx(m.port, 'rcpcc', 'cartão do itaú, uns 30 mil'), 'ver_horarios', { periodo: 'qualquer', dia: '' })
   const oferta = (m.w.state.horariosOferecidos || []) as Array<{ label: string }>
   eq('ver_horarios guarda até 3 opções', [out.isError, oferta.length > 0 && oferta.length <= 3], [false, true])
   const escolha = `pode ser ${oferta[0].label.split(', às ')[0].split(', ')[0]} às ${oferta[0].label.split('às ')[1]}`
-  out = await runTool(ctx(m.port, 'dba', `levaram ontem\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'DBA urgente.' })
+  out = await runTool(ctx(m.port, 'rcpcc', `cartão do itaú, uns 30 mil\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'Cartão.' })
   eq('agendar sem nome/e-mail guarda o horário e pede o dado', [out.isError, !!m.w.state.horarioEscolhido, !!m.w.state.reuniao, /nome completo/.test(out.content)], [false, true, false, true])
   m.w.state.respostas = { ...m.w.state.respostas, nomeCompleto: 'Carlos Pereira', email: 'carlos@x.com' }
-  out = await runTool(ctx(m.port, 'dba', `levaram ontem\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'DBA urgente.' })
+  out = await runTool(ctx(m.port, 'rcpcc', `cartão do itaú, uns 30 mil\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'Cartão.' })
   eq('agendar com dados reserva, grava a data e finaliza qualificado', [out.handoff, !!m.w.state.reuniao, typeof m.w.fields[neg.reuniao.fieldId]?.value, m.w.statusId, m.w.state.finalizado?.motivo], [true, true, 'number', neg.etapaQualificado.id, 'qualificado'])
+
+  // Nome: só vale o que parece nome de pessoa (bug do eval de 16/10: frase do caso gravada como nome completo)
+  const { pareceNome } = await import('../lib/tools')
+  eq('nome completo: "Maria Aparecida Souza" vale', pareceNome('Maria Aparecida Souza', 2), 'Maria Aparecida Souza')
+  eq('nome completo: "meu nome é João Lima" vale sem o prefixo', pareceNome('meu nome é João Lima', 2), 'João Lima')
+  eq('nome completo: frase do caso não vale', pareceNome('Levaram meu carro ontem, o oficial deixou um papel aqui', 2), '')
+  eq('nome completo: um nome só não vale', pareceNome('Marcos', 2), '')
+  eq('nome completo: horário escolhido não vira nome', [pareceNome('sexta de manhã', 2), pareceNome('o primeiro horário', 2)], ['', ''])
+  m = mundo(72186399)
+  m.w.state = { porta: 'dba', respostas: { apreendido: 'levaram', mandado: 'papel' } }
+  out = await runTool(ctx(m.port, 'dba', 'Levaram meu carro ontem, o oficial deixou um papel aqui'), 'salvar_respostas', { respostas: [{ campo: 'nomeCompleto', evidencia: 'Levaram meu carro ontem, o oficial deixou um papel aqui', valor: 'Maria' }] })
+  eq('salvar nome completo inventado é recusado', [out.isError, m.w.state.respostas?.nomeCompleto], [true, undefined])
+  m.w.state = { porta: 'rcpcc', respostas: {} }
+  out = await runTool(ctx(m.port, 'rcpcc', 'sou a Ana Souza, tenho uma dívida no cartão do Itaú'), 'salvar_respostas', { respostas: [{ campo: 'nome', evidencia: 'sou a Ana Souza, tenho uma dívida no cartão do Itaú', valor: 'Ana' }] })
+  eq('nome dentro de frase vale pelo valor', m.w.state.respostas?.nome, 'Ana')
+
+  const { acolher } = await import('../lib/llm')
+  const F = 'Entendi, vamos ver isso rápido.'
+  eq('acolhimento: entra na 1ª resposta do caso', acolher(F, ['Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?'], 'Rafael, o veículo já foi apreendido?', false), `${F} Rafael, o veículo já foi apreendido?`)
+  eq('acolhimento: não repete', acolher(F, ['Entendi, vamos ver isso rápido. O veículo já foi apreendido?'], 'O oficial deixou o mandado?', false), 'O oficial deixou o mandado?')
+  eq('acolhimento: não entra na abertura nem no encerramento', [acolher(F, [], 'Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?', false), acolher(F, ['x'], 'Obrigada.', true)], ['Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?', 'Obrigada.'])
+
+  eq('"vou passar para a equipe" sem encerrar é barrado', checarContexto('Obrigada. Vou passar para a nossa equipe consultar o seu processo.', { leadText: '', reuniaoMarcada: false, encerrado: false }).map(v => v.regra), ['disse que passou para a equipe sem encerrar'])
+  eq('"vou passar para a equipe" depois de encerrar passa', checarContexto('Obrigada. Vou passar para a nossa equipe consultar o seu processo.', { leadText: '', reuniaoMarcada: false, encerrado: true }), [])
+
+  m = mundo(72186399)
+  m.w.state = { porta: 'rcv', respostas: {} }
+  out = await runTool(ctx(m.port, 'rcv', 'Olá! Vi o anúncio e quero saber sobre a revisão do financiamento do meu veículo.'), 'salvar_respostas', { respostas: [{ campo: 'bancoVeiculo', evidencia: 'revisão do financiamento do meu veículo', valor: 'não informado' }] })
+  eq('banco "não informado" não é gravado', [out.isError, m.w.state.respostas?.bancoVeiculo], [true, undefined])
+
+  // Busca e apreensão: sem horário, conferência da equipe antes da reunião (pedido do Dr., 15/10/2026)
+  const { buildTools } = await import('../lib/tools')
+  const nomesDba = buildTools(CRM_MAP.portas.find(p => p.id === 'dba')!).map(t => t.type === 'function' ? t.function.name : '')
+  eq('busca e apreensão: sem ferramentas de agenda', [nomesDba.includes('ver_horarios'), nomesDba.includes('agendar_reuniao')], [false, false])
+  m = mundo(72104583)
+  m.w.state = { porta: 'dba', respostas: { apreendido: 'levaram ontem', mandado: 'deixou o papel', nomeCompleto: 'Marcos Pereira' } }
+  out = await runTool(ctx(m.port, 'dba', 'levaram ontem, deixou o papel'), 'finalizar_atendimento', { motivo: 'qualificado', resumo: 'DBA.' })
+  eq('busca e apreensão: Em atendimento, SDR, tarefa de consultar o processo', [out.handoff, m.w.statusId, m.w.responsible, /consultar o processo/.test(m.w.tasks[0]?.[0] || '')], [true, 72186399, neg.responsavelPadrao, true])
 
   // Follow-up: relógio e textos
   const { proximoToque, encaixar } = await import('../lib/followup-tempo')
@@ -215,7 +253,7 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('mensagem comum fica igual', lerMarca('oi, tudo bem?'), { tipo: null, codigo: '', limpo: 'oi, tudo bem?' })
   eq('origem vira campos (UTM + De onde por enum)', camposDaOrigem({ deOnde: 'Meta', utm_source: 'facebook', utm_campaign: 'rcv', fbclid: 'x' }).map(f => f.field_id).sort(), [1023546, 369986, 369988, 370000].sort())
   const { classificar: cls, escolherPorta: ep } = await import('../lib/router')
-  eq('frase do link leva a Gabi para a porta certa', ['meta-rcpcc', 'meta-rcv', 'meta-dba'].map(s => ep(cls(lerMarca((CRM_MAP as any).rastreio.links[s].texto).limpo))?.id), ['rcpcc', 'rcv', 'dba'])
+  eq('frase do link leva a Stela para a porta certa', ['meta-rcpcc', 'meta-rcv', 'meta-dba'].map(s => ep(cls(lerMarca((CRM_MAP as any).rastreio.links[s].texto).limpo))?.id), ['rcpcc', 'rcv', 'dba'])
 
   // Central v5: o que vai para a tela
   const C = await import('../lib/central')
@@ -248,14 +286,14 @@ export default async function testesCliente(eq: Eq): Promise<number> {
     ex(3, 'erro'), ex(5, 'followup', { detalhe: 'toque 1 · x' }), ex(30, 'automacao', { detalhe: 'reuniaoRealizada → Proposta' }),
     ex(31, 'automacao', { detalhe: 'contratoPago: lead já não está em Venda ganha, nada feito' }),
   ], nowMs)
-  eq('diário 24h: conversas, reunião da Gabi, erro, retomada e mediana', [mc.h24.conversas, mc.h24.reunioesGabi, mc.h24.erros, mc.h24.retomadas, mc.h24.respostaMedianaSeg], [2, 1, 1, 1, 6])
+  eq('diário 24h: conversas, reunião da Stela, erro, retomada e mediana', [mc.h24.conversas, mc.h24.reunioesGabi, mc.h24.erros, mc.h24.retomadas, mc.h24.respostaMedianaSeg], [2, 1, 1, 1, 6])
   eq('diário 7d: automação que não fez nada não conta', [mc.d7.automacoes, mc.h24.automacoes], [1, 0])
   eq('diário: custo em reais com o câmbio da env', mc.h24.custoBrl, Math.round(0.001 * Number(process.env.USD_BRL || 5.4) * 100) / 100)
   eq('categoria: rastreio é origem, calendly é agenda', [C.categoria({ at: '', tipo: 'automacao', leadId: 0, detalhe: 'rastreio: x' }), C.categoria({ at: '', tipo: 'automacao', leadId: 0, detalhe: 'calendly marcou' })], ['origem', 'agenda'])
-  const pr = C.prontidao({ GATE_TAG: 'ia-gabi', LEMBRETES_MODO: 'sombra' })
-  eq('prontidão: sem robô de envio a Gabi não aparece como ligada', pr.find(i => i.id === 'gabi')?.ok, false)
+  const pr = C.prontidao({ GATE_TAG: 'ia-stela', LEMBRETES_MODO: 'sombra' })
+  eq('prontidão: sem robô de envio a Stela não aparece como ligada', pr.find(i => i.id === 'gabi')?.ok, false)
   eq('prontidão: lembretes em sombra não aparecem como enviando', pr.find(i => i.id === 'lembretes')?.estado, 'modo sombra: confere sem enviar')
-  eq('prontidão: rampagem explica a etiqueta', pr.find(i => i.id === 'rampa')?.estado, 'fase de teste: só leads com a etiqueta ia-gabi')
+  eq('prontidão: rampagem explica a etiqueta', pr.find(i => i.id === 'rampa')?.estado, 'fase de teste: só leads com a etiqueta ia-stela')
   eq('régua: horário é agenda viva', C.destinoDaCorrecao('ela ofereceu horário de sábado').destino, 'agenda')
   eq('régua: honorário fica fora', C.destinoDaCorrecao('ela devia dizer que a consulta custa R$ 300').destino, 'fora do escopo')
   eq('régua: tom vira regra de conversa', C.destinoDaCorrecao('ela foi seca demais quando a pessoa disse que estava desesperada').destino, 'jeito de conversar')
