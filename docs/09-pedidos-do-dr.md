@@ -39,4 +39,6 @@ O Dr. revisou o guia e pediu estas mudanças. As duas decisões abertas foram fe
 | Automação "Retomar depois", teste real pelo webhook (lead 26212401, sem contato) | voltou para SDR › Follow-up, responsável SDR, etiqueta Follow up, tarefa e nota; lead fechado depois |
 | Produção | agente e painel publicados; `/api/validate` ok; laboratório: abertura da Stela e busca e apreensão com acolhimento |
 
-Pendências do escritório: renomear no Kommo o robô "Gabi · envio" para "Stela · envio" (só nome) e, se quiserem, os usuários GUILHERME e CLAUDIA para CLOSER 1 e CLOSER 2.
+Robô de envio renomeado no Kommo para "Stela · envio" em 16/10/2026 (mesmo ID 61873, ativo; nada muda na Vercel).
+
+Pendência opcional do escritório: renomear os usuários GUILHERME e CLAUDIA para CLOSER 1 e CLOSER 2.
