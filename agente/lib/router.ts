@@ -8,7 +8,7 @@ import type { LeadState } from './state'
  */
 
 export type Rota =
-  | { tipo: 'porta'; porta: Porta; travou: boolean; patch?: Partial<LeadState> }
+  | { tipo: 'porta'; porta: Porta; travou: boolean; patch?: Partial<LeadState>; motivo?: 'cliente_do_escritorio' }
   | { tipo: 'mensagem'; texto: string; patch: Partial<LeadState> }
   | { tipo: 'encerrar'; motivo: 'fora_do_escopo'; texto: string; patch: Partial<LeadState> }
   | { tipo: 'triagem' }
@@ -34,7 +34,7 @@ export function rotear(state: LeadState, texto: string): Rota {
   return { tipo: 'triagem' }
 }
 
-export type Assunto = 'rcpcc' | 'rcv' | 'dba' | 'fora' | 'outro' | 'indefinido'
+export type Assunto = 'rcpcc' | 'rcv' | 'dba' | 'fora' | 'cliente' | 'outro' | 'indefinido'
 export interface Triagem { assunto: Assunto; nome: string }
 
 export function primeiroNome(nome: string): string {
@@ -60,6 +60,7 @@ export function decidirTriagem(state: LeadState, t: Triagem): Rota {
   const porta = portaById(t.assunto)
   if (porta && porta.ativa && t.assunto !== 'outro') return { tipo: 'porta', porta, travou: true, patch: patchNome }
   if (t.assunto === 'fora') return { tipo: 'encerrar', motivo: 'fora_do_escopo', texto: comApresentacao(state, nome, A.foraDoEscopo), patch: { ...patchNome, aberturaEnviada: true } }
+  if (t.assunto === 'cliente') return { tipo: 'porta', porta: outros, travou: true, patch: patchNome, motivo: 'cliente_do_escritorio' }
   if (t.assunto === 'outro') return { tipo: 'porta', porta: outros, travou: true, patch: patchNome }
 
   const n = (state.tentativasTriagem || 0) + 1

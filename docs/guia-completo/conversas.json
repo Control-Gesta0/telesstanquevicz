@@ -21,19 +21,19 @@
       },
       {
         "dir": "in",
-        "text": "meu carro é financiado pelo banco pan, em 48 vezes, e a parcela tá pesada"
+        "text": "meu carro é financiado pelo banco pan, em 60 vezes, e a parcela tá pesada"
       },
       {
         "dir": "out",
-        "text": "Entendi, Marcos, e isso pesa mesmo no mês a mês.  \nQuantas parcelas você já pagou até agora?"
+        "text": "Entendi, isso pesa mesmo. Quantas parcelas já foram pagas?"
       },
       {
         "dir": "in",
-        "text": "já paguei 20, a parcela é 1.150"
+        "text": "já paguei 20, a parcela é 1.800"
       },
       {
         "dir": "out",
-        "text": "Dá para conversar sem custo com um dos nossos especialistas por Google Meet. Tenho sexta, 16/10, às 9h15 ou 14h, e segunda, 19/10, às 9h15. Qual fica melhor para você?"
+        "text": "Dá para conversar sem custo com um dos nossos especialistas por Google Meet. Tenho terça, 20/10, às 14h, quarta, 21/10, às 9h15 ou quarta, 21/10, às 14h, qual fica melhor?"
       },
       {
         "dir": "in",
@@ -41,7 +41,7 @@
       },
       {
         "dir": "out",
-        "text": "Me manda seu nome completo para eu fechar a reserva?"
+        "text": "Me passa seu nome completo, por favor."
       },
       {
         "dir": "in",
@@ -49,7 +49,7 @@
       },
       {
         "dir": "out",
-        "text": "Me manda seu e-mail para eu concluir a reserva?"
+        "text": "Me passa seu e-mail, por favor."
       },
       {
         "dir": "in",
@@ -57,56 +57,53 @@
       },
       {
         "dir": "out",
-        "text": "Pronto, ficou marcado para sexta, 16/10, às 9h15, pelo Google Meet com um dos nossos especialistas. O link chega no seu e-mail, marcos.exemplo@gmail.com, e você pode entrar com a câmera fechada."
+        "text": "Pronto, ficou marcado para terça, 20/10, às 14h, pelo Google Meet com um dos nossos especialistas. O link chega no seu e-mail, e se quiser pode entrar com a câmera fechada."
       }
     ],
     "eventos": [
       "Se apresentou e perguntou o nome e o que a pessoa procura (sem menu).",
       "Anotou: Nome = Marcos",
       "Ainda não deu para saber o assunto: perguntou de novo, com pergunta aberta (sem menu).",
-      "Anotou: Banco ou financeira do veículo = banco pan",
-      "Anotou: Total de parcelas do financiamento = 48",
+      "Anotou: Banco ou financeira do veículo = meu carro é financiado pelo banco pan",
+      "Anotou: Total de parcelas do financiamento = 60",
       "Entendeu o assunto: Financiamento de veículo.",
       "Anotou: Parcelas já pagas = 20",
-      "Anotou: Valor de cada parcela = 1150",
+      "Anotou: Valor de cada parcela = 1800",
       "Buscou horários na agenda (no teste, a agenda é de mentira).",
       "Tentou marcar a reunião (no teste, nada é reservado no Calendly).",
       "Anotou: Nome completo = Marcos Pereira da Silva",
-      "Tentou marcar a reunião (no teste, nada é reservado no Calendly).",
       "Anotou: E-mail = •••@•••",
       "Gravaria no card: Data da reunião.",
       "Gravaria no card: Link da reunião.",
       "Pararia de atender: o lead passa para a equipe.",
       "Gravaria no card: Nicho.",
       "Moveria o card para Reunião agendada.",
-      "Passaria o card para CLOSER 2.",
-      "Criaria tarefa para CLOSER 2: Reunião marcada pela IA: sexta, 16/10, às 9h15.",
+      "Passaria o card para Gabi (SDR).",
+      "Criaria tarefa para Gabi (SDR): Reunião marcada pela IA: terça, 20/10, às 14h. Aquecer o lead antes da reunião.",
       "Deixaria no card a nota com o resumo do caso.",
       "Tentou marcar a reunião (no teste, nada é reservado no Calendly)."
     ],
-    "travas": [
-      "resíduo de chatbot: Perfeito,"
-    ],
-    "custo": 0.0874,
+    "travas": [],
+    "custo": 0.0742,
     "finalizado": {
       "motivo": "qualificado",
-      "resumo": "Marcos Pereira da Silva procura orientação sobre financiamento de veículo pelo Banco Pan. O contrato é de 48 parcelas, com 20 já pagas, e parcela de R$ 1.150. Quer reunião sem custo para avaliar o caso.",
-      "em": "2026-10-15T20:58:18.833Z"
+      "resumo": "Marcos tem financiamento de veículo pelo Banco Pan, com 60 parcelas, 20 pagas e parcela de R$ 1.800. Quer conversar sobre a situação e marcou reunião sem custo.",
+      "em": "2026-10-20T14:52:35.262Z"
     },
     "portaFinal": "rcv",
     "reuniao": {
-      "iso": "2026-10-16T12:15:00.000Z",
-      "label": "sexta, 16/10, às 9h15",
+      "iso": "2026-10-20T17:00:00.000Z",
+      "label": "terça, 20/10, às 14h",
       "inviteeUri": "fake:invitee",
       "eventUri": "fake:event",
       "joinUrl": "https://meet.google.com/fake-link"
     },
     "respostas": [
       "• Nome: Marcos",
-      "• Banco ou financeira do veículo: banco pan",
-      "• Total de parcelas do financiamento: 48",
+      "• Banco ou financeira do veículo: meu carro é financiado pelo banco pan",
+      "• Total de parcelas do financiamento: 60",
       "• Parcelas já pagas: 20",
-      "• Valor de cada parcela: 1150",
+      "• Valor de cada parcela: 1800",
       "• Nome completo: Marcos Pereira da Silva",
       "• E-mail: marcos.exemplo@gmail.com"
     ]
@@ -201,49 +198,49 @@
       },
       {
         "dir": "in",
-        "text": "tenho um empréstimo no santander, tá uns 35 mil e estou com 4 parcelas atrasadas"
+        "text": "quanto vocês cobram? tenho um empréstimo no santander"
       },
       {
         "dir": "out",
-        "text": "Dá para conversar sem custo com um dos nossos especialistas por Google Meet. Tenho sexta, 16/10, às 9h15 ou 14h, e segunda, 19/10, às 9h15. Qual fica melhor para você?"
+        "text": "A proposta de honorários depende do caso, e quem apresenta é o especialista na reunião, que não tem custo nem compromisso.  \nMais ou menos quanto está a dívida hoje, somando tudo?"
       },
       {
         "dir": "in",
-        "text": "quanto vocês cobram pra entrar com a ação?"
+        "text": "tá uns 35 mil, com 4 parcelas atrasadas"
       },
       {
         "dir": "out",
-        "text": "A proposta de honorários depende do caso, e o especialista apresenta na reunião, sem custo e sem compromisso. Quer que eu veja um horário para você?"
-      },
-      {
-        "dir": "in",
-        "text": "então pode ser sexta às 9h15"
-      },
-      {
-        "dir": "out",
-        "text": "Para eu reservar, me passa seu nome completo, por favor?"
+        "text": "Obrigada! Um dos nossos especialistas vai falar com você por aqui para marcar a reunião, sem custo."
       }
     ],
     "eventos": [
       "Anotou: Nome = Ana",
       "Se apresentou e perguntou o nome e o que a pessoa procura (sem menu).",
       "Anotou: Tipo de dívida (e banco, se disser) = tenho um empréstimo no santander",
-      "Anotou: Valor aproximado da dívida = tá uns 35 mil",
-      "Anotou: Parcelas em atraso = estou com 4 parcelas atrasadas",
       "Entendeu o assunto: Dívida com banco (cartão, cheque especial, empréstimo).",
-      "Buscou horários na agenda (no teste, a agenda é de mentira).",
-      "Tentou marcar a reunião (no teste, nada é reservado no Calendly)."
+      "Anotou: Valor aproximado da dívida = tá uns 35 mil",
+      "Anotou: Parcelas em atraso = com 4 parcelas atrasadas",
+      "Pararia de atender: o lead passa para a equipe.",
+      "Gravaria no card: Nicho.",
+      "Moveria o card para outra etapa.",
+      "Passaria o card para CLOSER 2.",
+      "Criaria tarefa para CLOSER 2: Atendimento direto: conversar com o lead pelo WhatsApp e agendar a reunião.",
+      "Deixaria no card a nota com o resumo do caso."
     ],
     "travas": [],
-    "custo": 0.0335,
-    "finalizado": null,
+    "custo": 0.031,
+    "finalizado": {
+      "motivo": "qualificado",
+      "resumo": "Ana procurou o escritório por um empréstimo no Santander, com dívida aproximada de 35 mil e 4 parcelas atrasadas. Quer entender o que dá para fazer no caso e marcar uma reunião sem custo.",
+      "em": "2026-10-20T14:52:43.845Z"
+    },
     "portaFinal": "rcpcc",
     "reuniao": null,
     "respostas": [
       "• Nome: Ana",
       "• Tipo de dívida (e banco, se disser): tenho um empréstimo no santander",
       "• Valor aproximado da dívida: tá uns 35 mil",
-      "• Parcelas em atraso: estou com 4 parcelas atrasadas"
+      "• Parcelas em atraso: com 4 parcelas atrasadas"
     ]
   },
   {
@@ -293,18 +290,18 @@
       },
       {
         "dir": "out",
-        "text": "Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Esse assunto quem vê é a equipe do escritório, e alguém continua a conversa com você por aqui."
+        "text": "Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. A equipe jurídica que cuida do seu caso vê isso e te responde por aqui."
       }
     ],
     "eventos": [
-      "Passaria para a equipe: o assunto não é um dos três que ela atende (tarefa \"Assumir o atendimento\" para o SDR)."
+      "Passaria para o jurídico: moveria o card para JURÍDICO › CONTACTAR CLIENTE, com o JURÍDICO como responsável e a tarefa \"Cliente do escritório escreveu no WhatsApp: ver a conversa e responder.\""
     ],
     "travas": [],
-    "custo": 0.0021,
+    "custo": 0.0022,
     "finalizado": {
-      "motivo": "porta_sem_agente",
-      "resumo": "assunto fora dos três que a Stela atende",
-      "em": "2026-10-15T20:58:52.767Z"
+      "motivo": "cliente_do_escritorio",
+      "resumo": "já é cliente do escritório",
+      "em": "2026-10-20T14:52:47.303Z"
     },
     "portaFinal": "",
     "reuniao": null,

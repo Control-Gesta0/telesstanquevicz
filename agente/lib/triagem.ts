@@ -10,7 +10,7 @@ import type { LeadState } from './state'
  * continua em código (router.decidirTriagem). Falhou a IA: trata como "indefinido".
  */
 
-const ASSUNTOS: Assunto[] = ['rcpcc', 'rcv', 'dba', 'fora', 'outro', 'indefinido']
+const ASSUNTOS: Assunto[] = ['rcpcc', 'rcv', 'dba', 'fora', 'cliente', 'outro', 'indefinido']
 
 const SISTEMA = `Você faz a triagem do primeiro contato de um escritório de advocacia bancária no WhatsApp.
 Leia o que a pessoa escreveu e responda SÓ com JSON: {"assunto": "...", "nome": "..."}.
@@ -20,7 +20,8 @@ assunto:
 - "rcv": financiamento de veículo (carro, moto, caminhão): parcelas altas, juros, revisão do contrato, atraso, sem falar de apreensão.
 - "dba": busca e apreensão: veículo apreendido, levado, guinchado, mandado, oficial de justiça, ameaça de apreensão.
 - "fora": assunto que NÃO é bancário: trabalhista, família, pensão, divórcio, INSS, aposentadoria, imóvel, aluguel, consumo, criminal, trânsito.
-- "outro": precisa de uma pessoa do escritório: quem já é cliente e pergunta do processo, quem quer falar com uma pessoa ou advogado sem dizer o assunto, pagamento de boleto do escritório, outro assunto bancário fora dos três acima.
+- "cliente": já é cliente do escritório (diz que é cliente, pergunta do andamento do processo dele, do contrato com o escritório, da advogada ou do advogado que cuida do caso).
+- "outro": precisa de uma pessoa do escritório: quem quer falar com uma pessoa ou advogado sem dizer o assunto, pagamento de boleto do escritório, outro assunto bancário fora dos três acima.
 - "indefinido": só cumprimento, só o nome, "vi o anúncio" sem dizer o assunto, pedido genérico sem dizer o assunto ("preciso de ajuda", "quero uma informação", "tenho uma dúvida"), ou não dá para saber.
 
 Na dúvida entre "outro" e "indefinido", escolha "indefinido": a assistente pergunta o que está acontecendo.

@@ -76,6 +76,35 @@ export function acolher(frase: string | undefined, anteriores: string[], texto: 
   return `${frase} ${texto}`
 }
 
+/**
+ * Primeira mensagem da Stela nesta conversa: ela se apresenta e, sem o nome, pergunta só o nome
+ * (pedido do Dr.: começar pelo nome e pelo que a pessoa procura). Em código porque o modelo às vezes
+ * ia direto à pergunta do caso (eval de 20/10/2026). O que ela já gravou fica gravado. Puro: testado.
+ */
+export function primeiraMensagem(primeira: boolean, nome: string, texto: string, handoff: boolean): string {
+  if (!primeira || /aqui (é|e) a stela/i.test(texto)) return texto
+  const apresentacao = CRM_MAP.abertura.apresentacao
+  const n = (nome || '').trim().split(/\s+/)[0] || ''
+  const oi = n ? `Oi, ${n[0].toUpperCase()}${n.slice(1)}!` : 'Oi!'
+  if (!n && !handoff) return `${oi} ${apresentacao} Com quem eu falo?`
+  return `${oi} ${apresentacao} ${texto}`
+}
+
+const PERGUNTOU_SE_E_ROBO = /(t[oô]|estou|t[aá]) falando com (um |uma )?(rob[oô]|bot|m[aá]quina|ia\b|intelig[eê]ncia)|(voc[eê]|vc) [eé] (um |uma )?(rob[oô]|bot|ia\b|intelig[eê]ncia|m[aá]quina|humana?|pessoa de verdade|gente de verdade)|[eé] (um )?(rob[oô]|bot)\s*\?|isso [eé] (um )?(rob[oô]|bot|autom[aá]tic)/i
+const CONFIRMOU = /assistente virtual|\bsou (uma |a )?(ia|intelig[eê]ncia artificial|rob[oô])\b|atendimento autom[aá]tico/i
+
+/**
+ * Perguntaram diretamente se é robô e ela desconversou: a resposta passa a confirmar (ela não mente).
+ * Em código porque, sem dizer "assistente virtual" na apresentação, o modelo às vezes fugia da pergunta
+ * (eval de 20/10/2026). Puro: testado.
+ */
+export function respostaHonesta(textoDoLead: string, texto: string): string {
+  if (!PERGUNTOU_SE_E_ROBO.test(textoDoLead || '') || CONFIRMOU.test(texto)) return texto
+  const ap = /^(oi[^.!?]*[.!]\s*)?aqui (é|e) a stela, da teles & stanquevicz advogados\.?\s*/i
+  if (ap.test(texto)) return texto.replace(ap, 'Sim, aqui é a Stela, a assistente virtual da Teles & Stanquevicz Advogados. ')
+  return `Sim, sou a assistente virtual do escritório. ${texto}`
+}
+
 export function createBrain(opts: LlmOptions) {
   const openai = new OpenAI({ apiKey: opts.apiKey })
 
@@ -211,7 +240,9 @@ export function createBrain(opts: LlmOptions) {
         }
       }
       const safe = await enforce(messages, text, usage, handoff, ctx)
-      return { text: comAcolhimento(ctx, turns, safe.text, handoff), toolsUsed, handoff, urgente, guard: safe.guard, usage }
+      const estado = await ctx.port.getState()
+      const texto = respostaHonesta(ctx.lastLeadText, primeiraMensagem(!estado.aberturaEnviada && lead.primeiroContatoDaPorta, estado.respostas?.nome || '', comAcolhimento(ctx, turns, safe.text, handoff), handoff))
+      return { text: texto, toolsUsed, handoff, urgente, guard: safe.guard, usage }
     }
 
     // Tools já mexeram no CRM: nunca deixar o lead em silêncio

@@ -49,7 +49,7 @@ export interface ToolOutcome { content: string; isError: boolean; handoff?: bool
 const ok = (content: string, extra: Partial<ToolOutcome> = {}): ToolOutcome => ({ content, isError: false, ...extra })
 const err = (content: string): ToolOutcome => ({ content, isError: true })
 
-export const MOTIVOS = ['qualificado', 'advogado_ativo', 'menor_de_idade', 'urgencia', 'fora_do_escopo', 'pediu_humano', 'desistiu'] as const
+export const MOTIVOS = ['qualificado', 'advogado_ativo', 'menor_de_idade', 'urgencia', 'fora_do_escopo', 'pediu_humano', 'cliente_do_escritorio', 'desistiu'] as const
 type Motivo = typeof MOTIVOS[number]
 
 /** Sinal mínimo que a evidência precisa ter para cada motivo de finalização. */
@@ -58,6 +58,7 @@ const SINAL_MOTIVO: Partial<Record<Motivo, RegExp>> = {
   menor_de_idade: /\b(1[0-7]|[5-9])\s*anos\b|menor|col[eé]gio|escola|minha m[aã]e|meu pai/i,
   urgencia: /comida|fome|comer|rem[eé]dio|medica|despej|aluguel atrasad|na rua|intern|hospital|urgent|desesper/i,
   desistiu: /desist|n[aã]o (quero|tenho interesse|preciso) mais|deixa (pra|para) l[aá]|pode encerrar|n[aã]o quero continuar|n[aã]o vou (querer|continuar)/i,
+  cliente_do_escritorio: /cliente|processo|contrat|advogad|caso|andamento/i,
   pediu_humano: /humano|pessoa|atendente|advogad|doutor|dra?\b|falar com|me liga|liga[cç][aã]o|reclam|cliente|processo|contrat|pix|boleto|pag(ar|amento)|conta\b|chave/i,
 }
 
@@ -210,6 +211,13 @@ export function snapshot(porta: Porta, state: LeadState): Snapshot {
 }
 
 /** As perguntas de qualificação (antes do horário) estão respondidas? */
+/** Valor do caso abaixo do limite: o closer atende direto e marca (a Stela não oferece horário). */
+export function closerAgenda(porta: Porta, state: LeadState): boolean {
+  if (!porta.antesDeAgendar?.length || state.reuniao) return false
+  const valor = valorDoCaso(porta.id, Object.fromEntries(Object.entries(state.respostas || {}).map(([k, v]) => [k, String(v).replace(/^formulário:\s*/, '')])))
+  return valor !== null && valor < CRM_MAP.negocio.responsaveis.limite
+}
+
 export function prontoParaAgendar(porta: Porta, state: LeadState): boolean {
   const sem = new Set(state.semResposta || [])
   return !!porta.antesDeAgendar?.length && porta.antesDeAgendar.every(key => state.respostas?.[key] || sem.has(key))
@@ -217,6 +225,9 @@ export function prontoParaAgendar(porta: Porta, state: LeadState): boolean {
 
 export function describeOpen(porta: Porta, s: Snapshot, state: LeadState = {}): string {
   if (!porta.roteiro.length) return ''
+  if (porta.antesDeAgendar?.length && prontoParaAgendar(porta, state) && closerAgenda(porta, state)) {
+    return 'Qualificação completa e o caso fica com um dos nossos especialistas, que conversa com a pessoa e marca a reunião. NÃO ofereça horário nem peça nome completo ou e-mail. Chame finalizar_atendimento(qualificado) e, depois, diga em uma frase que um dos nossos especialistas vai falar com ela por aqui para marcar a reunião, sem custo.'
+  }
   if (porta.antesDeAgendar?.length && prontoParaAgendar(porta, state) && !state.reuniao) {
     const falta = s.abertos.filter(c => c.key === 'nomeCompleto' || c.key === 'email').map(c => c.name)
     if (state.horarioEscolhido) return falta.length ? `Horário escolhido (${state.horarioEscolhido.label}), ainda não reservado. Peça agora: ${falta[0]}. Depois chame agendar_reuniao.` : `Tudo pronto: chame agendar_reuniao para reservar ${state.horarioEscolhido.label}.`
@@ -306,7 +317,19 @@ async function efeitosDoNegocio(ctx: ToolCtx, motivo: string, urgente: boolean):
     const vez = valor !== null && valor < neg.responsaveis.limite ? await port.nextTurn() : 0
     const quem = escolherResponsavel(valor, vez)
     if (porta.nichoEnumId) await tenta('gravar Nichos', () => port.writeFields([{ field_id: neg.nicho.fieldId, values: [{ enum_id: porta.nichoEnumId }] }]))
-    if (noFunil) {
+    const direto = !state.reuniao && valor !== null && valor < neg.responsaveis.limite
+    if (direto) {
+      const d = neg.atendimentoDireto
+      if (noFunil) {
+        await tenta('mover etapa', () => port.moveStage(d.statusId, d.pipelineId))
+        await tenta('trocar responsável', () => port.setResponsible(quem.userId))
+        linhas.push(`Etapa: ${d.name} · Responsável: ${quem.nome} (${quem.regra})`)
+      } else {
+        linhas.push(`Lead fora do funil SDR ou em etapa do time: etapa e responsável mantidos (${quem.regra})`)
+      }
+      await tenta('criar tarefa', () => port.addTask(d.tarefa, noFunil ? quem.userId : neg.responsavelPadrao, agoraS + d.prazoMin * 60, neg.tarefaTipo))
+      linhas.push(`Tarefa: ${d.tarefa}`)
+    } else if (noFunil) {
       if (lead.statusId !== neg.etapaQualificado.id) await tenta('mover etapa', () => port.moveStage(neg.etapaQualificado.id, neg.pipelineId))
       await tenta('trocar responsável', () => port.setResponsible(quem.userId))
       linhas.push(`Etapa: ${neg.etapaQualificado.name} · Responsável: ${quem.nome} (${quem.regra})`)
@@ -314,6 +337,7 @@ async function efeitosDoNegocio(ctx: ToolCtx, motivo: string, urgente: boolean):
       linhas.push(`Lead fora do funil SDR ou em etapa do time: etapa e responsável mantidos (${quem.regra})`)
     }
     const aquecer = quem.userId === neg.responsaveis.acima ? ' Aquecer o lead antes da reunião.' : ''
+    if (!direto) {
     const tarefa = state.reuniao
       ? `Reunião marcada pela IA: ${state.reuniao.label}.${aquecer}`
       : state.agendamentoFalhou
@@ -321,7 +345,20 @@ async function efeitosDoNegocio(ctx: ToolCtx, motivo: string, urgente: boolean):
         : 'Agendar a reunião: o lead aceitou, mas não reservou horário com a IA.'
     await tenta('criar tarefa', () => port.addTask(tarefa, noFunil ? quem.userId : (neg.responsavelPadrao), agoraS + 3600, neg.tarefaTipo))
     linhas.push(`Tarefa: ${tarefa}`)
+    }
     if (state.reuniao) linhas.push(`Reunião: ${state.reuniao.label}${state.reuniao.joinUrl ? ` · ${state.reuniao.joinUrl}` : ''}`)
+  } else if (motivo === 'cliente_do_escritorio') {
+    // Já é cliente: vai para o JURÍDICO (quem cuida do caso), com tarefa. Pedido do Dr. (20/10/2026)
+    const c = neg.clienteDoEscritorio
+    if (noFunil) {
+      await tenta('mover para o JURÍDICO', () => port.moveStage(c.statusId, c.pipelineId))
+      await tenta('trocar responsável', () => port.setResponsible(c.responsavel))
+      linhas.push(`Etapa: ${c.name} · Responsável: ${neg.responsaveis.nomes[c.responsavel] || c.responsavel}`)
+    } else {
+      linhas.push('Lead fora do funil SDR: etapa e responsável mantidos')
+    }
+    await tenta('criar tarefa', () => port.addTask(c.tarefa, c.responsavel, agoraS + c.prazoMin * 60, neg.tarefaTipo))
+    linhas.push(`Tarefa: ${c.tarefa}`)
   } else if (motivo === 'fora_do_escopo') {
     // Não dispensa sozinha: etiqueta e tarefa para a equipe conferir (Desqualificado só depois, pela equipe)
     const c = neg.conferirEscopo
@@ -437,7 +474,8 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         if (motivo === 'qualificado') {
           // "Não sabe" só vale se foi registrado por salvar_respostas com a fala do lead — nunca declarado na finalização
           const sem = new Set(state.semResposta || [])
-          const faltando = porta.obrigatorios.filter(key => !state.respostas?.[key] && !(sem.has(key) && !campoByKey(key)?.options))
+          const exigidos = closerAgenda(porta, state) ? (porta.antesDeAgendar || []) : porta.obrigatorios
+          const faltando = exigidos.filter(key => !state.respostas?.[key] && !(sem.has(key) && !campoByKey(key)?.options))
           if (faltando.length) return err(`NÃO encerre e não diga que vai passar para a equipe. Ainda falta: ${faltando.map(key => campoByKey(key)?.name || key).join('; ')}. ${describeOpen(porta, snapshot(porta, state), state)} Se o lead disse que não sabe, grave com salvar_respostas usando a fala dele como evidência.`)
         } else {
           const ev = String(input.evidencia || '')
@@ -455,6 +493,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         const state = await port.getState()
         if (state.reuniao) return ok(`A reunião já está marcada (${state.reuniao.label}). Não ofereça outro horário.`)
         if (!prontoParaAgendar(porta, state)) return err(`Ainda não dá para oferecer horário. ${describeOpen(porta, snapshot(porta, state), state)}`)
+        if (closerAgenda(porta, state)) return err(`Não ofereça horário: ${describeOpen(porta, snapshot(porta, state), state)}`)
         const pref: Preferencia = {}
         if (input.periodo === 'manha' || input.periodo === 'tarde') pref.periodo = input.periodo
         const dia = String(input.dia || '').trim().toLowerCase()

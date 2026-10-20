@@ -75,7 +75,7 @@ export default async function testesCliente(eq: Eq): Promise<number> {
     const port = {
       getLead: async () => ({ id: 1, statusId: w.statusId, pipelineId: w.pipelineId, fields: w.fields, tags: [...w.tags] }),
       writeFields: async (vs: Array<{ field_id: number; values: Array<{ value?: unknown; enum_id?: number }> }>) => { for (const v of vs) w.fields[v.field_id] = { value: v.values[0]?.value, enumIds: v.values.map(x => x.enum_id).filter((x): x is number => !!x) } },
-      moveStage: async (s: number) => { w.statusId = s },
+      moveStage: async (s: number, p?: number) => { w.statusId = s; if (p) w.pipelineId = p },
       addTags: async (t: string[]) => { t.forEach(x => w.tags.add(x)) }, removeTags: async (t: string[]) => { t.forEach(x => w.tags.delete(x)) },
       addNote: async (n: string) => { w.notes.push(n) },
       setResponsible: async (u: number) => { w.responsible = u },
@@ -97,6 +97,19 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão Itaú', valorDivida: 'uns 30 mil', nomeCompleto: 'João Souza', email: 'joao@x.com' } }
   await runTool(ctx(m.port, 'rcpcc', 'cartão Itaú uns 30 mil'), 'finalizar_atendimento', { motivo: 'qualificado', resumo: 'RCPCC.' })
   eq('qualificado RCPCC < 50 mil: CLOSER 2 na vez 1', m.w.responsible, 13015432)
+  eq('< 50 mil: card no CLOSER › Atendimento direto com tarefa de agendar', [m.w.statusId, m.w.pipelineId, /agendar a reunião/.test(m.w.tasks[0]?.[0] || '')], [neg.atendimentoDireto.statusId, neg.atendimentoDireto.pipelineId, true])
+  const { closerAgenda } = await import('../lib/tools')
+  const rcpcc = CRM_MAP.portas.find(p => p.id === 'rcpcc')!
+  eq('< 50 mil: o closer agenda; ≥ 50 mil e sem valor: a Stela agenda', [closerAgenda(rcpcc, { respostas: { tipoDivida: 'cartão', valorDivida: 'uns 35 mil' } }), closerAgenda(rcpcc, { respostas: { tipoDivida: 'cartão', valorDivida: 'uns 60 mil' } }), closerAgenda(rcpcc, { respostas: { tipoDivida: 'cartão', valorDivida: 'formulário: acima_de_r$_50_mil' } })], [true, false, false])
+  m = mundo(72186399)
+  m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão Itaú', valorDivida: 'uns 30 mil' } }
+  out = await runTool(ctx(m.port, 'rcpcc', 'cartão Itaú uns 30 mil'), 'ver_horarios', { periodo: 'qualquer', dia: '' })
+  eq('< 50 mil: ver_horarios recusado', out.isError, true)
+  out = await runTool(ctx(m.port, 'rcpcc', 'cartão Itaú uns 30 mil'), 'finalizar_atendimento', { motivo: 'qualificado', resumo: 'RCPCC.' })
+  eq('< 50 mil: finaliza sem nome completo e e-mail', [out.isError, m.w.statusId], [false, neg.atendimentoDireto.statusId])
+  m = mundo(72104583)
+  out = await runTool(ctx(m.port, 'rcpcc', 'já sou cliente de vocês, quero saber do meu processo'), 'finalizar_atendimento', { motivo: 'cliente_do_escritorio', evidencia: 'já sou cliente de vocês, quero saber do meu processo', resumo: 'Cliente.' })
+  eq('cliente do escritório: JURÍDICO › CONTACTAR CLIENTE, responsável e tarefa do jurídico', [out.handoff, m.w.pipelineId, m.w.statusId, m.w.responsible, m.w.tasks[0]?.[1]], [true, neg.clienteDoEscritorio.pipelineId, neg.clienteDoEscritorio.statusId, neg.clienteDoEscritorio.responsavel, neg.clienteDoEscritorio.responsavel])
 
   m = mundo(72186403, 9312103)
   m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão', valorDivida: '30 mil', nomeCompleto: 'Ana Lima', email: 'ana@x.com' } }
@@ -109,19 +122,19 @@ export default async function testesCliente(eq: Eq): Promise<number> {
 
   m = mundo(72186399)
   out = await runTool(ctx(m.port, 'rcpcc', 'já sou cliente de vocês, quero saber do meu processo'), 'finalizar_atendimento', { motivo: 'pediu_humano', evidencia: 'já sou cliente de vocês, quero saber do meu processo', resumo: 'Cliente ativo.' })
-  eq('cliente do escritório: pediu humano com tarefa para o SDR', [out.handoff, m.w.tasks[0]?.[1]], [true, neg.responsavelPadrao])
+  eq('pediu humano (cliente pelo motivo antigo): tarefa para o SDR', [out.handoff, m.w.tasks[0]?.[1]], [true, neg.responsavelPadrao])
 
   // Agenda: oferecer, escolher, pedir dados, reservar (Calendly falso)
   m = mundo(72186399)
-  m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão do itaú', valorDivida: 'uns 30 mil' } }
-  out = await runTool(ctx(m.port, 'rcpcc', 'cartão do itaú, uns 30 mil'), 'ver_horarios', { periodo: 'qualquer', dia: '' })
+  m.w.state = { porta: 'rcpcc', respostas: { tipoDivida: 'cartão do itaú', valorDivida: 'uns 60 mil' } }
+  out = await runTool(ctx(m.port, 'rcpcc', 'cartão do itaú, uns 60 mil'), 'ver_horarios', { periodo: 'qualquer', dia: '' })
   const oferta = (m.w.state.horariosOferecidos || []) as Array<{ label: string }>
   eq('ver_horarios guarda até 3 opções', [out.isError, oferta.length > 0 && oferta.length <= 3], [false, true])
   const escolha = `pode ser ${oferta[0].label.split(', às ')[0].split(', ')[0]} às ${oferta[0].label.split('às ')[1]}`
-  out = await runTool(ctx(m.port, 'rcpcc', `cartão do itaú, uns 30 mil\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'Cartão.' })
+  out = await runTool(ctx(m.port, 'rcpcc', `cartão do itaú, uns 60 mil\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'Cartão.' })
   eq('agendar sem nome/e-mail guarda o horário e pede o dado', [out.isError, !!m.w.state.horarioEscolhido, !!m.w.state.reuniao, /nome completo/.test(out.content)], [false, true, false, true])
   m.w.state.respostas = { ...m.w.state.respostas, nomeCompleto: 'Carlos Pereira', email: 'carlos@x.com' }
-  out = await runTool(ctx(m.port, 'rcpcc', `cartão do itaú, uns 30 mil\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'Cartão.' })
+  out = await runTool(ctx(m.port, 'rcpcc', `cartão do itaú, uns 60 mil\n${escolha}`), 'agendar_reuniao', { evidencia: escolha, observacao: '', resumo: 'Cartão.' })
   eq('agendar com dados reserva, grava a data e finaliza qualificado', [out.handoff, !!m.w.state.reuniao, typeof m.w.fields[neg.reuniao.fieldId]?.value, m.w.statusId, m.w.state.finalizado?.motivo], [true, true, 'number', neg.etapaQualificado.id, 'qualificado'])
 
   // Nome: só vale o que parece nome de pessoa (bug do eval de 16/10: frase do caso gravada como nome completo)
@@ -152,6 +165,17 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   m.w.state = { porta: 'rcv', respostas: {} }
   out = await runTool(ctx(m.port, 'rcv', 'Olá! Vi o anúncio e quero saber sobre a revisão do financiamento do meu veículo.'), 'salvar_respostas', { respostas: [{ campo: 'bancoVeiculo', evidencia: 'revisão do financiamento do meu veículo', valor: 'não informado' }] })
   eq('banco "não informado" não é gravado', [out.isError, m.w.state.respostas?.bancoVeiculo], [true, undefined])
+
+  const { primeiraMensagem } = await import('../lib/llm')
+  eq('1ª mensagem sem nome: apresenta e pergunta o nome', primeiraMensagem(true, '', 'Por qual banco foi o financiamento?', false), `Oi! ${CRM_MAP.abertura.apresentacao} Com quem eu falo?`)
+  eq('1ª mensagem com nome: apresenta e segue', primeiraMensagem(true, 'ana', 'Mais ou menos quanto está a dívida?', false), `Oi, Ana! ${CRM_MAP.abertura.apresentacao} Mais ou menos quanto está a dívida?`)
+  eq('1ª mensagem que já se apresenta fica igual', primeiraMensagem(true, '', 'Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?', false), 'Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?')
+  eq('depois da primeira mensagem: nada muda', primeiraMensagem(false, '', 'Quantas parcelas já foram pagas?', false), 'Quantas parcelas já foram pagas?')
+
+  const { respostaHonesta } = await import('../lib/llm')
+  eq('perguntou se é robô e ela desconversou: confirma', respostaHonesta('tô falando com um robô? tenho dívida no cheque especial', 'Aqui é a Stela, da Teles & Stanquevicz Advogados. Mais ou menos quanto está a dívida?'), 'Sim, aqui é a Stela, a assistente virtual da Teles & Stanquevicz Advogados. Mais ou menos quanto está a dívida?')
+  eq('perguntou se é robô e ela já confirmou: fica igual', respostaHonesta('você é um robô?', 'Sou a assistente virtual do escritório. Qual o valor da dívida?'), 'Sou a assistente virtual do escritório. Qual o valor da dívida?')
+  eq('não perguntou: fica igual', respostaHonesta('tenho dívida no cartão', 'Mais ou menos quanto está a dívida?'), 'Mais ou menos quanto está a dívida?')
 
   // Busca e apreensão: sem horário, conferência da equipe antes da reunião (pedido do Dr., 15/10/2026)
   const { buildTools } = await import('../lib/tools')

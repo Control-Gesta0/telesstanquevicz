@@ -8,7 +8,7 @@ import { k, redis } from './redis'
  * Calendly → Kommo (14/10/2026). O Calendly tem ~3x mais reuniões que o campo "Reunião" do Kommo;
  * sem esta ponte, lembrete e relatório só enxergam um terço delas.
  *   invitee.created  → acha o lead (telefone dígito a dígito, depois e-mail), grava Reunião + link,
- *                      leva para SDR › Reunião agendada (se estiver no SDR e não ganho), nota no card
+ *                      leva para SDR › Reunião agendada (se estiver no SDR e não ganho, ou no CLOSER › Atendimento direto), nota no card
  *   invitee.canceled → limpa Reunião se for a mesma, nota e tarefa "reagendar" (remarcação não conta)
  * Lead não encontrado: não cria (evita duplicata); vai para o diário.
  * Funções de casamento são puras (rodam em `npm test`).
@@ -108,7 +108,10 @@ export async function sincronizarConvidado(evento: 'invitee.created' | 'invitee.
     const writes = [{ field_id: neg.reuniao.fieldId, values: [{ value: inicioS }] }, ...(c.scheduled_event?.location?.join_url ? [{ field_id: neg.reuniao.linkFieldId, values: [{ value: c.scheduled_event.location.join_url }] }] : [])]
     await updateLeadFields(lead.id, writes)
     let mov = ''
-    if (lead.pipelineId === neg.pipelineId && lead.statusId !== 142 && lead.statusId !== neg.etapaQualificado.id) {
+    // Do SDR (menos ganho) ou do CLOSER › Atendimento direto (o closer marcou): vai para SDR › Reunião agendada,
+    // onde o closer confere a agenda do dia (pedido do Dr., 20/10/2026). Responsável mantido.
+    const doDireto = lead.pipelineId === neg.atendimentoDireto.pipelineId && lead.statusId === neg.atendimentoDireto.statusId
+    if (doDireto || (lead.pipelineId === neg.pipelineId && lead.statusId !== 142 && lead.statusId !== neg.etapaQualificado.id)) {
       await updateLeadStatus(lead.id, neg.etapaQualificado.id, neg.pipelineId)
       mov = ` Movido para ${neg.etapaQualificado.name}.`
     }

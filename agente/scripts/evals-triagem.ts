@@ -20,7 +20,7 @@ const CASOS: Array<{ texto: string; assunto: string[]; nome: string }> = [
   { texto: 'atrasei 3 parcelas do carro e tô com medo de tomarem', assunto: ['dba', 'rcv'], nome: '' },
   { texto: 'meu nome é Carla, é sobre aposentadoria do INSS', assunto: ['fora'], nome: 'Carla' },
   { texto: 'preciso de ajuda com uma causa trabalhista', assunto: ['fora'], nome: '' },
-  { texto: 'já sou cliente, quero saber do meu processo', assunto: ['outro'], nome: '' },
+  { texto: 'já sou cliente, quero saber do meu processo', assunto: ['cliente'], nome: '' },
   { texto: 'quero falar com um advogado', assunto: ['outro', 'indefinido'], nome: '' },
 ]
 
@@ -62,7 +62,7 @@ const FLUXOS: Array<{ id: string; msgs: string[]; checa: (respostas: string[], e
   {
     id: 'já é cliente',
     msgs: ['oi, já sou cliente de vocês e queria saber do meu processo'],
-    checa: (r, e) => [e.state?.finalizado?.motivo === 'porta_sem_agente' ? '' : `deveria passar para a equipe (veio ${e.state?.finalizado?.motivo})`, /aqui é a stela/i.test(r[0]) ? '' : 'deveria se apresentar na primeira mensagem'],
+    checa: (r, e) => [e.state?.finalizado?.motivo === 'cliente_do_escritorio' ? '' : `deveria passar para o jurídico (veio ${e.state?.finalizado?.motivo})`, /aqui é a stela/i.test(r[0]) ? '' : 'deveria se apresentar na primeira mensagem'],
   },
 ]
 

@@ -119,10 +119,23 @@ export const CENARIOS: Cenario[] = [
     id: 'cliente-ativo',
     porta: 'rcpcc',
     msgs: ['Já sou cliente de vocês, quero saber do andamento do meu processo'],
-    checks: [finalizou('pediu_humano'), { nome: 'tarefa para a equipe', fn: (w: World) => w.tasks.length === 1 }],
+    checks: [finalizou('cliente_do_escritorio'), { nome: 'tarefa para o jurídico', fn: (w: World) => w.tasks.length === 1 },
+      { nome: 'card no JURÍDICO › CONTACTAR CLIENTE', fn: (w: World) => w.pipelineId === 9312127 && w.statusId === 72188239 && w.responsible === 11719371 }],
     criterios: [
-      'Encaminha para a equipe responsável sem fazer pitch nem perguntas de qualificação',
+      'Encaminha para a equipe jurídica que cuida do caso, sem fazer pitch nem perguntas de qualificação',
       'Não inventa andamento do processo',
+    ],
+  },
+  {
+    id: 'abaixo-50k',
+    porta: 'rcpcc',
+    msgs: ['Tenho uma dívida no cartão do Santander, uns 30 mil'],
+    checks: [umaPergunta, semFallback, tomHumano, finalizou('qualificado'), naoMarcou,
+      { nome: 'não ofereceu horário', fn: (_w: World, t: Turno[]) => !t.some(x => x.tools.includes('ver_horarios')) },
+      { nome: 'card no CLOSER › Atendimento direto com o closer', fn: (w: World) => w.pipelineId === 9312103 && w.statusId === 113161464 && [11719359, 13015432].includes(w.responsible ?? 0) }],
+    criterios: [
+      'Não oferece horário nem pede nome completo ou e-mail',
+      'Diz que um dos especialistas do escritório vai falar com a pessoa por aqui para marcar a reunião',
     ],
   },
   {
@@ -136,15 +149,15 @@ export const CENARIOS: Cenario[] = [
   {
     id: 'agenda-completa',
     porta: 'rcpcc',
-    fields: { 1047061: { value: 'entre_r$_30_mil_e_r$_50_mil', enumIds: [] }, 1047063: { value: 'com_parcelas_atrasadas_há_mais_de_90_dias', enumIds: [] }, 1047065: { value: 'cartão_de_crédito', enumIds: [] } },
-    state: { respostas: { valorDivida: 'formulário: entre r$ 30 mil e r$ 50 mil', atraso: 'formulário: com parcelas atrasadas há mais de 90 dias', tipoDivida: 'formulário: cartão de crédito' } },
+    fields: { 1047061: { value: 'acima_de_r$_50_mil', enumIds: [] }, 1047063: { value: 'com_parcelas_atrasadas_há_mais_de_90_dias', enumIds: [] }, 1047065: { value: 'cartão_de_crédito', enumIds: [] } },
+    state: { respostas: { valorDivida: 'formulário: acima de r$ 50 mil', atraso: 'formulário: com parcelas atrasadas há mais de 90 dias', tipoDivida: 'formulário: cartão de crédito' } },
     msgs: ['Oi, vi o anúncio. Minha dívida é no cartão do Nubank', 'pode ser o primeiro horário', 'Maria Aparecida Souza', 'maria.souza@gmail.com'],
     checks: [
       umaPergunta, semFallback, tomHumano,
       usou('ver_horarios'), usou('agendar_reuniao'),
       { nome: 'reservou e finalizou qualificado', fn: (w: World) => !!w.state.reuniao && w.state.finalizado?.motivo === 'qualificado' },
       { nome: 'moveu para AGENDAR REUNIÃO no funil SDR', fn: (w: World) => w.statusId === AGENDAR && w.pipelineId === SDR_PIPE },
-      { nome: 'responsável pelo rodízio (< 50 mil)', fn: (w: World) => w.responsible === 13015432 },
+      { nome: 'responsável a SDR (≥ 50 mil)', fn: (w: World) => w.responsible === 11719355 },
       { nome: 'não perguntou o valor de novo', fn: (_w: World, t: Turno[]) => !/quanto (est[aá]|[eé]|d[aá])|valor (aproximado|da d[ií]vida)/i.test(t[0]?.resposta || '') },
     ],
     criterios: [
@@ -156,8 +169,8 @@ export const CENARIOS: Cenario[] = [
   {
     id: 'horario-fora-da-oferta',
     porta: 'rcpcc',
-    state: { respostas: { tipoDivida: 'cartão do Itaú', valorDivida: 'uns 40 mil' } },
-    historico: [['in', 'é no cartão do Itaú, uns 40 mil'], ['out', 'Entendi. Dá para conversar sem custo com um dos nossos especialistas pelo Google Meet. Qual período fica melhor para você, manhã ou tarde?']],
+    state: { respostas: { tipoDivida: 'cartão do Itaú', valorDivida: 'uns 60 mil' } },
+    historico: [['in', 'é no cartão do Itaú, uns 60 mil'], ['out', 'Entendi. Dá para conversar sem custo com um dos nossos especialistas pelo Google Meet. Qual período fica melhor para você, manhã ou tarde?']],
     msgs: ['pode ser sábado de manhã?'],
     checks: [umaPergunta, naoMarcou, semFallback, usou('ver_horarios')],
     criterios: [

@@ -81,6 +81,8 @@ async function main() {
   const t5 = decidirTriagem({ aberturaEnviada: true, tentativasTriagem: 1 }, { assunto: 'rcpcc', nome: 'João' })
   eq('triagem entendeu: trava a porta e leva o nome', [id(t5), t5.tipo === 'porta' && t5.patch?.respostas?.nome], ['rcpcc', 'João'])
   eq('outro assunto (cliente, pessoa) vai para a equipe', id(decidirTriagem({}, { assunto: 'outro', nome: '' })), A.portaOutros)
+  const tc = decidirTriagem({}, { assunto: 'cliente', nome: '' })
+  eq('já é cliente: vai para a equipe marcado como cliente do escritório', [id(tc), tc.tipo === 'porta' && tc.motivo], [A.portaOutros, 'cliente_do_escritorio'])
   const t6 = decidirTriagem({}, { assunto: 'fora', nome: 'Paulo' })
   eq('assunto não bancário encerra e, no primeiro contato, ela se apresenta', [t6.tipo, t6.tipo === 'encerrar' && t6.texto], ['encerrar', `Oi, Paulo! ${A.apresentacao} ${A.foraDoEscopo.replace(/^Entendi\.\s*/, '')}`])
   const t7 = decidirTriagem({ aberturaEnviada: true }, { assunto: 'fora', nome: '' })

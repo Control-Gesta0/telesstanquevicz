@@ -441,6 +441,9 @@ export function regras() {
       { gatilho: '5 dias em Follow-up sem resposta', efeito: 'Vai para perdido (Lead Desaparecido) com a etiqueta "Desqualificado".' },
       { gatilho: 'Venda perdida no CLOSER com o motivo "Retomar depois (volta ao SDR)"', efeito: 'Volta para SDR › Follow-up, com a Gabi (SDR), etiqueta "Follow up", tarefa de retomar em 24 h e nota.' },
       { gatilho: 'Venda perdida no CLOSER com outro motivo', efeito: 'Põe a etiqueta "Desqualificado".' },
+      { gatilho: 'Stela qualifica um caso abaixo de R$ 50 mil', efeito: 'Não marca: card em CLOSER › Atendimento direto, rodízio CLOSER 1 e CLOSER 2, tarefa de conversar e agendar.' },
+      { gatilho: 'Closer marca no Calendly um lead do Atendimento direto', efeito: 'Card vai para SDR › Reunião agendada, com data e link, mantendo o closer como responsável.' },
+      { gatilho: 'Já é cliente do escritório', efeito: 'Card em JURÍDICO › CONTACTAR CLIENTE, responsável JURÍDICO, tarefa de responder.' },
       { gatilho: 'Busca e apreensão atendida pela Stela', efeito: 'Card em Em atendimento, com a Gabi (SDR), e tarefa de consultar o processo e confirmar a reunião em 30 minutos.' },
       { gatilho: 'Assunto que parece não bancário', efeito: 'Etiqueta "Conferir escopo" e tarefa para a Gabi (SDR) conferir antes de dispensar.' },
       { gatilho: `Mais de ${CRM_MAP.automacoes.limiteEmMassa.eventos} mudanças em ${CRM_MAP.automacoes.limiteEmMassa.janelaSeg / 60} min`, efeito: 'As automações pausam: é limpeza de funil, não venda.' },
@@ -506,7 +509,7 @@ interface Mundo {
 const LIMITE_DIA = Number(process.env.LAB_LIMITE_DIA || 150)
 const LIMITE_SESSAO = 24
 const CAMPO_NOME: Record<number, string> = { 1023263: 'Nicho', 719788: 'Data da reunião', 1012980: 'Link da reunião', 1023548: 'Desqualificado' }
-const ETAPAS_LAB: Record<number, string> = { 72104583: 'Leads de entrada', 72186399: 'Em atendimento', 72104595: 'Follow-up', 86825532: 'Reunião agendada', 72113011: 'No-show' }
+const ETAPAS_LAB: Record<number, string> = { 72104583: 'Leads de entrada', 72186399: 'Em atendimento', 72104595: 'Follow-up', 86825532: 'Reunião agendada', 72113011: 'No-show', 113161464: 'CLOSER › Atendimento direto (até R$ 50 mil)', 72188239: 'JURÍDICO › CONTACTAR CLIENTE' }
 
 function portaDoMundo(w: Mundo, eventos: string[]): LeadPort {
   const nomeResp = (id: number) => CRM_MAP.negocio.responsaveis.nomes[id] || `usuário ${id}`
@@ -590,6 +593,14 @@ export async function laboratorio(p: { sessao?: string; porta?: string; msg?: st
     }
     if (rota.tipo !== 'porta') return fechar(CRM_MAP.textoSeguro)
     if (!rota.porta.ativa) {
+      const textoLead = w.history.filter(m => m.dir === 'in').map(m => m.text).join('\n')
+      const cliente = rota.motivo === 'cliente_do_escritorio' || !!CRM_MAP.alertas.find(a => a.nome === 'cliente do escritório')?.re.test(textoLead)
+      if (cliente) {
+        const c = CRM_MAP.negocio.clienteDoEscritorio
+        w.state.finalizado = { motivo: 'cliente_do_escritorio', resumo: 'já é cliente do escritório', em: new Date().toISOString() }
+        eventos.push(`Passaria para o jurídico: moveria o card para ${c.name}, com o JURÍDICO como responsável e a tarefa "${c.tarefa}"`)
+        return fechar(comApresentacao(w.state, rota.patch?.respostas?.nome || w.state.respostas?.nome || '', CRM_MAP.abertura.clienteDoEscritorio), [], usdTriagem)
+      }
       w.state.finalizado = { motivo: 'porta_sem_agente', resumo: 'assunto fora dos três que a Stela atende', em: new Date().toISOString() }
       eventos.push('Passaria para a equipe: o assunto não é um dos três que ela atende (tarefa "Assumir o atendimento" para o SDR).')
       return fechar(comApresentacao(w.state, rota.patch?.respostas?.nome || w.state.respostas?.nome || '', rota.porta.mensagemSemAgente || CRM_MAP.textoSeguroFinal), [], usdTriagem)

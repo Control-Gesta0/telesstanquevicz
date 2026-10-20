@@ -126,9 +126,11 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
 
       // 2. Porta sem agente: mensagem fixa e finaliza (sem LLM)
       if (!porta.ativa) {
-        const fixo = porta.mensagemSemAgente || 'Anotei aqui. Alguém da equipe continua a conversa com você por aqui.'
+        // Já é cliente (triagem ou palavra-chave): vai para o JURÍDICO com tarefa, não para o SDR
+        const cliente = rota.motivo === 'cliente_do_escritorio' || !!CRM_MAP.alertas.find(a => a.nome === 'cliente do escritório')?.re.test(textoDoLead)
+        const fixo = cliente ? CRM_MAP.abertura.clienteDoEscritorio : porta.mensagemSemAgente || 'Anotei aqui. Alguém da equipe continua a conversa com você por aqui.'
         const texto = rota.travou ? comApresentacao(state, rota.patch?.respostas?.nome || state.respostas?.nome || '', fixo) : fixo
-        await aplicarFinalizacao(ctx, 'porta_sem_agente', `Assunto: ${porta.label}. Primeira mensagem: ${textoTurno.slice(0, 300)}`)
+        await aplicarFinalizacao(ctx, cliente ? 'cliente_do_escritorio' : 'porta_sem_agente', `${cliente ? 'Cliente do escritório' : `Assunto: ${porta.label}`}. Primeira mensagem: ${textoTurno.slice(0, 300)}`)
         const detail = await enviar(leadId, texto)
         await markAnswered(leadId, target.id)
         await logExec({ tipo: 'finalizou', leadId, nome, porta: porta.id, ms: Date.now() - t0, detalhe: `porta sem agente · ${detail}` })

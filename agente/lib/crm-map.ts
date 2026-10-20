@@ -122,6 +122,8 @@ export const CRM_MAP = {
     /** assunto que parece não bancário: NÃO recusa (pedido do Dr., 15/10/2026). Passa para a equipe conferir antes de dispensar */
     foraDoEscopo: 'Entendi. Vou passar o seu caso para a nossa equipe dar uma olhada, e alguém continua a conversa com você por aqui.',
     /** depois disso sem entender o assunto, passa para a equipe (porta outros) */
+    /** já é cliente: vai para o JURÍDICO */
+    clienteDoEscritorio: 'Anotei aqui. A equipe jurídica que cuida do seu caso vê isso e te responde por aqui.',
     maxTentativas: 3,
     portaOutros: 'geral',
   },
@@ -142,7 +144,7 @@ export const CRM_MAP = {
     {
       nome: 'cliente do escritório',
       re: /j[aá] sou cliente|sou cliente de voc|meu processo (com|a[ií])|andamento do (meu )?processo|contrato (com|de) voc[eê]s|j[aá] contratei voc|minha advogada a[ií]|meu advogado a[ií]/i,
-      aviso: 'Parece cliente do escritório. Não faça pitch nem perguntas de qualificação: diga que a equipe responsável vê o caso dele por aqui e chame finalizar_atendimento(pediu_humano).',
+      aviso: 'Parece cliente do escritório. Não faça pitch nem perguntas de qualificação: chame finalizar_atendimento(cliente_do_escritorio) e diga que a equipe jurídica que cuida do caso responde por aqui.',
     },
     {
       nome: 'pagamento',
@@ -178,7 +180,7 @@ export const CRM_MAP = {
       abaixo: [11719359, 13015432],
       /** do limite para cima, ou valor desconhecido: SDR aquece antes da reunião */
       acima: 11719355,
-      nomes: { 11719359: 'CLOSER 1', 13015432: 'CLOSER 2', 11719355: 'Gabi (SDR)' } as Record<number, string>,
+      nomes: { 11719359: 'CLOSER 1', 13015432: 'CLOSER 2', 11719355: 'Gabi (SDR)', 11719371: 'JURÍDICO' } as Record<number, string>,
     },
     /** tipo de tarefa do Kommo: 1 = Follow-up */
     tarefaTipo: 1,
@@ -186,6 +188,13 @@ export const CRM_MAP = {
     conferirEscopo: { tag: 'Conferir escopo', tarefa: 'Conferir escopo: a IA entendeu que o assunto não é bancário. Confira a conversa antes de dispensar.', prazoMin: 60 },
     /** humano que recebe "pediu humano", "outro assunto" e falhas */
     responsavelPadrao: 11719355,
+    /**
+     * Pedido do Dr. (20/10/2026): abaixo do limite, o closer atende direto, conversa e agenda a reunião.
+     * A Stela NÃO oferece horário: o card vai para esta etapa com o closer do rodízio e uma tarefa.
+     */
+    atendimentoDireto: { pipelineId: 9312103, statusId: 113161464, name: 'CLOSER › Atendimento direto (até R$ 50 mil)', tarefa: 'Atendimento direto: conversar com o lead pelo WhatsApp e agendar a reunião.', prazoMin: 60 },
+    /** Quem já é cliente: JURÍDICO › CONTACTAR CLIENTE, responsável JURIDICO, tarefa (pedido do Dr., 20/10/2026) */
+    clienteDoEscritorio: { pipelineId: 9312127, statusId: 72188239, name: 'JURÍDICO › CONTACTAR CLIENTE', responsavel: 11719371, tarefa: 'Cliente do escritório escreveu no WhatsApp: ver a conversa e responder.', prazoMin: 60 },
   },
 
   /**
