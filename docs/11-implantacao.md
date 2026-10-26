@@ -30,3 +30,29 @@
 Também na tela: acesso dos closers (GUILHERME, CLAUDIA) à etapa SDR › Reunião agendada; conferir se os robôs do JURÍDICO disparam em CONTACTAR CLIENTE.
 
 Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados, a origem passa a vir do rastreador da Vercel, que precisa do número do WhatsApp do escritório (`WHATSAPP_NUMERO`). Sem o número, "De onde" e campanha ficam em branco.
+
+## Mensagens prontas do Google (26/10/2026)
+
+- "Olá! Vim através do Google e gostaria de mais informações sobre Revisão de Financiamento de Veículos" → trava **financiamento de veículo** pela palavra-chave (o plural "Veículos" escapava e caía na IA). Card: De onde = Google, utm google/cpc/rcv, etiquetas **GOOGLE + RCV**.
+- "Olá! Vim através do Google e gostaria de mais informações sobre Defesa em ação de Busca e Apreensão" → **busca e apreensão**. Card: De onde = Google, utm google/cpc/dba, etiquetas **GOOGLE + DBA**.
+- Vale para todo lead (com ou sem a Stela), uma vez por lead. As etiquetas entram sempre; "De onde" só é gravado se estiver vazio. Instagram e Facebook/Meta com a mesma frase também gravam a origem (sem etiqueta, até haver pedido).
+- Prova no Kommo real: card de teste 26294985 (sem contato) com GOOGLE + DBA e De onde Google; fechado depois.
+- Correções que a avaliação pegou: "Olá!" era aceito como nome (acento no fim da palavra); "ainda não levaram" fazia a Stela perguntar a data da apreensão; reforço para gravar o que a pessoa já contou antes de perguntar.
+- Avaliação completa: **57/57** (19 cenários × 3, com `google-rcv` e `google-dba`). Triagem 45/45 e 5/5.
+
+## Auditoria contra o PDF de uso (26/10/2026)
+
+| No PDF | Situação |
+|---|---|
+| Etapas SDR (Leads de entrada, Em atendimento, Follow-up, Reunião agendada, No-show) | existem |
+| Etapas CLOSER (Leads de entrada, Atendimento direto, Proposta, Contrato, Pagamento) | existem |
+| JURÍDICO › CONTACTAR CLIENTE | existe |
+| Motivo de perda "Retomar depois (volta ao SDR)" | existe (39348516) |
+| Lead escreveu → Em atendimento; etiqueta Follow up; 5 dias → perdido | ligadas (webhook + relógio QStash de 15 min) |
+| Calendly marcou/remarcou/cancelou → card | ligado (webhook 98a6fd10, ativo) |
+| Ganho SDR → Proposta; Venda ganha → JURÍDICO; Venda perdida (Retomar depois / Desqualificado) | ligadas (webhook status_lead) |
+| Stela: qualifica, atendimento direto, busca e apreensão, fora do escopo, cliente → jurídico | prontas; atendendo só com `ia-stela` até a virada |
+| Origem: mensagem do Google | ligada |
+| Origem: links rastreados | aguardam o número do WhatsApp |
+| Lembretes 24 h e 2 h | seguem pelos robôs do Kommo (Vercel em modo sombra) |
+| Robôs antigos desligados, gatilhos do "Automatizar" removidos, acesso dos closers à Reunião agendada | só pela tela do Kommo (API não permite): pendente |

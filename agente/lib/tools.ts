@@ -253,7 +253,7 @@ export function pareceNome(texto: string, minPalavras = 1): string {
   if (!/^[\p{L}' .-]{2,80}$/u.test(limpo)) return ''
   const palavras = limpo.split(' ').filter(w => w.length > 1 || /^[a-z]$/i.test(w))
   if (palavras.length < minPalavras || palavras.length > 6) return ''
-  if (/\b(n[aã]o|sim|ok|oi|ol[aá]|bom dia|boa tarde|boa noite|obrigad[oa]|pode|quero|tenho|meu|minha|carro|d[ií]vida|banco|parcela|segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo|manh[aã]|tarde|noite|hora|hor[aá]rio|amanh[aã]|hoje|primeir[oa]|segund[oa]|[uú]ltim[oa]|esse|essa|melhor)\b/i.test(limpo)) return ''
+  if (/(?<!\p{L})(n[aã]o|sim|ok|oi|ol[aá]|bom dia|boa tarde|boa noite|obrigad[oa]|pode|quero|tenho|meu|minha|carro|d[ií]vida|banco|parcela|segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo|manh[aã]|tarde|noite|hora|hor[aá]rio|amanh[aã]|hoje|primeir[oa]|segund[oa]|[uú]ltim[oa]|esse|essa|melhor)(?!\p{L})/iu.test(limpo)) return ''
   return limpo
 }
 
@@ -443,6 +443,8 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           salvos.push(`${campo.name} = ${c.texto}`)
           if (campo.id > 0 && !CRM_MAP.camposProibidos.includes(campo.id)) writes.push({ field_id: campo.id, values: c.values })
         }
+        // Busca e apreensão que ainda não aconteceu: a data não existe, não se pergunta (eval de 26/10/2026)
+        if (respostas.apreendido && /ainda n[aã]o|n[aã]o (levaram|foi|apreend|tomaram|pegaram)|ainda (est[aá]|t[aá]) comigo|t[aá] comigo/i.test(respostas.apreendido) && !respostas.dataApreensao) semResposta.add('dataApreensao')
         if (writes.length) await port.writeFields(writes)
         const next = await port.patchState({ respostas, semResposta: [...semResposta] })
         return {

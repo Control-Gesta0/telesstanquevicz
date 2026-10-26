@@ -74,7 +74,7 @@ export const CRM_MAP = {
       promptFile: 'rcv.md',
       prioridade: 2,
       nichoEnumId: 744547,
-      sinais: /\b(carro|ve[ií]culo|moto|caminh[aã]o|caminhonete|financiei|financiad[oa]|financiamento do (carro|ve[ií]culo)|parcela do carro)\b/i,
+      sinais: /\b(carros?|ve[ií]culos?|motos?|caminh[aã]o|caminh[oõ]es|caminhonetes?|financiei|financiad[oa]|financiamento d[oe] (carro|ve[ií]culo)s?|revis[aã]o d[oe] financiamento|parcela do carro)\b/i,
       roteiro: ['nome', 'bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela', 'contrato', 'nomeCompleto', 'email'],
       obrigatorios: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela', 'nomeCompleto', 'email'],
       antesDeAgendar: ['bancoVeiculo', 'parcelasTotal', 'parcelasPagas', 'valorParcela'],
@@ -306,6 +306,19 @@ export const CRM_MAP = {
       DBA1: { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'ctwa', utm_campaign: 'dba' },
     } as Record<string, { deOnde: string; utm_source: string; utm_medium: string; utm_campaign: string }>,
     validadeCodigoDias: 7,
+    /**
+     * Frase pronta do anúncio, sem código (ex.: Google: "Olá! Vim através do Google e gostaria de mais
+     * informações sobre Revisão de Financiamento de Veículos"). Grava a origem só se "De onde" estiver vazio.
+     * Substitui os robôs "Painel - Google/Meta/Instagram" do Kommo (pedido de 26/10/2026).
+     */
+    frases: [
+      // pedido de 26/10/2026: etiqueta GOOGLE + a do assunto (DBA, RCV, RCPCC)
+      { re: /\b(vim|cheguei|vi) (atrav[eé]s do|pelo|por meio do|no) google\b/i, deOnde: 'Google', utm_source: 'google', utm_medium: 'cpc', etiqueta: 'GOOGLE' },
+      { re: /\b(vim|cheguei|vi) (atrav[eé]s do|pelo|por meio do|no) instagram\b/i, deOnde: 'Instagram', utm_source: 'instagram', utm_medium: 'social' },
+      { re: /\b(vim|cheguei|vi) (atrav[eé]s do|pelo|por meio do|no) (facebook|meta)\b/i, deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'paid_social' },
+    ] as Array<{ re: RegExp; deOnde: string; utm_source: string; utm_medium: string; etiqueta?: string }>,
+    /** etiqueta do assunto, junto com a da frase do anúncio */
+    etiquetasAssunto: { dba: 'DBA', rcv: 'RCV', rcpcc: 'RCPCC' } as Record<string, string>,
   },
 
   calendly: {

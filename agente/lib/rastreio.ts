@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { CRM_MAP } from './crm-map'
 import { logExec } from './execlog'
-import { updateLeadFields, type KommoFieldValue } from './kommo'
+import { addLeadTags, kommoGet, updateLeadFields, type KommoFieldValue, type KommoLead } from './kommo'
 import { k, redis } from './redis'
 
 /**
@@ -71,9 +71,46 @@ export async function registrarClique(o: Origem): Promise<string> {
 }
 
 /** Lê o código da 1ª mensagem, grava a origem no lead e devolve o texto limpo. Nunca derruba o inbound. */
+/** Origem pela frase pronta do anúncio (sem código). Puro: testado. A campanha sai do assunto da frase. */
+export function etiquetasPorFrase(texto: string): string[] {
+  const f = CRM_MAP.rastreio.frases.find(x => x.re.test(texto || ''))
+  const o = origemPorFrase(texto)
+  if (!f || !o || !f.etiqueta) return []
+  const assunto = o.utm_campaign ? CRM_MAP.rastreio.etiquetasAssunto[o.utm_campaign] : ''
+  return [f.etiqueta, ...(assunto ? [assunto] : [])]
+}
+
+export function origemPorFrase(texto: string): Origem | null {
+  const f = CRM_MAP.rastreio.frases.find(x => x.re.test(texto || ''))
+  if (!f) return null
+  const campanha = /busca e apreens/i.test(texto) ? 'dba' : /financiamento|ve[ií]culo/i.test(texto) ? 'rcv' : /juros|d[ií]vida|empr[eé]stimo|cart[aã]o/i.test(texto) ? 'rcpcc' : ''
+  return { slug: `frase-${f.deOnde.toLowerCase()}${campanha ? `-${campanha}` : ''}`, deOnde: f.deOnde, utm_source: f.utm_source, utm_medium: f.utm_medium, ...(campanha ? { utm_campaign: campanha } : {}) }
+}
+
 export async function aplicarRastreio(leadId: number, texto: string): Promise<string> {
   const m = lerMarca(texto)
-  if (!m.tipo) return texto
+  if (!m.tipo) {
+    const o = origemPorFrase(texto)
+    // Uma vez por lead, e só se "De onde" ainda estiver vazio (não sobrescreve origem melhor)
+    if (o && (await redis.set(k('rastro-frase', leadId), '1', { nx: true, ex: 30 * 86400 })) === 'OK') {
+      try {
+        const etiquetas = etiquetasPorFrase(texto)
+        if (etiquetas.length) await addLeadTags(leadId, etiquetas)
+        const lead = await kommoGet<KommoLead>(`/api/v4/leads/${leadId}`)
+        const temOrigem = (lead.custom_fields_values || []).some(f => f.field_id === CRM_MAP.rastreio.deOnde.fieldId && f.values?.length)
+        if (!temOrigem) {
+          await updateLeadFields(leadId, camposDaOrigem(o))
+          const dia = new Date().toISOString().slice(0, 10)
+          await redis.incr(k('rastro-leads', dia, o.slug || '?'))
+          await redis.expire(k('rastro-leads', dia, o.slug || '?'), 120 * 86400)
+          await logExec({ tipo: 'automacao', leadId, detalhe: `rastreio pela frase do anúncio${etiquetas.length ? ` · etiquetas ${etiquetas.join(' + ')}` : ''}: De onde ${o.deOnde} · ${o.utm_source}/${o.utm_medium}/${o.utm_campaign || '—'}` })
+        }
+      } catch (e) {
+        console.error('[rastreio] frase falhou:', e)
+      }
+    }
+    return texto
+  }
   try {
     let o: Origem | null = null
     if (m.tipo === 'cod') {

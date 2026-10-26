@@ -191,6 +191,25 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('todos: lead novo em Reunião agendada não atende', liberadoParaStela({ ...novoSdr, status_id: 86825532 }, [], cfgTodos).sim, false)
   eq('etiqueta atendimento-humano sempre vence', liberadoParaStela(novoSdr, ['ia-stela', 'atendimento-humano'], cfgTodos).sim, false)
 
+  // Mensagens prontas dos anúncios do Google (26/10/2026)
+  const { rotear: rotearG } = await import('../lib/router')
+  const { origemPorFrase } = await import('../lib/rastreio')
+  const gRcv = 'Olá! Vim através do Google e gostaria de mais informações sobre Revisão de Financiamento de Veículos'
+  const gDba = 'Olá! Vim através do Google e gostaria de mais informações sobre Defesa em ação de Busca e Apreensão'
+  const pid = (r: any) => r.tipo === 'porta' ? r.porta.id : r.tipo
+  eq('Google RCV trava financiamento de veículo pela palavra-chave', pid(rotearG({}, gRcv)), 'rcv')
+  eq('Google DBA trava busca e apreensão pela palavra-chave', pid(rotearG({}, gDba)), 'dba')
+  eq('Google RCV: origem Google, campanha rcv', [origemPorFrase(gRcv)?.deOnde, origemPorFrase(gRcv)?.utm_campaign], ['Google', 'rcv'])
+  eq('Google DBA: origem Google, campanha dba', [origemPorFrase(gDba)?.deOnde, origemPorFrase(gDba)?.utm_campaign], ['Google', 'dba'])
+  eq('mensagem comum não vira origem', origemPorFrase('oi, tenho uma dívida no cartão'), null)
+  const { etiquetasPorFrase } = await import('../lib/rastreio')
+  eq('Google: etiquetas GOOGLE + RCV / GOOGLE + DBA', [etiquetasPorFrase(gRcv), etiquetasPorFrase(gDba)], [['GOOGLE', 'RCV'], ['GOOGLE', 'DBA']])
+  eq('"Olá!" e "Bom dia" não viram nome', [pareceNome('Olá!'), pareceNome('Bom dia!'), pareceNome('manhã')], ['', '', ''])
+  m = mundo(72186399)
+  m.w.state = { porta: 'dba', respostas: {} }
+  await runTool(ctx(m.port, 'dba', 'ainda não levaram, mas chegou uma notificação'), 'salvar_respostas', { respostas: [{ campo: 'apreendido', evidencia: 'ainda não levaram', valor: 'não' }] })
+  eq('busca e apreensão ainda não feita: data não é perguntada', (m.w.state.semResposta || []).includes('dataApreensao'), true)
+
   // Busca e apreensão: sem horário, conferência da equipe antes da reunião (pedido do Dr., 15/10/2026)
   const { buildTools } = await import('../lib/tools')
   const nomesDba = buildTools(CRM_MAP.portas.find(p => p.id === 'dba')!).map(t => t.type === 'function' ? t.function.name : '')

@@ -204,6 +204,32 @@ export const CENARIOS: Cenario[] = [
     ],
   },
   {
+    id: 'google-rcv',
+    porta: 'rcv',
+    semAbertura: true,
+    msgs: ['Olá! Vim através do Google e gostaria de mais informações sobre Revisão de Financiamento de Veículos', 'Fernanda', 'foi pelo itaú, em 48 vezes'],
+    checks: [umaPergunta, semFallback, tomHumano, semMenuNumerado, salvou('nome', 'bancoVeiculo', 'parcelasTotal'),
+      { nome: 'se apresentou e pediu o nome na primeira resposta', fn: (_w: World, t: Turno[]) => /aqui é a stela/i.test(t[0]?.resposta || '') && /com quem eu falo/i.test(t[0]?.resposta || '') }],
+    criterios: [
+      'Na primeira resposta se apresenta como Stela e pergunta o nome, sem perguntar de novo o assunto (revisão de financiamento de veículo)',
+      'Depois do nome, segue o roteiro do financiamento sem repetir o que a pessoa já disse',
+    ],
+  },
+  {
+    id: 'google-dba',
+    porta: 'dba',
+    semAbertura: true,
+    msgs: ['Olá! Vim através do Google e gostaria de mais informações sobre Defesa em ação de Busca e Apreensão', 'Ricardo', 'ainda não levaram, mas chegou uma notificação'],
+    checks: [umaPergunta, semFallback, semPromessa, naoMarcou,
+      { nome: 'se apresentou e pediu o nome na primeira resposta', fn: (_w: World, t: Turno[]) => /aqui é a stela/i.test(t[0]?.resposta || '') && /com quem eu falo/i.test(t[0]?.resposta || '') },
+      { nome: 'não ofereceu horário', fn: (_w: World, t: Turno[]) => !t.some(x => x.tools.includes('ver_horarios')) }],
+    criterios: [
+      'Na primeira resposta se apresenta como Stela e pergunta o nome',
+      'Trata como busca e apreensão, com prioridade e sem dramatizar, e não promete barrar a apreensão',
+      'Não oferece horário de reunião',
+    ],
+  },
+  {
     id: 'nome-e-caso-juntos',
     porta: 'rcpcc',
     semAbertura: true,
