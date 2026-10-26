@@ -177,6 +177,20 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('perguntou se é robô e ela já confirmou: fica igual', respostaHonesta('você é um robô?', 'Sou a assistente virtual do escritório. Qual o valor da dívida?'), 'Sou a assistente virtual do escritório. Qual o valor da dívida?')
   eq('não perguntou: fica igual', respostaHonesta('tenho dívida no cartão', 'Mais ou menos quanto está a dívida?'), 'Mais ou menos quanto está a dívida?')
 
+  // Quem a Stela atende (etiqueta × modo "todos os leads novos")
+  const { liberadoParaStela } = await import('../lib/gate')
+  const virada = Date.parse('2026-10-27T00:00:00-03:00')
+  const cfgTodos = { gateTag: 'ia-stela', humanTag: 'atendimento-humano', desde: virada }
+  const cfgTeste = { gateTag: 'ia-stela', humanTag: 'atendimento-humano', desde: 0 }
+  const novoSdr = { pipeline_id: 9299515, status_id: 72104583, created_at: virada / 1000 + 60 }
+  eq('teste: sem etiqueta não atende', liberadoParaStela(novoSdr, [], cfgTeste).sim, false)
+  eq('teste: com ia-stela atende', liberadoParaStela(novoSdr, ['ia-stela'], cfgTeste).sim, true)
+  eq('todos: lead novo no SDR atende', liberadoParaStela(novoSdr, [], cfgTodos).sim, true)
+  eq('todos: lead criado antes da virada não atende', liberadoParaStela({ ...novoSdr, created_at: virada / 1000 - 3600 }, [], cfgTodos).sim, false)
+  eq('todos: lead novo no JURÍDICO não atende', liberadoParaStela({ ...novoSdr, pipeline_id: 9312127, status_id: 72188239 }, [], cfgTodos).sim, false)
+  eq('todos: lead novo em Reunião agendada não atende', liberadoParaStela({ ...novoSdr, status_id: 86825532 }, [], cfgTodos).sim, false)
+  eq('etiqueta atendimento-humano sempre vence', liberadoParaStela(novoSdr, ['ia-stela', 'atendimento-humano'], cfgTodos).sim, false)
+
   // Busca e apreensão: sem horário, conferência da equipe antes da reunião (pedido do Dr., 15/10/2026)
   const { buildTools } = await import('../lib/tools')
   const nomesDba = buildTools(CRM_MAP.portas.find(p => p.id === 'dba')!).map(t => t.type === 'function' ? t.function.name : '')

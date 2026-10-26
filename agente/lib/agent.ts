@@ -1,3 +1,4 @@
+import { liberadoParaStela } from './gate'
 import crypto from 'crypto'
 import { adoptToken, currentToken, debounceAndClaim, releaseLock, renewLock } from './buffer'
 import { CONFIG } from './config'
@@ -50,13 +51,17 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
     const lead = await getLead(leadId)
     nome = lead.name || ''
     const tags = leadTags(lead).map(t => t.toLowerCase())
-    if (tags.includes(CONFIG.humanTag)) return pular(`tag "${CONFIG.humanTag}"`, false)
-    // Gate: sem a tag, silêncio (e sem poluir o diário — a conta inteira manda add_message)
-    if (CONFIG.gateTag && !tags.includes(CONFIG.gateTag)) return pular(`sem a tag "${CONFIG.gateTag}"`, false)
+    // Gate: etiqueta de liberação ou modo "todos os leads novos" (lib/gate.ts). Sem liberação, silêncio
+    // e sem poluir o diário (a conta inteira manda add_message)
+    const gate = liberadoParaStela(lead, tags)
+    if (!gate.sim) return pular(gate.porque, false)
+    const pelaEtiqueta = !!CONFIG.gateTag && tags.includes(CONFIG.gateTag)
     if (await humanSpokeRecently(leadId)) return pular('humano falou pelo Kommo nas últimas 6h — a IA não atropela')
 
     // Tag de gate de volta num lead já finalizado = novo ciclo (lead voltou a entrar)
     const st0 = await getState(leadId)
+    // Modo "todos": atendimento já encerrado fica com a equipe (só a etiqueta de volta reabre o ciclo)
+    if (st0.finalizado && !pelaEtiqueta) return pular('atendimento da Stela já encerrado: segue com a equipe', false)
     if (st0.finalizado) {
       await clearState(leadId)
       console.log(`[agente] lead ${leadId} voltou com a tag de gate — novo ciclo`)

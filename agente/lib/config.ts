@@ -33,5 +33,7 @@ export const CONFIG = {
   // Gate: só atende quem tem a tag. Vazio = atende todos (só no fim da rampagem).
   gateTag: (process.env.GATE_TAG || '').toLowerCase(),
   humanTag: (process.env.HUMAN_TAG || 'atendimento-humano').toLowerCase(),
+  /** modo "todos os leads novos": data ISO da virada (vazio = só a etiqueta de liberação) */
+  atendeNovosDesde: Date.parse(process.env.ATENDE_NOVOS_DESDE || '') || 0,
   testLeadIds: list(process.env.TEST_LEAD_IDS).map(Number).filter(Boolean),
 }

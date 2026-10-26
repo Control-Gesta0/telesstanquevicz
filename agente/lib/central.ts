@@ -355,7 +355,7 @@ export function prontidao(env: Record<string, string | undefined>): Item[] {
   const gate = (env.GATE_TAG || '').trim()
   return [
     { id: 'gabi', nome: 'Stela respondendo no WhatsApp', ok: !!Number(env.KOMMO_BOT_ID || 0), estado: Number(env.KOMMO_BOT_ID || 0) ? 'ligada' : 'pronta, aguardando o robô de envio', oQueFalta: Number(env.KOMMO_BOT_ID || 0) ? undefined : 'Criar no Kommo o robô que envia a resposta da Stela.' },
-    { id: 'rampa', nome: 'Quem a Stela atende', ok: true, estado: gate ? `fase de teste: só leads com a etiqueta ${gate}` : 'todos os leads novos' },
+    { id: 'rampa', nome: 'Quem a Stela atende', ok: true, estado: Date.parse(env.ATENDE_NOVOS_DESDE || '') ? `todos os leads novos do SDR desde ${new Date(Date.parse(env.ATENDE_NOVOS_DESDE || '')).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}${gate ? ` e quem tiver a etiqueta ${gate}` : ''}` : gate ? `fase de teste: só leads com a etiqueta ${gate}` : 'todos os leads' },
     { id: 'retomada', nome: 'Retomada de quem parou de responder', ok: !!(env.QSTASH_TOKEN && env.SELF_URL), estado: env.QSTASH_TOKEN && env.SELF_URL ? 'ligada' : 'desligada' },
     { id: 'lembretes', nome: 'Lembretes de reunião (24h e 2h)', ok: env.LEMBRETES_MODO === 'ativo', estado: env.LEMBRETES_MODO === 'ativo' ? 'enviando' : 'modo sombra: confere sem enviar', oQueFalta: env.LEMBRETES_MODO === 'ativo' ? undefined : 'Desligar o disparo por data dos robôs de lembrete no Kommo e trocar para envio pela Vercel.' },
     { id: 'calendly', nome: 'Calendly atualizando o Kommo', ok: !!env.CALENDLY_WEBHOOK_KEY, estado: env.CALENDLY_WEBHOOK_KEY ? 'ligado' : 'desligado' },

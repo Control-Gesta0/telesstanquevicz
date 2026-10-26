@@ -1,3 +1,4 @@
+import { liberadoParaStela } from '../lib/gate'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { waitUntil } from '@vercel/functions'
 import crypto from 'crypto'
@@ -79,8 +80,8 @@ export function parseKommoWebhook(raw: unknown): { accountId: string; msgs: Inbo
 async function leadAtendido(leadId: number): Promise<boolean> {
   const cache = await redis.get<string>(k('gate', leadId))
   if (cache) return cache === '1'
-  const tags = leadTags(await getLead(leadId)).map(t => t.toLowerCase())
-  const sim = (!CONFIG.gateTag || tags.includes(CONFIG.gateTag)) && !tags.includes(CONFIG.humanTag)
+  const lead = await getLead(leadId)
+  const sim = liberadoParaStela(lead, leadTags(lead)).sim
   await redis.set(k('gate', leadId), sim ? '1' : '0', { ex: 60 })
   return sim
 }
