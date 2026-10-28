@@ -68,3 +68,21 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
   - "Entendi, vamos ver isso rápido. Entendi, Jorge." não dobra mais;
   - pergunta de percentual ("tiram 70%?") sempre recebe a resposta aprovada (`respostaDesconto`).
 - Avaliação completa: **63/63** (21 cenários × 3, com `google2-rcv` e `google2-dba`). Triagem aprovada. Publicado.
+
+## Etiquetas: `ia-stela` e limpeza das repetidas (28/10/2026)
+
+- A etiqueta `ia-stela` não existia na conta. Criadas pela API: `ia-stela` (314691) e `atendimento-humano` (314693).
+- As repetidas voltaram com a restauração dos leads excluídos (cada lead voltou com as suas etiquetas).
+- A API do Kommo não apaga nem renomeia etiqueta (DELETE dá 405; PATCH responde 200 e não muda o nome). Ela só tira e põe etiqueta nos leads. Por isso a junção foi feita lead a lead (`tags_to_add` + `tags_to_delete`, lotes de 50), e as etiquetas vazias saem pela tela do Kommo.
+- Backup das etiquetas de cada lead afetado, antes da troca: `docs/backup/etiquetas-antes-limpeza-2026-10-28.json` (542 leads).
+- Feito, conferido em varredura da conta inteira (26.443 leads):
+
+| Repetida | Leads trocados | Ficou em | Leads agora |
+|---|---|---|---|
+| QUALIFICADA | 509 | QUALIFICADO | 1.186 |
+| Reunião realizada | 17 | `reuniao-realizada` | 21 |
+| Advogada Parceira | 15 | Advogado Parceiro | 18 |
+| FACEBOOK | 1 | Meta | 3.951 |
+
+- Prova de que nada mais reagiu: nos leads trocados, os únicos eventos depois da troca são `entity_tag_added` e `entity_tag_deleted` (sem etapa, mensagem ou tarefa).
+- Falta, pela tela do Kommo: excluir as etiquetas vazias QUALIFICADA, Reunião realizada, Advogada Parceira, FACEBOOK, DESQUALIFICADO, AÇÃO MONITÓRIA e `zz-teste-apagar-stela` (criada no teste da API).
