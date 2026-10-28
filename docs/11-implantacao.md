@@ -85,4 +85,5 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 | FACEBOOK | 1 | Meta | 3.951 |
 
 - Prova de que nada mais reagiu: nos leads trocados, os únicos eventos depois da troca são `entity_tag_added` e `entity_tag_deleted` (sem etapa, mensagem ou tarefa).
-- Falta, pela tela do Kommo: excluir as etiquetas vazias QUALIFICADA, Reunião realizada, Advogada Parceira, FACEBOOK, DESQUALIFICADO, AÇÃO MONITÓRIA e `zz-teste-apagar-stela` (criada no teste da API).
+- Etiquetas vazias excluídas pela tela do Kommo (Cowork, roteiro em `docs/cowork-excluir-etiquetas.md`): QUALIFICADA, Reunião realizada, Advogada Parceira, FACEBOOK, DESQUALIFICADO, AÇÃO MONITÓRIA e `zz-teste-apagar-stela`. Conferido pela API: as sete sumiram, nenhuma outra saiu, a conta ficou com 58 etiquetas.
+- Criada também `Conferir escopo` (314707), usada no fora do escopo.
