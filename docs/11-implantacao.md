@@ -56,3 +56,15 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 | Origem: links rastreados | aguardam o número do WhatsApp |
 | Lembretes 24 h e 2 h | seguem pelos robôs do Kommo (Vercel em modo sombra) |
 | Robôs antigos desligados, gatilhos do "Automatizar" removidos, acesso dos closers à Reunião agendada | só pela tela do Kommo (API não permite): pendente |
+
+## Mensagens prontas do Google, 2ª versão (28/10/2026)
+
+- "Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Revisional de Veículos." → financiamento de veículo · GOOGLE + RCV · De onde Google.
+- "Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Busca e Apreensão." → busca e apreensão · GOOGLE + DBA · De onde Google.
+- Travas novas que a avaliação pediu:
+  - "falar com um Advogado Especialista em…" do anúncio **não** é pedido de pessoa (`pediuEspecialistaDoAnuncio`);
+  - fora do escopo cuja prova é um assunto atendido ("Revisão de Financiamento de Veículos", "Busca e Apreensão") é recusado (`assuntoAtendido`);
+  - "Busca", "Revisional", "Advogado Especialista" não viram nome; "financiamento do meu veículo" não vira banco (o campo banco exige nome de banco ou a resposta à pergunta);
+  - "Entendi, vamos ver isso rápido. Entendi, Jorge." não dobra mais;
+  - pergunta de percentual ("tiram 70%?") sempre recebe a resposta aprovada (`respostaDesconto`).
+- Avaliação completa: **63/63** (21 cenários × 3, com `google2-rcv` e `google2-dba`). Triagem aprovada. Publicado.

@@ -62,6 +62,21 @@ const SINAL_MOTIVO: Partial<Record<Motivo, RegExp>> = {
   pediu_humano: /humano|pessoa|atendente|advogad|doutor|dra?\b|falar com|me liga|liga[cç][aã]o|reclam|cliente|processo|contrat|pix|boleto|pag(ar|amento)|conta\b|chave/i,
 }
 
+/**
+ * A evidência fala de um assunto que o escritório atende (sinal de alguma porta ativa) e não de algo
+ * claramente não bancário nem de banco de montadora. Puro: testado.
+ */
+export function assuntoAtendido(evidencia: string): boolean {
+  const naoBancario = CRM_MAP.alertas.filter(a => a.nome === 'assunto não bancário' || a.nome === 'banco de montadora').some(a => a.re.test(evidencia))
+  return !naoBancario && CRM_MAP.portas.some(p => p.ativa && p.sinais.source !== '$^' && p.sinais.test(evidencia))
+}
+
+/** "Gostaria de falar com um Advogado Especialista em …" (mensagens prontas do Google). Puro: testado. */
+export function pediuEspecialistaDoAnuncio(texto: string): boolean {
+  return /\b(falar|conversar) com (um |uma )?(advogad[oa]|doutor[a]?|dr\.?a?)?\s*especialista em\b|\badvogad[oa] especialista em\b/i.test(texto || '')
+}
+const PEDIU_PESSOA = /\b(pessoa|humano|humana|atendente|algu[eé]m de verdade|me liga|liga[cç][aã]o|telefon)/i
+
 export function buildTools(porta: Porta): OpenAI.Chat.ChatCompletionTool[] {
   const tools: OpenAI.Chat.ChatCompletionTool[] = []
   if (porta.roteiro.length) {
@@ -253,7 +268,7 @@ export function pareceNome(texto: string, minPalavras = 1): string {
   if (!/^[\p{L}' .-]{2,80}$/u.test(limpo)) return ''
   const palavras = limpo.split(' ').filter(w => w.length > 1 || /^[a-z]$/i.test(w))
   if (palavras.length < minPalavras || palavras.length > 6) return ''
-  if (/(?<!\p{L})(n[aã]o|sim|ok|oi|ol[aá]|bom dia|boa tarde|boa noite|obrigad[oa]|pode|quero|tenho|meu|minha|carro|d[ií]vida|banco|parcela|segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo|manh[aã]|tarde|noite|hora|hor[aá]rio|amanh[aã]|hoje|primeir[oa]|segund[oa]|[uú]ltim[oa]|esse|essa|melhor)(?!\p{L})/iu.test(limpo)) return ''
+  if (/(?<!\p{L})(n[aã]o|sim|ok|oi|ol[aá]|bom dia|boa tarde|boa noite|obrigad[oa]|pode|quero|tenho|meu|minha|carro|d[ií]vida|banco|parcela|segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo|manh[aã]|tarde|noite|hora|hor[aá]rio|amanh[aã]|hoje|primeir[oa]|segund[oa]|[uú]ltim[oa]|esse|essa|melhor|busca|apreens[aã]o|revis[aã]o|revisional|financiamento|ve[ií]culos?|advogad[oa]|especialista|google|instagram|facebook|an[uú]ncio|juros|empr[eé]stimo|cart[aã]o|defesa|a[cç][aã]o|informa[cç][oõ]es)(?!\p{L})/iu.test(limpo)) return ''
   return limpo
 }
 
@@ -480,6 +495,16 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           const faltando = exigidos.filter(key => !state.respostas?.[key] && !(sem.has(key) && !campoByKey(key)?.options))
           if (faltando.length) return err(`NÃO encerre e não diga que vai passar para a equipe. Ainda falta: ${faltando.map(key => campoByKey(key)?.name || key).join('; ')}. ${describeOpen(porta, snapshot(porta, state), state)} Se o lead disse que não sabe, grave com salvar_respostas usando a fala dele como evidência.`)
         } else {
+          // Mensagem pronta do anúncio ("Gostaria de falar com um Advogado Especialista em Busca e Apreensão")
+          // é interesse no assunto, não pedido de pessoa: a reunião já é com o especialista (26/10/2026)
+          // Fora do escopo cuja "prova" é um assunto que o escritório atende (ex.: "Revisão de Financiamento de
+          // Veículos", "Busca e Apreensão" das mensagens do Google): recusado (eval de 28/10/2026)
+          if (motivo === 'fora_do_escopo' && assuntoAtendido(String(input.evidencia || ''))) {
+            return err('NÃO finalizado: isso é exatamente um assunto que o escritório atende. Não é fora do escopo: siga o roteiro desta porta (comece pelo nome, se ainda não souber).')
+          }
+          if (motivo === 'pediu_humano' && pediuEspecialistaDoAnuncio(ctx.leadText) && !PEDIU_PESSOA.test(ctx.lastLeadText)) {
+            return err('NÃO finalizado: "falar com um advogado especialista em…" é a mensagem pronta do anúncio. A pessoa quer tratar do caso; siga o roteiro (a reunião já é com um dos nossos especialistas).')
+          }
           const ev = String(input.evidencia || '')
           const sinal = SINAL_MOTIVO[motivo]
           if (!evidenceFound(ev, ctx.leadText) || (sinal && !sinal.test(ev))) {

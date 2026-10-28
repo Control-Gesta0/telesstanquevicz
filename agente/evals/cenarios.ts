@@ -135,7 +135,7 @@ export const CENARIOS: Cenario[] = [
       { nome: 'card no CLOSER › Atendimento direto com o closer', fn: (w: World) => w.pipelineId === 9312103 && w.statusId === 113161464 && [11719359, 13015432].includes(w.responsible ?? 0) }],
     criterios: [
       'Não oferece horário nem pede nome completo ou e-mail',
-      'Diz que um dos especialistas do escritório vai falar com a pessoa por aqui para marcar a reunião',
+      'Diz que um dos especialistas vai falar com a pessoa por aqui para marcar a reunião',
     ],
   },
   {
@@ -212,7 +212,7 @@ export const CENARIOS: Cenario[] = [
       { nome: 'se apresentou e pediu o nome na primeira resposta', fn: (_w: World, t: Turno[]) => /aqui é a stela/i.test(t[0]?.resposta || '') && /com quem eu falo/i.test(t[0]?.resposta || '') }],
     criterios: [
       'Na primeira resposta se apresenta como Stela e pergunta o nome, sem perguntar de novo o assunto (revisão de financiamento de veículo)',
-      'Depois do nome, segue o roteiro do financiamento sem repetir o que a pessoa já disse',
+      'Depois do nome, pergunta pelo banco; quando a pessoa diz o banco e o total de parcelas, não pergunta de novo nenhum dos dois (perguntar quantas parcelas já foram pagas é o próximo passo certo)',
     ],
   },
   {
@@ -227,6 +227,32 @@ export const CENARIOS: Cenario[] = [
       'Na primeira resposta se apresenta como Stela e pergunta o nome',
       'Trata como busca e apreensão, com prioridade e sem dramatizar, e não promete barrar a apreensão',
       'Não oferece horário de reunião',
+    ],
+  },
+  {
+    id: 'google2-rcv',
+    porta: 'rcv',
+    semAbertura: true,
+    msgs: ['Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Revisional de Veículos.', 'Paula', 'é pelo santander, 60 parcelas'],
+    checks: [umaPergunta, semFallback, tomHumano, salvou('nome', 'bancoVeiculo', 'parcelasTotal'),
+      { nome: 'não tratou como pedido de pessoa', fn: (w: World) => w.state.finalizado?.motivo !== 'pediu_humano' },
+      { nome: 'se apresentou e pediu o nome na primeira resposta', fn: (_w: World, t: Turno[]) => /aqui é a stela/i.test(t[0]?.resposta || '') && /com quem eu falo/i.test(t[0]?.resposta || '') }],
+    criterios: [
+      'Na primeira resposta se apresenta como Stela e pergunta o nome, sem passar para a equipe',
+      'Trata a mensagem como interesse em revisão de financiamento de veículo e segue o roteiro (banco, parcelas)',
+    ],
+  },
+  {
+    id: 'google2-dba',
+    porta: 'dba',
+    semAbertura: true,
+    msgs: ['Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Busca e Apreensão.', 'Jorge', 'levaram o carro semana passada'],
+    checks: [umaPergunta, semFallback, semPromessa, naoMarcou,
+      { nome: 'não tratou como pedido de pessoa', fn: (w: World) => w.state.finalizado?.motivo !== 'pediu_humano' },
+      { nome: 'não ofereceu horário', fn: (_w: World, t: Turno[]) => !t.some(x => x.tools.includes('ver_horarios')) }],
+    criterios: [
+      'Na primeira resposta se apresenta como Stela e pergunta o nome, sem passar para a equipe',
+      'Segue o roteiro da busca e apreensão com prioridade, sem perguntar de novo o que a pessoa já contou (a mensagem do anúncio não diz se o veículo já foi apreendido: perguntar isso é certo)',
     ],
   },
   {

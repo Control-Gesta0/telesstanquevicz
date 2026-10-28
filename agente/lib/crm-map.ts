@@ -26,7 +26,7 @@ const CAMPOS = {
   valorDivida: { key: 'valorDivida', id: 0, name: 'Valor aproximado da dívida', type: 'text', sinal: VALOR, pergunta: 'Mais ou menos quanto está a dívida hoje, somando tudo?' },
   atraso: { key: 'atraso', id: 0, name: 'Parcelas em atraso', type: 'text', sinal: /atras|em dia|parcela|pag|venc|\d|n[aã]o|sim|nenhuma/i, pergunta: 'Já tem parcela em atraso? Se tiver, quantas?' },
   // RCV
-  bancoVeiculo: { key: 'bancoVeiculo', id: 0, name: 'Banco ou financeira do veículo', type: 'text', sinal: /[a-zà-ú]{2,}/i, pergunta: 'Por qual banco ou financeira foi feito o financiamento?' },
+  bancoVeiculo: { key: 'bancoVeiculo', id: 0, name: 'Banco ou financeira do veículo', type: 'text', sinal: /(?<!\p{L})(banco|financeira|cooperativa|leasing|bv|pan|ita[uú]|bradesco|santander|caixa|safra|omni|aymor[eé]|daycoval|sicredi|sicoob|porto|volks\w*|vw|toyota|honda|gm|chevrolet|hyundai|renault|rci|fiat|stellantis|bmw|mercedes|yamaha|nissan|jeep|peugeot|citro[eë]n|mitsubishi|caoa|inter|nubank|c6|bb|brasil|banrisul|mercantil|creditas|losango|original|bmg|agibank|digio|pine|sofisa|rodobens|unicred|cresol|banestes|psa)(?!\p{L})/iu, pergunta: 'Por qual banco ou financeira foi feito o financiamento?' },
   parcelasTotal: { key: 'parcelasTotal', id: 0, name: 'Total de parcelas do financiamento', type: 'numeric', sinal: /\d|vezes|parcel|meses/i, pergunta: 'O financiamento foi feito em quantas parcelas?' },
   parcelasPagas: { key: 'parcelasPagas', id: 0, name: 'Parcelas já pagas', type: 'numeric', sinal: /\d|pag|nenhuma/i, pergunta: 'Quantas parcelas já foram pagas?' },
   valorParcela: { key: 'valorParcela', id: 0, name: 'Valor de cada parcela', type: 'numeric', sinal: VALOR, pergunta: 'Qual o valor de cada parcela?' },

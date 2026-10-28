@@ -73,7 +73,9 @@ export function acolher(frase: string | undefined, anteriores: string[], texto: 
   const chave = norm(frase).trim()
   if (norm(texto).includes(chave) || anteriores.some(t => norm(t).includes(chave))) return texto
   if (/aqui (é|e) a stela|com quem eu falo/i.test(texto)) return texto
-  return `${frase} ${texto}`
+  // o modelo já começou com "Entendi" (ou "Entendi, Jorge."): troca pelo acolhimento, sem repetir
+  const resto = texto.replace(/^\s*entendi(,\s*\p{L}+)?\s*[.!,]?\s*/iu, '')
+  return `${frase} ${resto.charAt(0).toUpperCase()}${resto.slice(1)}`
 }
 
 /**
@@ -103,6 +105,20 @@ export function respostaHonesta(textoDoLead: string, texto: string): string {
   const ap = /^(oi[^.!?]*[.!]\s*)?aqui (é|e) a stela, da teles & stanquevicz advogados\.?\s*/i
   if (ap.test(texto)) return texto.replace(ap, 'Sim, aqui é a Stela, a assistente virtual da Teles & Stanquevicz Advogados. ')
   return `Sim, sou a assistente virtual do escritório. ${texto}`
+}
+
+const PERGUNTOU_DESCONTO = /\d{1,3}\s?%|por cento|quanto (voc[eê]s )?(tiram|conseguem tirar|d[aá] (pra|para) (tirar|reduzir|baixar))|quanto (vou|vai|d[aá] (pra|para)) (economizar|reduzir|baixar)|consegue[m]? (tirar|reduzir|baixar) (\d|metade|a metade)/i
+const RESPONDEU_DESCONTO = /cada (caso|contrato) [eé] diferente|depende d[aoe]|s[oó] (o especialista|na reuni[aã]o)|olhando (o seu|os) (contrato|documentos|n[uú]meros)/i
+
+/**
+ * Perguntaram quanto dá para tirar da dívida e a resposta não respondeu: começa pela frase aprovada
+ * (sem prometer percentual). Em código porque o modelo às vezes pulava para a próxima pergunta
+ * (eval de 28/10/2026). Puro: testado.
+ */
+export function respostaDesconto(textoDoLead: string, handoff: boolean, texto: string): string {
+  if (handoff || !PERGUNTOU_DESCONTO.test(textoDoLead || '') || RESPONDEU_DESCONTO.test(texto)) return texto
+  const resto = texto.replace(/^\s*entendi\s*[.!,]?\s*/i, '')
+  return `Cada caso é diferente: quanto dá para reduzir, só o especialista consegue dizer olhando o seu contrato, na reunião sem custo. ${resto.charAt(0).toUpperCase()}${resto.slice(1)}`
 }
 
 export function createBrain(opts: LlmOptions) {
@@ -241,7 +257,7 @@ export function createBrain(opts: LlmOptions) {
       }
       const safe = await enforce(messages, text, usage, handoff, ctx)
       const estado = await ctx.port.getState()
-      const texto = respostaHonesta(ctx.lastLeadText, primeiraMensagem(!estado.aberturaEnviada && lead.primeiroContatoDaPorta, estado.respostas?.nome || '', comAcolhimento(ctx, turns, safe.text, handoff), handoff))
+      const texto = respostaDesconto(ctx.lastLeadText, handoff, respostaHonesta(ctx.lastLeadText, primeiraMensagem(!estado.aberturaEnviada && lead.primeiroContatoDaPorta, estado.respostas?.nome || '', comAcolhimento(ctx, turns, safe.text, handoff), handoff)))
       return { text: texto, toolsUsed, handoff, urgente, guard: safe.guard, usage }
     }
 

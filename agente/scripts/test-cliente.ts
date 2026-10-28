@@ -155,6 +155,7 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   const { acolher } = await import('../lib/llm')
   const F = 'Entendi, vamos ver isso rápido.'
   eq('acolhimento: entra na 1ª resposta do caso', acolher(F, ['Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?'], 'Rafael, o veículo já foi apreendido?', false), `${F} Rafael, o veículo já foi apreendido?`)
+  eq('acolhimento: não dobra o "Entendi"', acolher(F, ['Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?'], 'Entendi, Jorge. O veículo já foi apreendido?', false), `${F} O veículo já foi apreendido?`)
   eq('acolhimento: não repete', acolher(F, ['Entendi, vamos ver isso rápido. O veículo já foi apreendido?'], 'O oficial deixou o mandado?', false), 'O oficial deixou o mandado?')
   eq('acolhimento: não entra na abertura nem no encerramento', [acolher(F, [], 'Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?', false), acolher(F, ['x'], 'Obrigada.', true)], ['Oi! Aqui é a Stela, da Teles & Stanquevicz Advogados. Com quem eu falo?', 'Obrigada.'])
 
@@ -173,6 +174,9 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('depois da primeira mensagem: nada muda', primeiraMensagem(false, '', 'Quantas parcelas já foram pagas?', false), 'Quantas parcelas já foram pagas?')
 
   const { respostaHonesta } = await import('../lib/llm')
+  const { respostaDesconto } = await import('../lib/llm')
+  eq('perguntou 70% e ela pulou: responde que depende do caso', respostaDesconto('Vocês conseguem tirar 70% da minha dívida do cartão?', false, 'Entendi. Quanto mais ou menos está a dívida hoje?'), 'Cada caso é diferente: quanto dá para reduzir, só o especialista consegue dizer olhando o seu contrato, na reunião sem custo. Quanto mais ou menos está a dívida hoje?')
+  eq('perguntou 70% e ela respondeu: fica igual', respostaDesconto('tiram 70%?', false, 'Cada caso é diferente, e o especialista mostra na reunião. Quanto está a dívida?'), 'Cada caso é diferente, e o especialista mostra na reunião. Quanto está a dívida?')
   eq('perguntou se é robô e ela desconversou: confirma', respostaHonesta('tô falando com um robô? tenho dívida no cheque especial', 'Aqui é a Stela, da Teles & Stanquevicz Advogados. Mais ou menos quanto está a dívida?'), 'Sim, aqui é a Stela, a assistente virtual da Teles & Stanquevicz Advogados. Mais ou menos quanto está a dívida?')
   eq('perguntou se é robô e ela já confirmou: fica igual', respostaHonesta('você é um robô?', 'Sou a assistente virtual do escritório. Qual o valor da dívida?'), 'Sou a assistente virtual do escritório. Qual o valor da dívida?')
   eq('não perguntou: fica igual', respostaHonesta('tenho dívida no cartão', 'Mais ou menos quanto está a dívida?'), 'Mais ou menos quanto está a dívida?')
@@ -202,9 +206,34 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   eq('Google RCV: origem Google, campanha rcv', [origemPorFrase(gRcv)?.deOnde, origemPorFrase(gRcv)?.utm_campaign], ['Google', 'rcv'])
   eq('Google DBA: origem Google, campanha dba', [origemPorFrase(gDba)?.deOnde, origemPorFrase(gDba)?.utm_campaign], ['Google', 'dba'])
   eq('mensagem comum não vira origem', origemPorFrase('oi, tenho uma dívida no cartão'), null)
+  const g2Rcv = 'Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Revisional de Veículos.'
+  const g2Dba = 'Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Busca e Apreensão.'
+  eq('Google (2ª versão): RCV e DBA pela palavra-chave', [pid(rotearG({}, g2Rcv)), pid(rotearG({}, g2Dba))], ['rcv', 'dba'])
+  const { etiquetasPorFrase: etq2 } = await import('../lib/rastreio')
+  eq('Google (2ª versão): etiquetas GOOGLE + RCV / GOOGLE + DBA', [etq2(g2Rcv), etq2(g2Dba)], [['GOOGLE', 'RCV'], ['GOOGLE', 'DBA']])
+  m = mundo(72186399)
+  m.w.state = { porta: 'dba', respostas: {} }
+  out = await runTool(ctx(m.port, 'dba', g2Dba), 'finalizar_atendimento', { motivo: 'pediu_humano', evidencia: 'Gostaria de falar com um Advogado Especialista', resumo: 'x' })
+  eq('"falar com um Advogado Especialista em…" do anúncio não vira pedido de pessoa', [out.isError, m.w.state.finalizado], [true, undefined])
+  out = await runTool(ctx(m.port, 'dba', `${g2Dba}\nquero falar com uma pessoa de verdade`), 'finalizar_atendimento', { motivo: 'pediu_humano', evidencia: 'quero falar com uma pessoa de verdade', resumo: 'x' })
+  eq('pedido de pessoa de verdade depois do anúncio vale', out.isError, false)
+  const { assuntoAtendido } = await import('../lib/tools')
+  eq('assunto do anúncio não é fora do escopo', [assuntoAtendido('Revisão de Financiamento de Veículos'), assuntoAtendido('Defesa em ação de Busca e Apreensão')], [true, true])
+  eq('pensão e banco de montadora continuam podendo ser fora do escopo', [assuntoAtendido('é sobre a pensão do meu filho'), assuntoAtendido('financiado pelo banco toyota')], [false, false])
+  m = mundo(72186399)
+  m.w.state = { porta: 'rcv', respostas: {} }
+  out = await runTool(ctx(m.port, 'rcv', gRcv), 'finalizar_atendimento', { motivo: 'fora_do_escopo', evidencia: 'Revisão de Financiamento de Veículos', resumo: 'x' })
+  eq('mensagem do Google não fecha como fora do escopo', [out.isError, m.w.state.finalizado], [true, undefined])
+  m = mundo(72186399)
+  m.w.state = { porta: 'rcv', respostas: {} }
+  out = await runTool(ctx(m.port, 'rcv', 'Olá! Vi o anúncio e quero saber sobre a revisão do financiamento do meu veículo.'), 'salvar_respostas', { respostas: [{ campo: 'bancoVeiculo', evidencia: 'revisão do financiamento do meu veículo', valor: 'financiamento de veículo' }] })
+  eq('"financiamento do meu veículo" não vira banco', [out.isError, m.w.state.respostas?.bancoVeiculo], [true, undefined])
+  out = await runTool(ctx(m.port, 'rcv', 'foi no bradesco, em 60 parcelas'), 'salvar_respostas', { respostas: [{ campo: 'bancoVeiculo', evidencia: 'foi no bradesco', valor: 'Bradesco' }] })
+  eq('"foi no bradesco" vira banco', m.w.state.respostas?.bancoVeiculo, 'foi no bradesco')
   const { etiquetasPorFrase } = await import('../lib/rastreio')
   eq('Google: etiquetas GOOGLE + RCV / GOOGLE + DBA', [etiquetasPorFrase(gRcv), etiquetasPorFrase(gDba)], [['GOOGLE', 'RCV'], ['GOOGLE', 'DBA']])
   eq('"Olá!" e "Bom dia" não viram nome', [pareceNome('Olá!'), pareceNome('Bom dia!'), pareceNome('manhã')], ['', '', ''])
+  eq('palavras do anúncio não viram nome', [pareceNome('Busca e Apreensão'), pareceNome('Revisional de Veículos'), pareceNome('Advogado Especialista')], ['', '', ''])
   m = mundo(72186399)
   m.w.state = { porta: 'dba', respostas: {} }
   await runTool(ctx(m.port, 'dba', 'ainda não levaram, mas chegou uma notificação'), 'salvar_respostas', { respostas: [{ campo: 'apreendido', evidencia: 'ainda não levaram', valor: 'não' }] })
