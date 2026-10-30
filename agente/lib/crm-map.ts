@@ -249,8 +249,8 @@ export const CRM_MAP = {
       pipelineId: 9299515,
       /** lead escreveu: estas etapas voltam para Em atendimento; as outras ficam onde estão */
       retorno: { de: [72104583, 72104595] as number[], para: 72186399 },
-      /** etapas onde a Stela atende no modo "todos os leads novos": Leads de entrada, Em atendimento, Follow-up */
-      entrada: [72104583, 72186399, 72104595] as number[],
+      /** etapas onde a Stela atende no modo "todos os leads novos": Leads de entrada, Social Seller, Em atendimento, Follow-up */
+      entrada: [72104583, 113568644, 72186399, 72104595] as number[],
       /** 5 dias em Follow-up sem mensagem do lead → perdido. Lote por volta do relógio (15 min). */
       followUp: { statusId: 72104595, dias: 5, motivoPerda: 27720027, tag: 'Desqualificado', lote: 40 },
     },
@@ -298,7 +298,24 @@ export const CRM_MAP = {
       'instagram-bio': { deOnde: 'Instagram', utm_source: 'instagram', utm_medium: 'bio', utm_campaign: 'perfil', texto: 'Olá! Vim pelo Instagram e quero falar sobre o meu caso.' },
       'site': { deOnde: '', utm_source: 'site', utm_medium: 'organic', utm_campaign: 'site', texto: 'Olá! Vim pelo site e quero falar sobre o meu caso.' },
       'youtube': { deOnde: '', utm_source: 'youtube', utm_medium: 'video', utm_campaign: 'youtube', texto: 'Olá! Vi o vídeo de vocês e quero falar sobre o meu caso.' },
-    } as Record<string, { deOnde: string; utm_source: string; utm_medium: string; utm_campaign: string; texto: string }>,
+      // Lives "fura fila" (pedido de 29/10/2026): link da bio, vai para SDR › Social Seller com a etiqueta LIVE
+      'live-instagram': { deOnde: 'Instagram', utm_source: 'instagram', utm_medium: 'live', utm_campaign: 'rcpcc', texto: 'Quero a análise gratuita das minhas dívidas com o banco.', live: true, etiquetas: ['LIVE', 'Instagram'] },
+      'live-tiktok': { deOnde: '', utm_source: 'tiktok', utm_medium: 'live', utm_campaign: 'rcpcc', texto: 'Quero a análise gratuita das minhas dívidas com o banco.', live: true, etiquetas: ['LIVE', 'TIKTOK'] },
+    } as Record<string, { deOnde: string; utm_source: string; utm_medium: string; utm_campaign: string; texto: string; live?: boolean; etiquetas?: string[] }>,
+    /**
+     * Live "fura fila" (pedido de 29/10/2026): "manda QUERO no direct". Primeira mensagem de um lead novo que é só
+     * "quero" → SDR › Social Seller, etiqueta LIVE (+ Instagram se veio pelo direct) e a Stela abre no RCPCC.
+     * "quero" no meio de uma conversa é resposta comum: só vale para lead criado há pouco e sem conversa.
+     */
+    live: {
+      re: /^[^\p{L}\d]*quero[^\p{L}\d]*$/iu,
+      etapa: { pipelineId: 9299515, statusId: 113568644, name: 'SDR › Social Seller' },
+      etiqueta: 'LIVE',
+      etiquetaCanal: { instagram_business: 'Instagram', tiktok: 'TIKTOK' } as Record<string, string>,
+      leadNovoMin: 120,
+      /** o que a Stela lê no lugar do "quero" (casa com os sinais do RCPCC) */
+      textoParaStela: 'QUERO (veio da live: quer a análise gratuita das dívidas com o banco)',
+    },
     /** códigos fixos para anúncio que abre o WhatsApp direto (texto pronto do anúncio termina com "(ref. CODIGO)") */
     refs: {
       RCPCC1: { deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'ctwa', utm_campaign: 'rcpcc' },

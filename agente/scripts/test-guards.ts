@@ -114,11 +114,33 @@ async function main() {
   eq('advogado ativo inventado NÃO finaliza', [out.isError, mundo.tags.has('gate')], [true, true])
   out = await runTool(ctx('sim, já tenho advogado cuidando do processo'), 'finalizar_atendimento', { motivo: 'advogado_ativo', evidencia: 'já tenho advogado cuidando do processo', resumo: 'x' })
   eq('advogado ativo real finaliza e remove SÓ o gate', [out.isError, out.handoff, mundo.tags.has('gate'), mundo.tags.has('outra'), mundo.state.finalizado?.motivo], [false, true, false, true, 'advogado_ativo'])
+  // Conversa real de 29/10/2026: "Mais já resolvi" / "ele já conseguiu resolver isso"
+  mundo.state = {}; mundo.tags.add('gate')
+  out = await runTool(ctx('Sobre busca e apreensão de carro.... Mais já resolvi... Obrigada pela atenção'), 'finalizar_atendimento', { motivo: 'desistiu', evidencia: 'Mais já resolvi', resumo: 'x' })
+  eq('"já resolvi" finaliza como desistiu', [out.isError, mundo.state.finalizado?.motivo], [false, 'desistiu'])
+  mundo.state = {}; mundo.tags.add('gate')
+  out = await runTool(ctx('ele já conseguiu resolver isso. Graças a Deus deu certo'), 'finalizar_atendimento', { motivo: 'desistiu', evidencia: 'ele já conseguiu resolver isso', resumo: 'x' })
+  eq('"já conseguiu resolver" finaliza como desistiu', [out.isError, mundo.state.finalizado?.motivo], [false, 'desistiu'])
+  mundo.state = {}; mundo.tags.add('gate')
+  out = await runTool(ctx('quanto custa a reunião?'), 'finalizar_atendimento', { motivo: 'desistiu', evidencia: 'quanto custa a reunião?', resumo: 'x' })
+  eq('pergunta comum NÃO vira desistência', out.isError, true)
+  const { sinalDeCliente } = await import('../lib/agent')
+  eq('"já fiz vídeo chamada com o rapaz" não é cliente', sinalDeCliente('Eu já fiz vídeo chamada com o rapaz obrigado'), false)
+  eq('"quero saber do meu processo" é cliente', sinalDeCliente('quero saber do andamento do meu processo'), true)
   if (porta.obrigatorios.length) {
     mundo.state = {}
     out = await runTool(ctx('oi'), 'finalizar_atendimento', { motivo: 'qualificado', resumo: 'x' })
     eq('qualificado com roteiro incompleto é recusado', out.isError, true)
   }
+
+  // Live "fura fila" (pedido de 29/10/2026)
+  const { ehQueroDaLive } = await import('../lib/rastreio')
+  const { classificar } = await import('../lib/router')
+  eq('live: "QUERO" sozinho é da live', [ehQueroDaLive('QUERO'), ehQueroDaLive('quero!!'), ehQueroDaLive(' Quero 🙋‍♀️ ')], [true, true, true])
+  eq('live: "quero marcar" ou "quero sim, às 10h" não é', [ehQueroDaLive('quero marcar'), ehQueroDaLive('quero sim, às 10h')], [false, false])
+  eq('live: o texto que a Stela lê cai no RCPCC', classificar(CRM_MAP.rastreio.live.textoParaStela).map(p => p.id), ['rcpcc'])
+  eq('live: links da bio caem no RCPCC', ['live-instagram', 'live-tiktok'].map(l => classificar(CRM_MAP.rastreio.links[l].texto).map(p => p.id).join()), ['rcpcc', 'rcpcc'])
+  eq('live: Social Seller é etapa de entrada da Stela', CRM_MAP.automacoes.sdr.entrada.includes(CRM_MAP.rastreio.live.etapa.statusId), true)
 
   const extra = await import('./test-cliente').catch(() => null)
   if (extra?.default) { const extras = await extra.default(eq); falhas += extras }

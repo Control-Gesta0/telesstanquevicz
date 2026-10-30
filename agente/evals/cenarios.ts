@@ -127,6 +127,17 @@ export const CENARIOS: Cenario[] = [
     ],
   },
   {
+    // conversa real de 29/10/2026 (Letícia): a Stela seguiu perguntando e mandou follow-up
+    id: 'ja-resolveu',
+    porta: 'dba',
+    msgs: ['Sobre busca e apreensão de carro.... Mais já resolvi... Obrigada pela atenção'],
+    checks: [finalizou('desistiu'), tomHumano],
+    criterios: [
+      'Respeita que a pessoa já resolveu: agradece em poucas palavras e encerra, sem fazer pergunta do roteiro',
+      'Não insiste nem oferece reunião',
+    ],
+  },
+  {
     id: 'abaixo-50k',
     porta: 'rcpcc',
     msgs: ['Tenho uma dívida no cartão do Santander, uns 30 mil'],

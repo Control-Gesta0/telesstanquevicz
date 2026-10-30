@@ -57,7 +57,8 @@ const SINAL_MOTIVO: Partial<Record<Motivo, RegExp>> = {
   advogado_ativo: /advogad|processo|recurso|escrit[oó]rio|a[cç][aã]o/i,
   menor_de_idade: /\b(1[0-7]|[5-9])\s*anos\b|menor|col[eé]gio|escola|minha m[aã]e|meu pai/i,
   urgencia: /comida|fome|comer|rem[eé]dio|medica|despej|aluguel atrasad|na rua|intern|hospital|urgent|desesper/i,
-  desistiu: /desist|n[aã]o (quero|tenho interesse|preciso) mais|deixa (pra|para) l[aá]|pode encerrar|n[aã]o quero continuar|n[aã]o vou (querer|continuar)/i,
+  // "já resolvi", "ele conseguiu resolver", "deu certo" (conversa real de 29/10/2026: a Stela seguiu o roteiro e mandou follow-up)
+  desistiu: /desist|n[aã]o (quero|tenho interesse|preciso) mais|deixa (pra|para) l[aá]|pode encerrar|n[aã]o quero continuar|n[aã]o vou (querer|continuar)|j[aá] (resolvi|resolveu|resolvemos|resolveram|consegui|conseguiu|conseguimos|deu certo|est[aá] resolvid|foi resolvid|t[aá] resolvid)|consegui(u|mos)? resolver|deu certo/i,
   cliente_do_escritorio: /cliente|processo|contrat|advogad|caso|andamento/i,
   pediu_humano: /humano|pessoa|atendente|advogad|doutor|dra?\b|falar com|me liga|liga[cç][aã]o|reclam|cliente|processo|contrat|pix|boleto|pag(ar|amento)|conta\b|chave/i,
 }

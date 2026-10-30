@@ -132,7 +132,9 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
       // 2. Porta sem agente: mensagem fixa e finaliza (sem LLM)
       if (!porta.ativa) {
         // Já é cliente (triagem ou palavra-chave): vai para o JURÍDICO com tarefa, não para o SDR
-        const cliente = rota.motivo === 'cliente_do_escritorio' || !!CRM_MAP.alertas.find(a => a.nome === 'cliente do escritório')?.re.test(textoDoLead)
+        // A triagem sozinha não basta: precisa de sinal de cliente no texto. "Já fiz vídeo chamada com o rapaz"
+        // é lead em negociação, não cliente (foi parar no JURÍDICO na conversa real de 29/10/2026)
+        const cliente = (rota.motivo === 'cliente_do_escritorio' && sinalDeCliente(textoDoLead)) || !!CRM_MAP.alertas.find(a => a.nome === 'cliente do escritório')?.re.test(textoDoLead)
         const fixo = cliente ? CRM_MAP.abertura.clienteDoEscritorio : porta.mensagemSemAgente || 'Anotei aqui. Alguém da equipe continua a conversa com você por aqui.'
         const texto = rota.travou ? comApresentacao(state, rota.patch?.respostas?.nome || state.respostas?.nome || '', fixo) : fixo
         await aplicarFinalizacao(ctx, cliente ? 'cliente_do_escritorio' : 'porta_sem_agente', `${cliente ? 'Cliente do escritório' : `Assunto: ${porta.label}`}. Primeira mensagem: ${textoTurno.slice(0, 300)}`)
@@ -180,4 +182,9 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
   } finally {
     await releaseLock(leadId, lockOwner)
   }
+}
+
+/** Sinal mínimo de que quem escreve já é cliente (processo, contrato, advogado do caso). Puro: testado. */
+export function sinalDeCliente(texto: string): boolean {
+  return /\bcliente\b|processo|contrat|advogad|andamento|procura[cç][aã]o|honor[aá]rio/i.test(texto || '')
 }

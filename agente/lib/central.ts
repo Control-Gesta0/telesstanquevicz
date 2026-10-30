@@ -114,6 +114,7 @@ const FUNIS = [
 /** Como o card chega em cada etapa. É o que a Central explica ao lado do número. */
 const PAPEL: Record<number, { papel: 'gabi' | 'automacao' | 'time'; como: string }> = {
   72104583: { papel: 'gabi', como: 'Lead novo do WhatsApp. A Stela atende aqui; quando o lead escreve, vai sozinho para Em atendimento.' },
+  113568644: { papel: 'gabi', como: 'Veio da live (mandou QUERO no direct ou clicou no link da bio do Instagram ou do TikTok). A Stela atende já no assunto de dívida com banco.' },
   72186399: { papel: 'gabi', como: 'Conversa em andamento com a Stela ou com a equipe.' },
   72104595: { papel: 'automacao', como: 'Parou de responder. Se escrever, volta sozinho para Em atendimento; 5 dias sem resposta, vai para perdido.' },
   86825532: { papel: 'gabi', como: 'Reunião marcada pela Stela, pelo closer ou pelo Calendly. Os closers conferem aqui a agenda do dia.' },
@@ -510,7 +511,7 @@ interface Mundo {
 const LIMITE_DIA = Number(process.env.LAB_LIMITE_DIA || 150)
 const LIMITE_SESSAO = 24
 const CAMPO_NOME: Record<number, string> = { 1023263: 'Nicho', 719788: 'Data da reunião', 1012980: 'Link da reunião', 1023548: 'Desqualificado' }
-const ETAPAS_LAB: Record<number, string> = { 72104583: 'Leads de entrada', 72186399: 'Em atendimento', 72104595: 'Follow-up', 86825532: 'Reunião agendada', 72113011: 'No-show', 113161464: 'CLOSER › Atendimento direto (até R$ 50 mil)', 72188239: 'JURÍDICO › CONTACTAR CLIENTE' }
+const ETAPAS_LAB: Record<number, string> = { 72104583: 'Leads de entrada', 113568644: 'Social Seller', 72186399: 'Em atendimento', 72104595: 'Follow-up', 86825532: 'Reunião agendada', 72113011: 'No-show', 113161464: 'CLOSER › Atendimento direto (até R$ 50 mil)', 72188239: 'JURÍDICO › CONTACTAR CLIENTE' }
 
 function portaDoMundo(w: Mundo, eventos: string[]): LeadPort {
   const nomeResp = (id: number) => CRM_MAP.negocio.responsaveis.nomes[id] || `usuário ${id}`

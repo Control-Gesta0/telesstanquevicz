@@ -20,7 +20,7 @@ assunto:
 - "rcv": financiamento de veículo (carro, moto, caminhão): parcelas altas, juros, revisão do contrato, atraso, sem falar de apreensão.
 - "dba": busca e apreensão: veículo apreendido, levado, guinchado, mandado, oficial de justiça, ameaça de apreensão.
 - "fora": assunto que NÃO é bancário: trabalhista, família, pensão, divórcio, INSS, aposentadoria, imóvel, aluguel, consumo, criminal, trânsito.
-- "cliente": já é cliente do escritório (diz que é cliente, pergunta do andamento do processo dele, do contrato com o escritório, da advogada ou do advogado que cuida do caso).
+- "cliente": já é cliente do escritório (diz que é cliente, pergunta do andamento do processo dele, do contrato com o escritório, da advogada ou do advogado que cuida do caso). Quem só diz que já fez a reunião ou a vídeo chamada com a equipe ainda NÃO é cliente: é "outro".
 - "outro": precisa de uma pessoa do escritório: quem quer falar com uma pessoa ou advogado sem dizer o assunto, pagamento de boleto do escritório, outro assunto bancário fora dos três acima.
 - "indefinido": só cumprimento, só o nome, "vi o anúncio" sem dizer o assunto, pedido genérico sem dizer o assunto ("preciso de ajuda", "quero uma informação", "tenho uma dúvida"), ou não dá para saber.
 

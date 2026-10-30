@@ -5,6 +5,7 @@ import { CRM_MAP, portaById } from './crm-map'
 import { logExec } from './execlog'
 import { dentroDoHorario, JANELA_META_MS, MARGEM_JANELA_MS, proximoToque } from './followup-tempo'
 import { appendMessage, getHistory, humanSpokeRecently } from './history'
+import { liberadoParaStela } from './gate'
 import { getLead, leadTags, updateLeadStatus } from './kommo'
 import { k, redis } from './redis'
 import { getState, type LeadState } from './state'
@@ -79,7 +80,11 @@ export async function executarFollowup(leadId: number, toque: 1 | 2 | 3, token: 
   const state = await getState(leadId)
   const parar = async (motivo: string) => { await redis.del(k('fu', leadId)); return motivo }
   if (tags.includes(CONFIG.humanTag)) return parar(`tag ${CONFIG.humanTag}`)
-  if (CONFIG.gateTag && !tags.includes(CONFIG.gateTag)) return parar('sem a tag de gate')
+  // Mesmo gate do inbound: etiqueta ia-stela ou modo "todos os leads novos" (antes só olhava a etiqueta)
+  const gate = liberadoParaStela(lead, tags)
+  if (!gate.sim) return parar(`fora do gate: ${gate.porque}`)
+  // Card fechado pela equipe (ganho/perdido) não recebe follow-up, nem com a etiqueta (conversa real de 29/10/2026)
+  if (lead.status_id === 142 || lead.status_id === 143) return parar('card fechado (ganho ou perdido)')
   if (state.finalizado) return parar('atendimento finalizado')
   if (await humanSpokeRecently(leadId)) return parar('humano falou nas últimas 6h')
 

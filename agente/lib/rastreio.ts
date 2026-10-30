@@ -1,7 +1,8 @@
 import crypto from 'crypto'
 import { CRM_MAP } from './crm-map'
 import { logExec } from './execlog'
-import { addLeadTags, kommoGet, updateLeadFields, type KommoFieldValue, type KommoLead } from './kommo'
+import { getHistory } from './history'
+import { addLeadTags, kommoGet, updateLeadFields, updateLeadStatus, type KommoFieldValue, type KommoLead } from './kommo'
 import { k, redis } from './redis'
 
 /**
@@ -87,9 +88,84 @@ export function origemPorFrase(texto: string): Origem | null {
   return { slug: `frase-${f.deOnde.toLowerCase()}${campanha ? `-${campanha}` : ''}`, deOnde: f.deOnde, utm_source: f.utm_source, utm_medium: f.utm_medium, ...(campanha ? { utm_campaign: campanha } : {}) }
 }
 
+/** A mensagem é só "quero" (com pontuação ou emoji)? Puro: testado. */
+export function ehQueroDaLive(texto: string): boolean {
+  return CRM_MAP.rastreio.live.re.test((texto || '').trim())
+}
+
+/** Etapas de onde o lead da live pode ir para Social Seller: Leads de entrada e Em atendimento (o gatilho do Kommo
+ *  "lead escreveu → Em atendimento" pode chegar antes). Card em outra etapa fica onde está. */
+const ANTES_DO_SOCIAL = [72104583, 72186399]
+
+/** Lead da live: SDR › Social Seller + etiquetas. */
+async function marcarLive(leadId: number, etiquetas: string[], lead?: KommoLead): Promise<void> {
+  const L = CRM_MAP.rastreio.live
+  await addLeadTags(leadId, [...new Set(etiquetas)])
+  const atual = lead || await kommoGet<KommoLead>(`/api/v4/leads/${leadId}`)
+  if (atual.pipeline_id === L.etapa.pipelineId && ANTES_DO_SOCIAL.includes(atual.status_id)) {
+    await updateLeadStatus(leadId, L.etapa.statusId, L.etapa.pipelineId)
+  }
+}
+
+/**
+ * Mensagens do chat do lead (eventos do Kommo): canal da 1ª recebida e se alguém já escreveu para ele.
+ * O Kommo não devolve evento de chat filtrando por lead: lê a janela desde a criação do lead e filtra aqui.
+ */
+export async function chatDoLead(leadId: number, desdeSeg: number): Promise<{ canal: string; recebidas: number; enviadas: number }> {
+  type Ev = { type: string; entity_id: number; value_after?: Array<{ message?: { origin?: string } }> }
+  for (let tentativa = 0; tentativa < 2; tentativa++) {
+    const evs: Ev[] = []
+    for (let page = 1; page <= 3; page++) {
+      const d = await kommoGet<{ _embedded?: { events?: Ev[] } }>(
+        `/api/v4/events?filter%5Btype%5D=incoming_chat_message,outgoing_chat_message&filter%5Bcreated_at%5D%5Bfrom%5D=${desdeSeg - 60}&limit=100&page=${page}`).catch(() => null)
+      const lote = d?._embedded?.events || []
+      evs.push(...lote.filter(e => e.entity_id === leadId))
+      if (lote.length < 100) break
+    }
+    const recebidas = evs.filter(e => e.type === 'incoming_chat_message')
+    if (recebidas.length) return { canal: recebidas[recebidas.length - 1].value_after?.[0]?.message?.origin || '', recebidas: recebidas.length, enviadas: evs.length - recebidas.length }
+    await new Promise(r => setTimeout(r, 1500))
+  }
+  return { canal: '', recebidas: 0, enviadas: 0 }
+}
+
+/**
+ * "QUERO" da live (pedido de 29/10/2026). Vale só para lead criado há pouco, ainda em Leads de entrada e sem
+ * conversa guardada: "quero" no meio de um atendimento é resposta comum. Devolve o texto que a Stela lê, ou null.
+ */
+async function queroDaLive(leadId: number, texto: string): Promise<string | null> {
+  if (!ehQueroDaLive(texto)) return null
+  const L = CRM_MAP.rastreio.live
+  const lead = await kommoGet<KommoLead>(`/api/v4/leads/${leadId}`)
+  const novo = Date.now() - (lead.created_at || 0) * 1000 <= L.leadNovoMin * 60_000
+  const naEntrada = lead.pipeline_id === L.etapa.pipelineId && [...ANTES_DO_SOCIAL, L.etapa.statusId].includes(lead.status_id)
+  if (!novo || !naEntrada || (await getHistory(leadId)).length) return null
+  // Primeira mensagem da conversa: ninguém escreveu antes para ele ("quer agendar?" → "quero" não é live)
+  const chat = await chatDoLead(leadId, lead.created_at || 0)
+  if (chat.enviadas > 0 || chat.recebidas > 1) return null
+  if ((await redis.set(k('rastro-live', leadId), '1', { nx: true, ex: 30 * 86400 })) !== 'OK') return L.textoParaStela
+  const canal = chat.canal
+  const etiquetaCanal = L.etiquetaCanal[canal]
+  await marcarLive(leadId, [L.etiqueta, ...(etiquetaCanal ? [etiquetaCanal] : [])], lead)
+  const temOrigem = (lead.custom_fields_values || []).some(f => f.field_id === CRM_MAP.rastreio.deOnde.fieldId && f.values?.length)
+  const o: Origem = { slug: `live-${etiquetaCanal ? etiquetaCanal.toLowerCase() : 'direct'}`, deOnde: canal === 'instagram_business' ? 'Instagram' : '', utm_source: canal === 'instagram_business' ? 'instagram' : canal || 'direct', utm_medium: 'live', utm_campaign: 'rcpcc' }
+  if (!temOrigem) await updateLeadFields(leadId, camposDaOrigem(o))
+  const dia = new Date().toISOString().slice(0, 10)
+  await redis.incr(k('rastro-leads', dia, o.slug || '?'))
+  await redis.expire(k('rastro-leads', dia, o.slug || '?'), 120 * 86400)
+  await logExec({ tipo: 'automacao', leadId, detalhe: `live: QUERO${canal ? ` pelo ${canal}` : ''} → ${L.etapa.name} · etiquetas ${[L.etiqueta, etiquetaCanal].filter(Boolean).join(' + ')}` })
+  return L.textoParaStela
+}
+
 export async function aplicarRastreio(leadId: number, texto: string): Promise<string> {
   const m = lerMarca(texto)
   if (!m.tipo) {
+    try {
+      const live = await queroDaLive(leadId, texto)
+      if (live) return live
+    } catch (e) {
+      console.error('[rastreio] live falhou:', e)
+    }
     const o = origemPorFrase(texto)
     // Uma vez por lead, e só se "De onde" ainda estiver vazio (não sobrescreve origem melhor)
     if (o && (await redis.set(k('rastro-frase', leadId), '1', { nx: true, ex: 30 * 86400 })) === 'OK') {
@@ -125,6 +201,8 @@ export async function aplicarRastreio(leadId: number, texto: string): Promise<st
       return m.limpo
     }
     await updateLeadFields(leadId, camposDaOrigem(o))
+    const link = o.slug ? CRM_MAP.rastreio.links[o.slug] : undefined
+    if (link?.live) await marcarLive(leadId, link.etiquetas || [CRM_MAP.rastreio.live.etiqueta]).catch(e => console.error('[rastreio] live (link) falhou:', e))
     const dia = new Date().toISOString().slice(0, 10)
     await redis.incr(k('rastro-leads', dia, o.slug || '?'))
     await redis.expire(k('rastro-leads', dia, o.slug || '?'), 120 * 86400)
