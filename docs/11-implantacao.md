@@ -87,3 +87,28 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - Prova de que nada mais reagiu: nos leads trocados, os únicos eventos depois da troca são `entity_tag_added` e `entity_tag_deleted` (sem etapa, mensagem ou tarefa).
 - Etiquetas vazias excluídas pela tela do Kommo (Cowork, roteiro em `docs/cowork-excluir-etiquetas.md`): QUALIFICADA, Reunião realizada, Advogada Parceira, FACEBOOK, DESQUALIFICADO, AÇÃO MONITÓRIA e `zz-teste-apagar-stela`. Conferido pela API: as sete sumiram, nenhuma outra saiu, a conta ficou com 58 etiquetas.
 - Criada também `Conferir escopo` (314707), usada no fora do escopo.
+
+## Fim de semana com a Stela, Social Seller e live (30/10/2026)
+
+- **Pedido do cliente (29/10):** sexta às 17h/17h30 ligar a Stela para todos os leads que chegarem no fim de semana; na segunda a equipe avalia.
+- **Publicado:** `ATENDE_NOVOS_DESDE=2026-10-30T17:30:00-03:00`. A partir das 17h30 a Stela atende todo lead **criado** depois disso, no SDR, em Leads de entrada, Social Seller, Em atendimento ou Follow-up. Os leads antigos continuam com a equipe; a etiqueta `ia-stela` continua valendo à mão.
+- **Falta, pela tela do Kommo às 17h30:** desligar os 10 robôs de atendimento (roteiro em `docs/cowork-virada-fim-de-semana.md`). Mensagem de outro robô conta como "humano falou" e cala a Stela por 6 h, então com eles ligados a Stela quase não responde.
+- **Para voltar atrás:** religar os 10 robôs e apagar `ATENDE_NOVOS_DESDE` (Control Gestão publica).
+
+### Correções vindas das 9 conversas reais com `ia-stela` (27 a 29/10)
+
+| Conversa | O que aconteceu | Correção |
+|---|---|---|
+| Letícia (26304233) | "Mais já resolvi": a Stela seguiu o roteiro; o encerramento foi recusado; mandou 2 follow-ups, um depois de a Gabi marcar perdido | "já resolvi", "conseguiu resolver", "deu certo" encerram como `desistiu`; follow-up para em card ganho/perdido |
+| Roger (26300977) | "Já fiz vídeo chamada com o rapaz" virou cliente e foi para o JURÍDICO | cliente só com sinal no texto (processo, contrato, advogado, andamento); a triagem não trata "já fiz a reunião" como cliente |
+| José (26320267) | plano balão do Banco GM encerrado como "fora do escopo" | **não é erro**: banco de montadora vai para conferência (etiqueta Conferir escopo), pedido do Dr. de 26/10. A Gabi conferiu e seguiu |
+| (todos) | o follow-up da Stela exigia a etiqueta `ia-stela` | follow-up usa o mesmo gate do inbound: vale para os leads novos do fim de semana |
+
+### Social Seller e live "fura fila" (pedido de 29/10)
+
+- Etapa **SDR › Social Seller** (113568644) criada, entre Leads de entrada e Em atendimento. É etapa de entrada da Stela.
+- Etiqueta **LIVE** (314835) criada.
+- **"Manda QUERO no direct":** a primeira mensagem de um lead novo (até 2 h de criado, sem mensagem anterior de ninguém) que é só "quero" vai para Social Seller com LIVE (+ Instagram, se veio pelo direct), De onde Instagram e campanha rcpcc. A Stela lê "QUERO (veio da live: quer a análise gratuita das dívidas com o banco)" e abre no RCPCC. "Quero" no meio de uma conversa não conta.
+- **Links da bio:** `https://telesstanquevicz-ia.vercel.app/r/live-instagram` e `/r/live-tiktok` abrem o WhatsApp `WHATSAPP_NUMERO=558005917729` (0800 591 7729) com "Quero a análise gratuita das minhas dívidas com o banco." e vão para Social Seller com LIVE + Instagram ou LIVE + TIKTOK.
+- Comentário de live não chega ao Kommo (só o direct). TikTok não tem canal no Kommo: só o link.
+- Avaliação: 23 cenários × 3 aprovados (66 + `live-quero` 3/3); triagem aprovada; testes ok. Publicado.

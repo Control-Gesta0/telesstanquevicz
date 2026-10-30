@@ -138,6 +138,19 @@ export const CENARIOS: Cenario[] = [
     ],
   },
   {
+    // live "fura fila" (pedido de 29/10/2026): o inbound troca o "QUERO" por este texto
+    id: 'live-quero',
+    porta: 'rcpcc',
+    semAbertura: true,
+    msgs: ['QUERO (veio da live: quer a análise gratuita das dívidas com o banco)'],
+    checks: [umaPergunta, semFallback, tomHumano],
+    criterios: [
+      'Se apresenta como Stela, da Teles & Stanquevicz Advogados, e pergunta com quem fala',
+      'Não repete de volta "veio da live" nem o texto entre parênteses de forma robótica',
+      'Não promete resultado nem fala de valores',
+    ],
+  },
+  {
     id: 'abaixo-50k',
     porta: 'rcpcc',
     msgs: ['Tenho uma dívida no cartão do Santander, uns 30 mil'],
