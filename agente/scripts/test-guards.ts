@@ -140,6 +140,8 @@ async function main() {
   eq('live: "quero marcar" ou "quero sim, às 10h" não é', [ehQueroDaLive('quero marcar'), ehQueroDaLive('quero sim, às 10h')], [false, false])
   eq('live: o texto que a Stela lê cai no RCPCC', classificar(CRM_MAP.rastreio.live.textoParaStela).map(p => p.id), ['rcpcc'])
   eq('live: links da bio caem no RCPCC', ['live-instagram', 'live-tiktok'].map(l => classificar(CRM_MAP.rastreio.links[l].texto).map(p => p.id).join()), ['rcpcc', 'rcpcc'])
+  eq('live: QUERO na DM do TikTok ganha a etiqueta TIKTOK', [CRM_MAP.rastreio.live.etiquetaCanal.tiktok_kommo, CRM_MAP.rastreio.live.fonteCanal.tiktok_kommo], ['TIKTOK', 'tiktok'])
+  eq('TikTok: a tarefa vai para a SDR e é de conferência', [CRM_MAP.rastreio.tiktok.origem, /coment[aá]rio/.test(CRM_MAP.rastreio.tiktok.tarefa)], ['tiktok_kommo', true])
   eq('live: Social Seller é etapa de entrada da Stela', CRM_MAP.automacoes.sdr.entrada.includes(CRM_MAP.rastreio.live.etapa.statusId), true)
 
   const extra = await import('./test-cliente').catch(() => null)

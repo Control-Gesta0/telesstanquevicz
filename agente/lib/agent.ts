@@ -1,4 +1,5 @@
 import { liberadoParaStela } from './gate'
+import { avisoTiktok } from './rastreio'
 import crypto from 'crypto'
 import { adoptToken, currentToken, debounceAndClaim, releaseLock, renewLock } from './buffer'
 import { CONFIG } from './config'
@@ -57,6 +58,8 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
     if (!gate.sim) return pular(gate.porque, false)
     const pelaEtiqueta = !!CONFIG.gateTag && tags.includes(CONFIG.gateTag)
     if (await humanSpokeRecently(leadId)) return pular('humano falou pelo Kommo nas últimas 6h — a IA não atropela')
+    // TikTok: comentário não aceita DM. Tarefa para a SDR conferir (lib/rastreio.ts)
+    await avisoTiktok(leadId)
 
     // Tag de gate de volta num lead já finalizado = novo ciclo (lead voltou a entrar)
     const st0 = await getState(leadId)

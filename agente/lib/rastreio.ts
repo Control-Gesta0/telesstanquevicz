@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import { CRM_MAP } from './crm-map'
 import { logExec } from './execlog'
 import { getHistory } from './history'
-import { addLeadTags, kommoGet, updateLeadFields, updateLeadStatus, type KommoFieldValue, type KommoLead } from './kommo'
+import { addLeadTags, addLeadTask, kommoGet, updateLeadFields, updateLeadStatus, type KommoFieldValue, type KommoLead } from './kommo'
 import { k, redis } from './redis'
 
 /**
@@ -148,13 +148,33 @@ async function queroDaLive(leadId: number, texto: string): Promise<string | null
   const etiquetaCanal = L.etiquetaCanal[canal]
   await marcarLive(leadId, [L.etiqueta, ...(etiquetaCanal ? [etiquetaCanal] : [])], lead)
   const temOrigem = (lead.custom_fields_values || []).some(f => f.field_id === CRM_MAP.rastreio.deOnde.fieldId && f.values?.length)
-  const o: Origem = { slug: `live-${etiquetaCanal ? etiquetaCanal.toLowerCase() : 'direct'}`, deOnde: canal === 'instagram_business' ? 'Instagram' : '', utm_source: canal === 'instagram_business' ? 'instagram' : canal || 'direct', utm_medium: 'live', utm_campaign: 'rcpcc' }
+  const o: Origem = { slug: `live-${etiquetaCanal ? etiquetaCanal.toLowerCase() : 'direct'}`, deOnde: canal === 'instagram_business' ? 'Instagram' : '', utm_source: L.fonteCanal[canal] || canal || 'direct', utm_medium: 'live', utm_campaign: 'rcpcc' }
   if (!temOrigem) await updateLeadFields(leadId, camposDaOrigem(o))
   const dia = new Date().toISOString().slice(0, 10)
   await redis.incr(k('rastro-leads', dia, o.slug || '?'))
   await redis.expire(k('rastro-leads', dia, o.slug || '?'), 120 * 86400)
   await logExec({ tipo: 'automacao', leadId, detalhe: `live: QUERO${canal ? ` pelo ${canal}` : ''} → ${L.etapa.name} · etiquetas ${[L.etiqueta, etiquetaCanal].filter(Boolean).join(' + ')}` })
   return L.textoParaStela
+}
+
+/**
+ * Lead do TikTok atendido pela Stela: etiqueta TIKTOK e tarefa para a SDR conferir se a mensagem saiu (comentário
+ * não aceita DM). Uma vez por lead; o canal fica guardado para não reler eventos a cada mensagem. Nunca derruba o atendimento.
+ */
+export async function avisoTiktok(leadId: number): Promise<void> {
+  try {
+    if (await redis.get(k('canal', leadId)) !== null) return
+    const chat = await chatDoLead(leadId, Math.floor(Date.now() / 1000) - 600)
+    if (!chat.canal) return // evento ainda não apareceu: tenta de novo na próxima mensagem
+    if ((await redis.set(k('canal', leadId), chat.canal, { nx: true, ex: 90 * 86400 })) !== 'OK') return
+    const t = CRM_MAP.rastreio.tiktok
+    if (chat.canal !== t.origem) return
+    await addLeadTags(leadId, [t.etiqueta])
+    await addLeadTask(leadId, t.tarefa, CRM_MAP.negocio.responsavelPadrao, Math.floor(Date.now() / 1000) + t.prazoMin * 60, CRM_MAP.negocio.tarefaTipo)
+    await logExec({ tipo: 'automacao', leadId, detalhe: 'TikTok: etiqueta TIKTOK e tarefa para a SDR conferir se a mensagem saiu (comentário não aceita DM)' })
+  } catch (e) {
+    console.error('[rastreio] aviso TikTok falhou:', e)
+  }
 }
 
 export async function aplicarRastreio(leadId: number, texto: string): Promise<string> {

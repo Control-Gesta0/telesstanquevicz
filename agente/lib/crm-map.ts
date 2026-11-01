@@ -311,10 +311,23 @@ export const CRM_MAP = {
       re: /^[^\p{L}\d]*quero[^\p{L}\d]*$/iu,
       etapa: { pipelineId: 9299515, statusId: 113568644, name: 'SDR › Social Seller' },
       etiqueta: 'LIVE',
-      etiquetaCanal: { instagram_business: 'Instagram', tiktok: 'TIKTOK' } as Record<string, string>,
+      etiquetaCanal: { instagram_business: 'Instagram', tiktok_kommo: 'TIKTOK' } as Record<string, string>,
+      /** utm_source pelo canal do chat (origin do Kommo) */
+      fonteCanal: { instagram_business: 'instagram', tiktok_kommo: 'tiktok', waba: 'whatsapp' } as Record<string, string>,
       leadNovoMin: 120,
       /** o que a Stela lê no lugar do "quero" (casa com os sinais do RCPCC) */
       textoParaStela: 'QUERO (veio da live: quer a análise gratuita das dívidas com o banco)',
+    },
+    /**
+     * TikTok ligado ao Kommo (31/10/2026): comentário entra como conversa, mas o TikTok não deixa mandar DM para
+     * quem só comentou (a mensagem da Stela dá erro). Pela API não dá para saber se foi comentário ou DM, então
+     * a Stela responde (DM funciona) e a SDR recebe uma tarefa para conferir. Uma vez por lead.
+     */
+    tiktok: {
+      origem: 'tiktok_kommo',
+      etiqueta: 'TIKTOK',
+      tarefa: 'Lead do TikTok: confira se a mensagem da Stela saiu. Se deu erro, a pessoa só comentou: responda o comentário pelo app do TikTok pedindo para chamar na DM (ou mandar QUERO na DM).',
+      prazoMin: 60,
     },
     /** códigos fixos para anúncio que abre o WhatsApp direto (texto pronto do anúncio termina com "(ref. CODIGO)") */
     refs: {

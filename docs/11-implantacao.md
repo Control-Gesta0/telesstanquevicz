@@ -112,3 +112,10 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - **Links da bio:** `https://telesstanquevicz-ia.vercel.app/r/live-instagram` e `/r/live-tiktok` abrem o WhatsApp `WHATSAPP_NUMERO=558005917729` (0800 591 7729) com "Quero a análise gratuita das minhas dívidas com o banco." e vão para Social Seller com LIVE + Instagram ou LIVE + TIKTOK.
 - Comentário de live não chega ao Kommo (só o direct). TikTok não tem canal no Kommo: só o link.
 - Avaliação: 23 cenários × 3 aprovados (66 + `live-quero` 3/3); triagem aprovada; testes ok. Publicado.
+
+### TikTok ligado ao Kommo (1º/11/2026)
+
+- O TikTok foi ligado ao Kommo (canal `tiktok_kommo`). Comentário entra como conversa, mas o TikTok não deixa mandar DM para quem só comentou: a mensagem da Stela aparece com erro ("start a chat with this user in the TikTok app first"). Casos: leads 26337643 e 26344795.
+- Pela API não dá para saber se foi comentário ou DM (as duas conversas têm o mesmo chat e a mesma origem). Então a Stela continua respondendo (DM funciona) e, uma vez por lead do TikTok, põe a etiqueta TIKTOK e cria tarefa para a SDR: conferir se a mensagem saiu e, se deu erro, responder o comentário pelo app pedindo para chamar na DM.
+- "QUERO" da live pela DM do TikTok agora ganha LIVE + TIKTOK e utm_source tiktok.
+- Fim de semana: 3 leads novos (2 TikTok, 1 Instagram), nenhum lead novo de WhatsApp. Robôs antigos seguem ligados (10 + 23).
