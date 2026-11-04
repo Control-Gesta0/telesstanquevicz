@@ -141,3 +141,9 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 | Testes do cliente | um erro de carregamento era engolido e os testes não rodavam | agora conta como falha |
 
 **Antes de religar:** desligar os 10 robôs de atendimento; teste real com um WhatsApp da equipe (com `ia-stela`), incluindo a Gabi respondendo no meio para ver a Stela recuar; depois religar o modo "todos os leads novos".
+
+## Pedidos de 04/11/2026 (tarde)
+
+- **JURÍDICO › Negociação** (113755868) criada pela API, depois de "Cumprindo despacho", sem nenhuma automação. Dá para arrastar a coluna para outra posição na tela.
+- **Closers nas etapas do SDR:** GUILHERME e CLAUDIA precisam ver e editar SDR › Reunião agendada e SDR › Em atendimento. É direito de usuário (só pela tela): roteiro em `docs/cowork-acesso-closers.md`.
+- Robôs antigos: o escritório decidiu manter ligados. Consequência: mensagem de robô aparece para a Stela igual à dela, então resposta dupla em lead novo pode voltar a acontecer.
