@@ -119,3 +119,25 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - Pela API não dá para saber se foi comentário ou DM (as duas conversas têm o mesmo chat e a mesma origem). Então a Stela continua respondendo (DM funciona) e, uma vez por lead do TikTok, põe a etiqueta TIKTOK e cria tarefa para a SDR: conferir se a mensagem saiu e, se deu erro, responder o comentário pelo app pedindo para chamar na DM.
 - "QUERO" da live pela DM do TikTok agora ganha LIVE + TIKTOK e utm_source tiktok.
 - Fim de semana: 3 leads novos (2 TikTok, 1 Instagram), nenhum lead novo de WhatsApp. Robôs antigos seguem ligados (10 + 23).
+
+## Stela desligada e corrigida (04/11/2026)
+
+**O que o cliente viu (3 e 4/11):** "a Stela tá doidona", não etiqueta as conversas, não conseguem desligar, ignora respostas, para do nada e se mete nas conversas da equipe.
+
+**Desligada às 9h50 de 04/11:** `ATENDE_NOVOS_DESDE` apagado. Ela só atende card com `ia-stela` (nenhum tem).
+
+**Causas encontradas nas conversas (Brenda 26358297, Sergio 26360523, Thaissa 26363565, Cleberson 26363581, Sandro 26366867, Edberto 26364765):**
+
+| Problema | Causa | Correção |
+|---|---|---|
+| Se mete na conversa da equipe | o webhook de mensagem do Kommo não entrega o que a equipe manda: a Stela nunca detectou um humano (0 vezes) | `lib/equipe.ts`: antes de responder e antes do follow-up, lê os eventos `outgoing_chat_message` das últimas 6 h; mensagem com `created_by` de usuário = pessoa da equipe → a Stela não responde |
+| Bagunça com várias respostas | os 10 robôs de atendimento seguem ligados (Sergio: 15+ mensagens de robô em 15 min) | desligar os 10 antes de religar (roteiro do Cowork) |
+| Não etiqueta e não dá para desligar | no modo "todos os leads novos" ela atendia sem etiqueta | põe `ia-stela` quando começa; se a equipe tirar a etiqueta, ela para naquele card (`equipeTirouEtiqueta`) |
+| "Prazer, Stela" e "Pan" como nome; banco perguntado 6 vezes | a triagem e o salvar aceitavam o nome da IA e nome de banco | `lib/nome.ts`: "Stela" e banco sozinho nunca são nome; "Pan" manda gravar como banco |
+| Ignora respostas (mesma pergunta seguida) | nada impedia repetir | trava "repetiu a mesma pergunta": reescreve com outras palavras |
+| Busca e apreensão: "Não" e depois "Em que dia foi a apreensão?"; "Bom dia" gravado como data | "Não" sozinho não pulava a data; o sinal da data aceitava "dia" de "bom dia" | corrigido |
+| "Não compensa, já comprei outro carro" respondido com "Com quem eu falo?" | desistência não reconhecida e a 1ª mensagem jogava fora a resposta | "não compensa", "já comprei outro" = desistiu; a 1ª mensagem mantém o acolhimento |
+| Desconto do consignado (R$ 647/mês) virou valor da dívida e foi direto para o closer | parcela gravada como total | valor com "desconta/parcela/por mês" é recusado: pergunta o total |
+| Testes do cliente | um erro de carregamento era engolido e os testes não rodavam | agora conta como falha |
+
+**Antes de religar:** desligar os 10 robôs de atendimento; teste real com um WhatsApp da equipe (com `ia-stela`), incluindo a Gabi respondendo no meio para ver a Stela recuar; depois religar o modo "todos os leads novos".

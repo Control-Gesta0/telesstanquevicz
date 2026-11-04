@@ -1,3 +1,4 @@
+import { naoENome } from './nome'
 import { CRM_MAP, portaById, type Porta } from './crm-map'
 import type { LeadState } from './state'
 
@@ -52,7 +53,8 @@ export function comApresentacao(state: LeadState, nome: string, texto: string): 
 /** Puro (testado): o que fazer com o resultado da triagem. */
 export function decidirTriagem(state: LeadState, t: Triagem): Rota {
   const A = CRM_MAP.abertura
-  const nomeDito = (t.nome || '').trim()
+  // a triagem às vezes devolve o nome da própria IA ("Olá Stela") ou um banco ("Pan"): descarta (04/11/2026)
+  const nomeDito = naoENome(t.nome || '') ? '' : (t.nome || '').trim()
   const nome = primeiroNome(nomeDito || state.respostas?.nome || '')
   const patchNome: Partial<LeadState> = nomeDito ? { respostas: { ...(state.respostas || {}), nome: nomeDito } } : {}
   const outros = portaById(A.portaOutros)!

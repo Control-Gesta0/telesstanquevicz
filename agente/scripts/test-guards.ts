@@ -144,7 +144,17 @@ async function main() {
   eq('TikTok: a tarefa vai para a SDR e é de conferência', [CRM_MAP.rastreio.tiktok.origem, /coment[aá]rio/.test(CRM_MAP.rastreio.tiktok.tarefa)], ['tiktok_kommo', true])
   eq('live: Social Seller é etapa de entrada da Stela', CRM_MAP.automacoes.sdr.entrada.includes(CRM_MAP.rastreio.live.etapa.statusId), true)
 
-  const extra = await import('./test-cliente').catch(() => null)
+  // Conversas reais de 3 e 4/11/2026: a Gabi respondia e a Stela não percebia; a equipe não conseguia tirá-la
+  const { ultimasDaEquipe } = await import('../lib/equipe')
+  const mapa = ultimasDaEquipe([{ entity_id: 1, created_by: 0, created_at: 100 }, { entity_id: 2, created_by: 11719355, created_at: 200 }, { entity_id: 2, created_by: 11719355, created_at: 300 }])
+  eq('equipe: mensagem de pessoa conta, de robô (0) não', [mapa[1], mapa[2]], [undefined, 300])
+  const { equipeTirouEtiqueta } = await import('../lib/gate')
+  eq('etiqueta: equipe tirou depois que a Stela começou → para', equipeTirouEtiqueta([], { aberturaEnviada: true }, 'ia-stela'), true)
+  eq('etiqueta: lead novo sem conversa ainda → não para', equipeTirouEtiqueta([], {}, 'ia-stela'), false)
+  eq('etiqueta: com a etiqueta → não para', equipeTirouEtiqueta(['IA-Stela'], { porta: 'rcv' }, 'ia-stela'), false)
+
+  // Falha ao carregar os testes do cliente conta como falha (antes sumia em silêncio)
+  const extra = await import('./test-cliente').catch(e => { console.log(`❌ testes do cliente não carregaram: ${e.message}`); falhas++; return null })
   if (extra?.default) { const extras = await extra.default(eq); falhas += extras }
 
   console.log(falhas ? `\n❌ ${falhas} falha(s)` : '\n✅ Todas as travas OK')

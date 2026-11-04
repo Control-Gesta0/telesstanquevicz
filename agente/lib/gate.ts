@@ -22,3 +22,13 @@ export function liberadoParaStela(lead: Pick<KommoLead, 'pipeline_id' | 'status_
   if (!etapa) return { sim: false, porque: 'fora das etapas de entrada do SDR' }
   return { sim: true, porque: 'lead novo no SDR' }
 }
+
+/**
+ * A equipe tirou a etiqueta de um lead que a Stela já estava atendendo: ela para ali (pedido de 04/11/2026,
+ * "não estamos conseguindo desligar ela"). Vale nos dois modos; a etiqueta é o liga/desliga do card. Puro: testado.
+ */
+export function equipeTirouEtiqueta(tags: string[], state: { aberturaEnviada?: boolean; porta?: string; finalizado?: unknown }, gateTag = CONFIG.gateTag): boolean {
+  if (!gateTag || state.finalizado) return false
+  const comEtiqueta = tags.map(x => x.toLowerCase()).includes(gateTag)
+  return !comEtiqueta && !!(state.aberturaEnviada || state.porta)
+}

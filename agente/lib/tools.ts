@@ -1,3 +1,4 @@
+import { naoENome } from './nome'
 import type OpenAI from 'openai'
 import { CalendlyError, casarEscolha, escolherOpcoes, horariosLivres, reservar, type Preferencia } from './calendly'
 import { CRM_MAP, campoByKey, type Campo, type Porta } from './crm-map'
@@ -58,7 +59,7 @@ const SINAL_MOTIVO: Partial<Record<Motivo, RegExp>> = {
   menor_de_idade: /\b(1[0-7]|[5-9])\s*anos\b|menor|col[eé]gio|escola|minha m[aã]e|meu pai/i,
   urgencia: /comida|fome|comer|rem[eé]dio|medica|despej|aluguel atrasad|na rua|intern|hospital|urgent|desesper/i,
   // "já resolvi", "ele conseguiu resolver", "deu certo" (conversa real de 29/10/2026: a Stela seguiu o roteiro e mandou follow-up)
-  desistiu: /desist|n[aã]o (quero|tenho interesse|preciso) mais|deixa (pra|para) l[aá]|pode encerrar|n[aã]o quero continuar|n[aã]o vou (querer|continuar)|j[aá] (resolvi|resolveu|resolvemos|resolveram|consegui|conseguiu|conseguimos|deu certo|est[aá] resolvid|foi resolvid|t[aá] resolvid)|consegui(u|mos)? resolver|deu certo/i,
+  desistiu: /desist|n[aã]o (quero|tenho interesse|preciso) mais|deixa (pra|para) l[aá]|pode encerrar|n[aã]o quero continuar|n[aã]o vou (querer|continuar)|j[aá] (resolvi|resolveu|resolvemos|resolveram|consegui|conseguiu|conseguimos|deu certo|est[aá] resolvid|foi resolvid|t[aá] resolvid)|consegui(u|mos)? resolver|deu certo|n[aã]o compensa|j[aá] (at[eé] )?comprei outro|vou deixar (pra|para) l[aá]/i,
   cliente_do_escritorio: /cliente|processo|contrat|advogad|caso|andamento/i,
   pediu_humano: /humano|pessoa|atendente|advogad|doutor|dra?\b|falar com|me liga|liga[cç][aã]o|reclam|cliente|processo|contrat|pix|boleto|pag(ar|amento)|conta\b|chave/i,
 }
@@ -447,10 +448,17 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
             const min = key === 'nomeCompleto' ? 2 : 1
             // a evidência inteira pode ser uma frase ("sou a Ana Souza, tenho dívida…"): vale o valor, se ele estiver dentro dela
             const n = pareceNome(ev, min) || (valor && ev.toLowerCase().includes(valor.toLowerCase()) ? pareceNome(valor, min) : '')
+            const nao = naoENome(n || valor)
+            if (nao === 'banco') { erros.push(`${campo.name}: "${n || valor}" é nome de banco, não de pessoa. Se o roteiro tem o banco, grave em bancoVeiculo (ou no tipo de dívida) e pergunte o nome da pessoa de novo, com outras palavras ("E o seu nome, qual é?")`); continue }
+            if (nao === 'ia') { erros.push(`${campo.name}: "Stela" é o SEU nome (a pessoa estava te cumprimentando). Pergunte o nome dela`); continue }
             if (!n) { erros.push(`${campo.name}: "${ev}" não é um nome de pessoa — pergunte o nome`); continue }
             respostas[key] = n
             salvos.push(`${campo.name} = ${n}`)
             continue
+          }
+          // "desconta R$ 647" é a parcela do mês, não o total (Edberto, 03/11/2026: virou caso de R$ 647 e foi direto para o closer)
+          if (key === 'valorDivida' && /descont|parcela|presta[cç][aã]o|por m[eê]s|mensal|ao m[eê]s|todo m[eê]s/i.test(ev) && !/total|tudo|soma|devo|d[ií]vida (est[aá]|[eé]|de)/i.test(ev)) {
+            erros.push(`${campo.name}: "${ev}" é o valor da parcela ou do desconto do mês, não o total da dívida. Pergunte quanto está a dívida somando tudo (se não souber, quantas parcelas faltam)`); continue
           }
           const bruto = campo.type === 'text' || campo.type === 'textarea' ? ev : valor
           const c = coerce(campo, bruto, lead.fields[campo.id]?.enumIds)
@@ -460,7 +468,8 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
           if (campo.id > 0 && !CRM_MAP.camposProibidos.includes(campo.id)) writes.push({ field_id: campo.id, values: c.values })
         }
         // Busca e apreensão que ainda não aconteceu: a data não existe, não se pergunta (eval de 26/10/2026)
-        if (respostas.apreendido && /ainda n[aã]o|n[aã]o (levaram|foi|apreend|tomaram|pegaram)|ainda (est[aá]|t[aá]) comigo|t[aá] comigo/i.test(respostas.apreendido) && !respostas.dataApreensao) semResposta.add('dataApreensao')
+        // "Não" sozinho também (Thaissa, 04/11/2026: disse que não foi apreendido e recebeu "Em que dia foi a apreensão?")
+        if (respostas.apreendido && /^\s*n[aã]o\b|ainda n[aã]o|n[aã]o (levaram|foi|apreend|tomaram|pegaram)|ainda (est[aá]|t[aá]) comigo|t[aá] comigo/i.test(respostas.apreendido) && !respostas.dataApreensao) semResposta.add('dataApreensao')
         if (writes.length) await port.writeFields(writes)
         const next = await port.patchState({ respostas, semResposta: [...semResposta] })
         return {
@@ -550,7 +559,7 @@ export async function runTool(ctx: ToolCtx, name: string, input: Record<string, 
         await port.patchState({ horarioEscolhido: escolhido })
         // O lead acabou de mandar o nome completo ou o e-mail e o modelo não gravou: aproveita, sem inventar
         const respostas = { ...(state.respostas || {}) }
-        if (!respostas.nomeCompleto && pareceNome(ctx.lastLeadText, 2)) respostas.nomeCompleto = pareceNome(ctx.lastLeadText, 2)
+        if (!respostas.nomeCompleto && pareceNome(ctx.lastLeadText, 2) && !naoENome(pareceNome(ctx.lastLeadText, 2))) respostas.nomeCompleto = pareceNome(ctx.lastLeadText, 2)
         const emailLead = ctx.lastLeadText.match(/\S+@\S+\.\S+/)?.[0]?.replace(/[.,;]+$/, '')
         if (!respostas.email && emailLead) respostas.email = emailLead
         if (respostas.nomeCompleto !== state.respostas?.nomeCompleto || respostas.email !== state.respostas?.email) await port.patchState({ respostas })

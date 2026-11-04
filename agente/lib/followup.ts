@@ -5,7 +5,7 @@ import { CRM_MAP, portaById } from './crm-map'
 import { logExec } from './execlog'
 import { dentroDoHorario, JANELA_META_MS, MARGEM_JANELA_MS, proximoToque } from './followup-tempo'
 import { appendMessage, getHistory, humanSpokeRecently } from './history'
-import { liberadoParaStela } from './gate'
+import { equipeTirouEtiqueta, liberadoParaStela } from './gate'
 import { getLead, leadTags, updateLeadStatus } from './kommo'
 import { k, redis } from './redis'
 import { getState, type LeadState } from './state'
@@ -86,6 +86,7 @@ export async function executarFollowup(leadId: number, toque: 1 | 2 | 3, token: 
   // Card fechado pela equipe (ganho/perdido) não recebe follow-up, nem com a etiqueta (conversa real de 29/10/2026)
   if (lead.status_id === 142 || lead.status_id === 143) return parar('card fechado (ganho ou perdido)')
   if (state.finalizado) return parar('atendimento finalizado')
+  if (equipeTirouEtiqueta(tags, state)) return parar('a equipe tirou a etiqueta')
   if (await humanSpokeRecently(leadId)) return parar('humano falou nas últimas 6h')
 
   const hist = await getHistory(leadId)

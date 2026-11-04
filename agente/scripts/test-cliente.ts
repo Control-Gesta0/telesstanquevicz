@@ -386,5 +386,29 @@ export default async function testesCliente(eq: Eq): Promise<number> {
   const h = C.hashSenha('54321')
   eq('senha: hash confere só com a senha certa', [C.confereSenha('54321', h), C.confereSenha('12345', h), C.confereSenha('54321', ''), h.includes('54321')], [true, false, false, false])
 
+  // Conversas reais de 3 e 4/11/2026
+  const { naoENome } = await import('../lib/nome')
+  eq('nome: "Stela" (a própria IA) e "Pan" (o banco) não são nome', [naoENome('Stela'), naoENome('Pan'), naoENome('Banco Pan'), naoENome('Brenda'), naoENome('Pandora')], ['ia', 'banco', 'banco', '', ''])
+  m = mundo(72186399)
+  m.w.state = { porta: 'rcv', respostas: {} }
+  out = await runTool(ctx(m.port, 'rcv', 'Pan'), 'salvar_respostas', { respostas: [{ campo: 'nome', evidencia: 'Pan', valor: 'Pan' }] })
+  eq('nome: "Pan" não é gravado como nome e manda gravar como banco', [m.w.state.respostas?.nome, /banco/.test(out.content)], [undefined, true])
+  m = mundo(72186399)
+  m.w.state = { porta: 'dba', respostas: { nome: 'Thaissa' } }
+  await runTool(ctx(m.port, 'dba', 'Não'), 'salvar_respostas', { respostas: [{ campo: 'apreendido', evidencia: 'Não', valor: 'Não' }] })
+  eq('busca e apreensão: "Não" (não apreendido) pula a data', (m.w.state.semResposta || []).includes('dataApreensao'), true)
+  m = mundo(72186399)
+  m.w.state = { porta: 'dba', respostas: { nome: 'Thaissa', apreendido: 'Sim' } }
+  await runTool(ctx(m.port, 'dba', 'Bom dia'), 'salvar_respostas', { respostas: [{ campo: 'dataApreensao', evidencia: 'Bom dia', valor: 'Bom dia' }] })
+  eq('busca e apreensão: "Bom dia" não vira data', m.w.state.respostas?.dataApreensao, undefined)
+  m = mundo(72186399)
+  m.w.state = { porta: 'rcpcc', respostas: {} }
+  out = await runTool(ctx(m.port, 'rcpcc', 'desconta R$.647,00'), 'salvar_respostas', { respostas: [{ campo: 'valorDivida', evidencia: 'desconta R$.647,00', valor: '647' }] })
+  eq('valor: desconto do mês não vira total da dívida', [m.w.state.respostas?.valorDivida, out.isError || /parcela/.test(out.content)], [undefined, true])
+  const { checarContexto: checarRepeticao } = await import('../lib/regras')
+  eq('repetição: mesma pergunta duas vezes seguidas é barrada', checarRepeticao('Por qual banco ou financeira foi feito o financiamento?', { leadText: '48 x de 2.633', reuniaoMarcada: false, ultimaDaStela: 'Entendi, Pan. Por qual banco ou financeira foi feito o financiamento?' }).some(v => v.regra === 'repetiu a mesma pergunta'), true)
+  eq('repetição: pergunta nova passa', checarRepeticao('Quantas parcelas já foram pagas?', { leadText: '48', reuniaoMarcada: false, ultimaDaStela: 'O financiamento foi feito em quantas parcelas?' }).length, 0)
+  eq('1ª mensagem sem nome mantém o acolhimento', primeiraMensagem(true, '', 'Entendi, isso pesa mesmo. Por qual banco foi?', false), `Oi! ${CRM_MAP.abertura.apresentacao} Entendi, isso pesa mesmo. Com quem eu falo?`)
+
   return 0
 }

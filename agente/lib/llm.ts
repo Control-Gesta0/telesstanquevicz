@@ -88,8 +88,13 @@ export function primeiraMensagem(primeira: boolean, nome: string, texto: string,
   const apresentacao = CRM_MAP.abertura.apresentacao
   const n = (nome || '').trim().split(/\s+/)[0] || ''
   const oi = n ? `Oi, ${n[0].toUpperCase()}${n.slice(1)}!` : 'Oi!'
-  if (!n && !handoff) return `${oi} ${apresentacao} Com quem eu falo?`
-  return `${oi} ${apresentacao} ${texto}`
+  // Sem nome: pergunta o nome, mas mantém o acolhimento curto da resposta (antes o caso que o lead contou
+  // sumia e ficava só "Com quem eu falo?", conversas de 3 e 4/11/2026)
+  const primeira1 = (texto || '').trim().split(/(?<=[.!])\s+/)[0] || ''
+  const ack = primeira1 && !primeira1.includes('?') && primeira1.length <= 90 && !/aqui (é|e) a stela/i.test(primeira1) ? `${primeira1} ` : ''
+  const junta = (t: string) => t.replace(/\s{2,}/g, ' ').trim()
+  if (!n && !handoff) return junta(`${oi} ${apresentacao} ${ack}Com quem eu falo?`)
+  return junta(`${oi} ${apresentacao} ${texto}`)
 }
 
 const PERGUNTOU_SE_E_ROBO = /(t[oô]|estou|t[aá]) falando com (um |uma )?(rob[oô]|bot|m[aá]quina|ia\b|intelig[eê]ncia)|(voc[eê]|vc) [eé] (um |uma )?(rob[oô]|bot|ia\b|intelig[eê]ncia|m[aá]quina|humana?|pessoa de verdade|gente de verdade)|[eé] (um )?(rob[oô]|bot)\s*\?|isso [eé] (um )?(rob[oô]|bot|autom[aá]tic)/i
@@ -184,7 +189,7 @@ export function createBrain(opts: LlmOptions) {
   async function enforce(messages: Msg[], bruto: string, usage: Usage, handoff: boolean, ctx: ToolCtx): Promise<{ text: string; guard: string[] }> {
     const lastLead = ctx.lastLeadText
     const reuniaoMarcada = !!(await ctx.port.getState()).reuniao
-    const checkReplyCtx = (t: string): Violation[] => [...checkReply(t), ...checarContexto(t, { leadText: ctx.leadText, reuniaoMarcada, encerrado: handoff })]
+    const checkReplyCtx = (t: string): Violation[] => [...checkReply(t), ...checarContexto(t, { leadText: ctx.leadText, reuniaoMarcada, encerrado: handoff, ultimaDaStela: ctx.lastAgentText })]
     const text = semTravessao(bruto)
     const marca = text !== bruto ? ['travessão: trocado em código'] : []
     const v1 = checkReplyCtx(text)
@@ -196,7 +201,7 @@ export function createBrain(opts: LlmOptions) {
     const fix: Msg[] = [
       ...messages,
       { role: 'assistant', content: text },
-      { role: 'system', content: `[TRAVA DO SISTEMA] Sua resposta NÃO foi enviada porque violou: ${v1.map((v: Violation) => `${v.regra} ("${v.trecho}")`).join('; ')}. Reescreva a mensagem inteira respeitando o prompt, com NO MÁXIMO um ponto de interrogação. Responda só com o texto do WhatsApp.` },
+      { role: 'system', content: `[TRAVA DO SISTEMA] Sua resposta NÃO foi enviada porque violou: ${v1.map((v: Violation) => `${v.regra} ("${v.trecho}")`).join('; ')}. Reescreva a mensagem inteira respeitando o prompt, com NO MÁXIMO um ponto de interrogação.${v1.some(v => v.regra === 'repetiu a mesma pergunta') ? ' Você já fez essa pergunta na mensagem anterior e a pessoa respondeu do jeito dela: NÃO repita igual. Considere o que ela disse; se ainda faltar a informação, explique a pergunta com outras palavras ou dê um exemplo de resposta.' : ''} Responda só com o texto do WhatsApp.` },
     ]
     const c = await call(fix, null, usage)
     const text2 = semTravessao((c.message?.content || '').trim())

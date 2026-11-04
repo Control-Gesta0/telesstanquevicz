@@ -1,4 +1,4 @@
-import { liberadoParaStela } from './gate'
+import { equipeTirouEtiqueta, liberadoParaStela } from './gate'
 import { avisoTiktok } from './rastreio'
 import crypto from 'crypto'
 import { adoptToken, currentToken, debounceAndClaim, releaseLock, renewLock } from './buffer'
@@ -8,7 +8,7 @@ import {
   alreadyAnswered, appendMessage, getHistory, humanSpokeRecently, lastInbound, markAnswered, type ChatMsg,
 } from './history'
 import { CRM_MAP, portaById } from './crm-map'
-import { fieldValue, getLead, leadTags } from './kommo'
+import { addLeadTags, fieldValue, getLead, leadTags } from './kommo'
 import { createBrain } from './llm'
 import { kommoPort } from './port'
 import { respostasDoFormulario } from './roteamento'
@@ -69,6 +69,10 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
       await clearState(leadId)
       console.log(`[agente] lead ${leadId} voltou com a tag de gate — novo ciclo`)
     }
+    // A etiqueta é o liga/desliga do card: tirou depois que a Stela começou, ela para (04/11/2026)
+    if (equipeTirouEtiqueta(tags, st0)) return pular(`a equipe tirou a etiqueta ${CONFIG.gateTag}: segue com a equipe`)
+    // Modo "todos os leads novos": a Stela marca o card que começa a atender, para a equipe ver e poder tirar
+    if (!pelaEtiqueta && CONFIG.gateTag) await addLeadTags(leadId, [CONFIG.gateTag])
 
     const claim = await debounceAndClaim(leadId, webhookId)
     if (!claim.proceed) { console.log(`[debounce] lead ${leadId}: ${claim.reason}`); return }

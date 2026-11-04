@@ -150,6 +150,42 @@ export const CENARIOS: Cenario[] = [
       'Não promete resultado nem fala de valores',
     ],
   },
+  // ---- conversas reais de 3 e 4/11/2026 (Stela "doidona") ----
+  {
+    id: 'real-sandro-pan',
+    porta: 'rcv',
+    msgs: ['[áudio do lead]: Oi bom dia, eu tenho um carro financiado, a prestação é 2.630 reais e eu já tô com quatro prestação atrasada. Eu queria entrar com um caso de redução de juros.', 'Pan', '48 x de 2.633 reais'],
+    checks: [umaPergunta, semFallback, tomHumano,
+      { nome: '"Pan" não virou nome', fn: (w: World) => !/^pan$/i.test(String(w.state.respostas?.nome || '')) },
+      { nome: 'não repetiu a mesma pergunta seguida', fn: (_w: World, t: Turno[]) => t.every((x, i) => i === 0 || x.resposta.trim() !== t[i - 1].resposta.trim()) }],
+    criterios: [
+      'Entende "Pan" como o Banco Pan (o banco do financiamento) e não chama a pessoa de Pan',
+      'Não pergunta o banco de novo depois que a pessoa disse "Pan"',
+    ],
+  },
+  {
+    id: 'real-ola-stela',
+    porta: 'rcv',
+    semAbertura: true,
+    msgs: ['Olá Stela, Bom Dia'],
+    checks: [umaPergunta, tomHumano, { nome: 'não chamou a pessoa de Stela', fn: (_w: World, t: Turno[]) => !/(prazer|oi|ol[aá]),? stela/i.test(resp(t)) }],
+    criterios: ['Se apresenta e pergunta o nome da pessoa, sem tratar "Stela" como o nome dela'],
+  },
+  {
+    id: 'real-dba-nao-apreendido',
+    porta: 'dba',
+    semAbertura: true,
+    msgs: ['Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Busca e Apreensão.', 'Thaissa', 'Não'],
+    checks: [umaPergunta, semFallback, tomHumano, { nome: 'não perguntou a data da apreensão', fn: (_w: World, t: Turno[]) => !/em que dia foi a apreens|quando foi a apreens/i.test(resp(t)) }],
+    criterios: ['Depois que a pessoa responde "Não" à pergunta se o veículo já foi apreendido, segue para a pergunta do mandado (ou do processo), sem perguntar a data da apreensão'],
+  },
+  {
+    id: 'real-desiste-audio',
+    porta: 'rcv',
+    msgs: ['[áudio do lead]: Fala meu jovem, desculpa, eu estava trabalhando. Não compensa não. Tava fazendo as contas que não compensa recuperar esse carro, não. Inclusive eu já até comprei outro carro, graças a Deus.'],
+    checks: [finalizou('desistiu'), tomHumano],
+    criterios: ['Respeita a decisão em poucas palavras e encerra sem fazer pergunta do roteiro'],
+  },
   {
     id: 'abaixo-50k',
     porta: 'rcpcc',

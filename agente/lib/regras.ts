@@ -20,8 +20,18 @@ export const REGRAS_CLIENTE: Array<{ regra: string; re: RegExp }> = [
  *  - valor em R$ que o lead não disse (honorário ou desconto inventado);
  *  - "está marcado" sem a reserva confirmada pelo Calendly.
  */
-export function checarContexto(text: string, ctx: { leadText: string; reuniaoMarcada: boolean; encerrado?: boolean }): Array<{ regra: string; trecho: string }> {
+/** Última pergunta de um texto, normalizada (sem acento, pontuação e caixa). Puro. */
+export function ultimaPergunta(texto: string): string {
+  const partes = (texto || '').split(/(?<=[.!?])\s+/).filter(p => p.includes('?'))
+  const q = partes[partes.length - 1] || ''
+  return q.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+export function checarContexto(text: string, ctx: { leadText: string; reuniaoMarcada: boolean; encerrado?: boolean; ultimaDaStela?: string }): Array<{ regra: string; trecho: string }> {
   const out: Array<{ regra: string; trecho: string }> = []
+  // Mesma pergunta duas vezes seguidas: soa como se ignorasse a resposta (Sandro, 04/11/2026: o banco 6 vezes)
+  const q = ultimaPergunta(text)
+  if (q && q.length > 10 && q === ultimaPergunta(ctx.ultimaDaStela || '')) out.push({ regra: 'repetiu a mesma pergunta', trecho: q })
   const digitosLead = new Set((ctx.leadText.match(/\d+/g) || []).map(n => n.replace(/^0+/, '')))
   for (const m of text.matchAll(/r\$\s?([\d.,]+)|\b(\d+(?:[.,]\d+)?)\s?mil\b/gi)) {
     const numero = (m[1] || m[2] || '').split(/[.,]/)[0].replace(/^0+/, '')

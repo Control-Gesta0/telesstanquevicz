@@ -33,7 +33,7 @@ const CAMPOS = {
   contrato: { key: 'contrato', id: 0, name: 'Tem o contrato do financiamento', type: 'text', sinal: /contrato|tenho|n[aã]o|sim|app|aplicativo|e-?mail/i, pergunta: 'Tem o contrato do financiamento em mãos?' },
   // DBA
   apreendido: { key: 'apreendido', id: 0, name: 'Veículo já apreendido', type: 'text', sinal: /apreend|levar|tomar|guinch|ainda n|n[aã]o|sim|j[aá]\b|comigo|recolh/i, pergunta: 'O veículo já foi apreendido?' },
-  dataApreensao: { key: 'dataApreensao', id: 0, name: 'Data da apreensão', type: 'text', sinal: /\d|ontem|hoje|semana|m[eê]s|dia|segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo|janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro/i, pergunta: 'Em que dia foi a apreensão?' },
+  dataApreensao: { key: 'dataApreensao', id: 0, name: 'Data da apreensão', type: 'text', sinal: /\d|ontem|hoje|semana|m[eê]s|(?<!bom )dia\b|segunda|ter[cç]a|quarta|quinta|sexta|s[aá]bado|domingo|janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro/i, pergunta: 'Em que dia foi a apreensão?' },
   mandado: { key: 'mandado', id: 0, name: 'Recebeu cópia do mandado', type: 'text', sinal: /mandado|papel|c[oó]pia|deixou|n[aã]o|sim|recebi|oficial|documento/i, pergunta: 'O oficial de justiça deixou uma cópia do mandado com você?' },
   valorDividaDba: { key: 'valorDividaDba', id: 0, name: 'Quanto falta pagar do financiamento', type: 'text', sinal: VALOR, pergunta: 'Quanto falta pagar do financiamento, mais ou menos?' },
   // Agendamento (todas as portas)

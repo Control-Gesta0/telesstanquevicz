@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { equipeEscreveu } from './equipe'
 import { k, redis } from './redis'
 
 /**
@@ -72,5 +73,8 @@ export async function markHumanSpoke(leadId: number): Promise<void> {
 }
 
 export async function humanSpokeRecently(leadId: number): Promise<boolean> {
-  return !!(await redis.get(k('humano', leadId)))
+  if (await redis.get(k('humano', leadId))) return true
+  // O webhook não traz a mensagem da equipe: confere nos eventos do Kommo (lib/equipe.ts)
+  if (await equipeEscreveu(leadId)) { await markHumanSpoke(leadId); return true }
+  return false
 }
