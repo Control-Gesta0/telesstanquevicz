@@ -145,5 +145,6 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 ## Pedidos de 04/11/2026 (tarde)
 
 - **JURÍDICO › Negociação** (113755868) criada pela API, depois de "Cumprindo despacho", sem nenhuma automação. Dá para arrastar a coluna para outra posição na tela.
-- **Closers nas etapas do SDR:** GUILHERME e CLAUDIA precisam ver e editar SDR › Reunião agendada e SDR › Em atendimento. É direito de usuário (só pela tela): roteiro em `docs/cowork-acesso-closers.md`.
+- **CLOSER › Em atendimento** (113807748) criada como primeira coluna do CLOSER (correção do cliente em 05/11: a etapa de atendimento é no funil do closer).
+- **Closers no SDR:** GUILHERME e CLAUDIA precisam ver e editar só SDR › Reunião agendada. É direito de usuário (só pela tela): roteiro em `docs/cowork-acesso-closers.md`.
 - Robôs antigos: o escritório decidiu manter ligados. Consequência: mensagem de robô aparece para a Stela igual à dela, então resposta dupla em lead novo pode voltar a acontecer.
