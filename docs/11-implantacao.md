@@ -156,3 +156,10 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - O prefixo ("RCV · ", "RCPCC · ") sai do texto antes de a Stela ler; o resto cai na porta certa pela palavra-chave.
 - Grava a origem uma vez por lead e só se "De onde" estiver vazio. Vale para todo lead, com ou sem a Stela.
 - Testes ok. Avaliação com a IA não rodada nesta sessão (a chave da OpenAI do projeto não está disponível aqui); a mudança é de rastreio, sem mexer no texto da Stela. Publicado.
+
+## "A IA não atendeu muitas pessoas ontem" (06/11/2026)
+
+- **Causa:** a Stela está desligada para os leads novos desde 04/11 às 9h50 (depois do "tá doidona"), à espera do teste real. Só atende card com `ia-stela`. Em 05/11 nenhum card tinha a etiqueta.
+- **Efeito colateral achado:** leads novos do Google (Suelen 26381485, Filipe 26381895 e outros) foram para **SDR › Social Seller**. Quando a Vercel põe etiqueta num lead que ainda está em Incoming leads, o Kommo aceita o lead e o joga na primeira coluna depois de Incoming, que era a Social Seller (antes era Em atendimento). 13 leads saíram de Incoming para Social Seller entre 03 e 06/11.
+- **Correção:** Social Seller passou para depois de Em atendimento (sort 30). Em atendimento voltou a ser a primeira coluna. Só 1 card ainda estava em Social Seller sem ser da live (Beatriz 26389965): mover para Em atendimento pela tela.
+- Cuidado ao reordenar etapa pela API: PATCH sem `name` apaga o nome da etapa (aconteceu e foi corrigido na hora).
