@@ -22,6 +22,9 @@ const CASOS: Array<{ texto: string; assunto: string[]; nome: string }> = [
   { texto: 'preciso de ajuda com uma causa trabalhista', assunto: ['fora'], nome: '' },
   { texto: 'já sou cliente, quero saber do meu processo', assunto: ['cliente'], nome: '' },
   { texto: 'quero falar com um advogado', assunto: ['outro', 'indefinido'], nome: '' },
+  // conversa real de 06/11/2026: virou "assunto da equipe" e a Stela parou de responder
+  { texto: 'Boa tarde pode falar comigo', assunto: ['indefinido'], nome: '' },
+  { texto: 'alguém pode me atender?', assunto: ['indefinido'], nome: '' },
 ]
 
 const FLUXOS: Array<{ id: string; msgs: string[]; checa: (respostas: string[], estado: any) => string[] }> = [
