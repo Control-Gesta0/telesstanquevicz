@@ -163,3 +163,9 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - **Efeito colateral achado:** leads novos do Google (Suelen 26381485, Filipe 26381895 e outros) foram para **SDR › Social Seller**. Quando a Vercel põe etiqueta num lead que ainda está em Incoming leads, o Kommo aceita o lead e o joga na primeira coluna depois de Incoming, que era a Social Seller (antes era Em atendimento). 13 leads saíram de Incoming para Social Seller entre 03 e 06/11.
 - **Correção:** Social Seller passou para depois de Em atendimento (sort 30). Em atendimento voltou a ser a primeira coluna. Só 1 card ainda estava em Social Seller sem ser da live (Beatriz 26389965): mover para Em atendimento pela tela.
 - Cuidado ao reordenar etapa pela API: PATCH sem `name` apaga o nome da etapa (aconteceu e foi corrigido na hora).
+
+## Stela religada para os leads novos (06/11/2026, 15h48)
+
+- `ATENDE_NOVOS_DESDE=2026-11-06T15:48:00-03:00`, publicado. Painel: "todos os leads novos do SDR desde 06/11/2026 e quem tiver a etiqueta ia-stela".
+- Sem o teste real combinado (decisão do escritório). Robôs antigos seguem ligados.
+- Conferência marcada para as 17h50.
