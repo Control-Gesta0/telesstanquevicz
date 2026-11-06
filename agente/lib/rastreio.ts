@@ -81,10 +81,16 @@ export function etiquetasPorFrase(texto: string): string[] {
   return [f.etiqueta, ...(assunto ? [assunto] : [])]
 }
 
+/** "RCV · Olá! …" → "Olá! …" (o prefixo do anúncio não é conversa). Puro: testado. */
+export function semPrefixoAnuncio(texto: string): string {
+  return (texto || '').replace(CRM_MAP.rastreio.prefixoAnuncio, '')
+}
+
 export function origemPorFrase(texto: string): Origem | null {
   const f = CRM_MAP.rastreio.frases.find(x => x.re.test(texto || ''))
   if (!f) return null
-  const campanha = /busca e apreens/i.test(texto) ? 'dba' : /financiamento|ve[ií]culo/i.test(texto) ? 'rcv' : /juros|d[ií]vida|empr[eé]stimo|cart[aã]o/i.test(texto) ? 'rcpcc' : ''
+  const prefixo = (texto.match(CRM_MAP.rastreio.prefixoAnuncio)?.[1] || '').toLowerCase()
+  const campanha = prefixo || (/busca e apreens/i.test(texto) ? 'dba' : /financiamento|ve[ií]culo/i.test(texto) ? 'rcv' : /juros|d[ií]vida|empr[eé]stimo|cart[aã]o/i.test(texto) ? 'rcpcc' : '')
   return { slug: `frase-${f.deOnde.toLowerCase()}${campanha ? `-${campanha}` : ''}`, deOnde: f.deOnde, utm_source: f.utm_source, utm_medium: f.utm_medium, ...(campanha ? { utm_campaign: campanha } : {}) }
 }
 
@@ -205,7 +211,7 @@ export async function aplicarRastreio(leadId: number, texto: string): Promise<st
         console.error('[rastreio] frase falhou:', e)
       }
     }
-    return texto
+    return semPrefixoAnuncio(texto)
   }
   try {
     let o: Origem | null = null

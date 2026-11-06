@@ -133,6 +133,18 @@ async function main() {
     eq('qualificado com roteiro incompleto é recusado', out.isError, true)
   }
 
+  // Meta Ads (06/11/2026)
+  {
+    const R = await import('../lib/rastreio')
+    const { classificar: cls } = await import('../lib/router')
+    const rcv = 'RCV · Olá! Tenho financiamento de veículo e quero mais informações.'
+    const rcpcc = 'RCPCC · Olá! Tenho dívidas com banco e quero mais informações.'
+    eq('Meta RCV: etiquetas Meta + RCV, De onde Meta, campanha rcv', [R.etiquetasPorFrase(rcv), R.origemPorFrase(rcv)?.deOnde, R.origemPorFrase(rcv)?.utm_campaign], [['Meta', 'RCV'], 'Meta', 'rcv'])
+    eq('Meta RCPCC: etiquetas Meta + RCPCC, campanha rcpcc', [R.etiquetasPorFrase(rcpcc), R.origemPorFrase(rcpcc)?.utm_campaign], [['Meta', 'RCPCC'], 'rcpcc'])
+    eq('Meta: o prefixo sai do texto que a Stela lê', [R.semPrefixoAnuncio(rcv), R.semPrefixoAnuncio('RCV é o meu caso')], ['Olá! Tenho financiamento de veículo e quero mais informações.', 'RCV é o meu caso'])
+    eq('Meta: sem o prefixo, cai na porta certa', [cls(R.semPrefixoAnuncio(rcv)).map(p => p.id), cls(R.semPrefixoAnuncio(rcpcc)).map(p => p.id)], [['rcv'], ['rcpcc']])
+    eq('Google continua com GOOGLE', R.etiquetasPorFrase('Olá, vim pelo Google. Gostaria de falar com um Advogado Especialista em Busca e Apreensão.'), ['GOOGLE', 'DBA'])
+  }
   // Live "fura fila" (pedido de 29/10/2026)
   const { ehQueroDaLive } = await import('../lib/rastreio')
   const { classificar } = await import('../lib/router')

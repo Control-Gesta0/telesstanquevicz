@@ -148,3 +148,11 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - **CLOSER › Em atendimento** (113807748) criada como primeira coluna do CLOSER (correção do cliente em 05/11: a etapa de atendimento é no funil do closer).
 - **Closers no SDR:** GUILHERME e CLAUDIA precisam ver e editar só SDR › Reunião agendada. É direito de usuário (só pela tela): roteiro em `docs/cowork-acesso-closers.md`.
 - Robôs antigos: o escritório decidiu manter ligados. Consequência: mensagem de robô aparece para a Stela igual à dela, então resposta dupla em lead novo pode voltar a acontecer.
+
+## Mensagens prontas do Meta Ads (06/11/2026)
+
+- "RCV · Olá! Tenho financiamento de veículo e quero mais informações." → etiquetas Meta + RCV · De onde Meta · facebook/paid_social/rcv.
+- "RCPCC · Olá! Tenho dívidas com banco e quero mais informações." → etiquetas Meta + RCPCC · De onde Meta · facebook/paid_social/rcpcc.
+- O prefixo ("RCV · ", "RCPCC · ") sai do texto antes de a Stela ler; o resto cai na porta certa pela palavra-chave.
+- Grava a origem uma vez por lead e só se "De onde" estiver vazio. Vale para todo lead, com ou sem a Stela.
+- Testes ok. Avaliação com a IA não rodada nesta sessão (a chave da OpenAI do projeto não está disponível aqui); a mudança é de rastreio, sem mexer no texto da Stela. Publicado.

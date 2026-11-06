@@ -346,9 +346,14 @@ export const CRM_MAP = {
       { re: /\b(vim|cheguei|vi) (atrav[eé]s do|pelo|por meio do|no) google\b/i, deOnde: 'Google', utm_source: 'google', utm_medium: 'cpc', etiqueta: 'GOOGLE' },
       { re: /\b(vim|cheguei|vi) (atrav[eé]s do|pelo|por meio do|no) instagram\b/i, deOnde: 'Instagram', utm_source: 'instagram', utm_medium: 'social' },
       { re: /\b(vim|cheguei|vi) (atrav[eé]s do|pelo|por meio do|no) (facebook|meta)\b/i, deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'paid_social' },
+      // Meta Ads (06/11/2026): "RCV · Olá! Tenho financiamento de veículo…" e "RCPCC · Olá! Tenho dívidas com banco…".
+      // Etiqueta Meta + a do assunto; o prefixo sai do texto antes de a Stela ler (prefixoAnuncio)
+      { re: /^\s*(RCV|RCPCC)\s*[·•|:-]\s*ol[aá]/i, deOnde: 'Meta', utm_source: 'facebook', utm_medium: 'paid_social', etiqueta: 'Meta' },
     ] as Array<{ re: RegExp; deOnde: string; utm_source: string; utm_medium: string; etiqueta?: string }>,
     /** etiqueta do assunto, junto com a da frase do anúncio */
     etiquetasAssunto: { dba: 'DBA', rcv: 'RCV', rcpcc: 'RCPCC' } as Record<string, string>,
+    /** prefixo do anúncio ("RCV · ", "RCPCC · "): identifica a campanha e sai do texto que a Stela lê */
+    prefixoAnuncio: /^\s*(RCV|RCPCC|DBA)\s*[·•|:-]\s*(?=ol[aá])/i,
   },
 
   calendly: {
