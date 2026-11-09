@@ -133,6 +133,11 @@ async function main() {
     eq('qualificado com roteiro incompleto é recusado', out.isError, true)
   }
 
+  // 09/11/2026: o cache do gate voltava como número e toda mensagem em menos de 60 s era descartada
+  {
+    const { gateDoCache } = await import('../api/inbound')
+    eq('gate em cache: 1 (número) e "1" (texto) liberam; 0 e "0" não', [gateDoCache(1), gateDoCache('1'), gateDoCache(0), gateDoCache('0')], [true, true, false, false])
+  }
   // Meta Ads (06/11/2026)
   {
     const R = await import('../lib/rastreio')

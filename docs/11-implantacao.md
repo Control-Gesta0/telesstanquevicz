@@ -169,3 +169,9 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - `ATENDE_NOVOS_DESDE=2026-11-06T15:48:00-03:00`, publicado. Painel: "todos os leads novos do SDR desde 06/11/2026 e quem tiver a etiqueta ia-stela".
 - Sem o teste real combinado (decisão do escritório). Robôs antigos seguem ligados.
 - Conferência marcada para as 17h50.
+
+## Stela "parando" no meio da conversa (09/11/2026)
+
+- **Sintoma:** Francisco (26408041) respondeu "Empréstimo" e "Vcs atendem qual cidade" às 8h53 e ficou sem resposta; Sidnei (26408591) igual. A equipe entrava depois de 11 minutos.
+- **Causa:** as mensagens chegavam ao webhook (todas marcadas como vistas), mas eram descartadas no gate. O cache de 60 s do "lead é da Stela?" é gravado como '1', e o Upstash devolve o número 1; a comparação `=== '1'` dava sempre falso. Toda mensagem que chegava até 60 s depois de outra (inclusive o eco da própria resposta da Stela) era jogada fora em silêncio. O bug existia desde que o cache foi criado; com a Stela atendendo leads de verdade, apareceu.
+- **Correção:** `gateDoCache` compara pelo valor em texto. Confirmado no Redis que o valor volta como número. Teste novo. Publicado às 10h50 de 09/11.

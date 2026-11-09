@@ -76,10 +76,15 @@ export function parseKommoWebhook(raw: unknown): { accountId: string; msgs: Inbo
   return msgs.length ? { accountId: pick(body, 'account[id]', ['account', 'id']), msgs } : null
 }
 
+/** Valor guardado no cache do gate ('1'/'0' ou 1/0, conforme o Redis devolve). Puro: testado. */
+export const gateDoCache = (v: unknown): boolean => String(v) === '1'
+
 /** O lead tem a tag de gate e não está com humano? (cache de 60s: rajada de mídia não vira rajada de GET) */
 async function leadAtendido(leadId: number): Promise<boolean> {
-  const cache = await redis.get<string>(k('gate', leadId))
-  if (cache) return cache === '1'
+  // O Upstash devolve '1' como o NÚMERO 1 (desserializa JSON): comparar com a string dava sempre falso e toda
+  // mensagem que chegava menos de 60 s depois de outra era descartada em silêncio (Francisco e Sidnei, 09/11/2026)
+  const cache = await redis.get<string | number>(k('gate', leadId))
+  if (cache !== null && cache !== undefined) return gateDoCache(cache)
   const lead = await getLead(leadId)
   const sim = liberadoParaStela(lead, leadTags(lead)).sim
   await redis.set(k('gate', leadId), sim ? '1' : '0', { ex: 60 })
