@@ -13,15 +13,23 @@ async function kommo<T>(method: string, path: string, body?: unknown, opts?: { r
   const retries = opts?.retries ?? 3
   const retry5xx = opts?.retry5xx ?? true
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(`${CONFIG.kommoDomain}${path}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${CONFIG.kommoToken}`,
-        Accept: 'application/json',
-        ...(body ? { 'Content-Type': 'application/json' } : {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    })
+    let res: Response
+    try {
+      res = await fetch(`${CONFIG.kommoDomain}${path}`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${CONFIG.kommoToken}`,
+          Accept: 'application/json',
+          ...(body ? { 'Content-Type': 'application/json' } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      })
+    } catch (e) {
+      // Conexão caiu ("fetch failed", "other side closed"): tenta de novo. Em 12/11/2026 a resposta da Flash Imports
+      // se perdeu assim. O Salesbot (retry5xx:false) não repete: a mensagem pode já ter saído.
+      if (retry5xx && attempt < retries) { await sleep(1000 * (attempt + 1)); continue }
+      throw e
+    }
     const text = await res.text()
     if (res.ok) return (text ? JSON.parse(text) : {}) as T
     const retryable = res.status === 429 || (retry5xx && res.status >= 500)

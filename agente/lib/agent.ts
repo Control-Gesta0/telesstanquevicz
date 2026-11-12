@@ -8,7 +8,7 @@ import {
   alreadyAnswered, appendMessage, getHistory, humanSpokeRecently, lastInbound, markAnswered, type ChatMsg,
 } from './history'
 import { CRM_MAP, portaById } from './crm-map'
-import { addLeadTags, fieldValue, getLead, leadTags } from './kommo'
+import { addLeadTags, addLeadTask, fieldValue, getLead, leadTags } from './kommo'
 import { createBrain } from './llm'
 import { kommoPort } from './port'
 import { respostasDoFormulario } from './roteamento'
@@ -186,6 +186,9 @@ export async function processLead(leadId: number, webhookId: string): Promise<vo
     const msg = (e instanceof Error ? e.message : String(e)).slice(0, 300)
     console.error(`[agente] ERRO lead ${leadId} após ${Date.now() - t0}ms: ${msg}`, e)
     await logExec({ tipo: 'erro', leadId, nome, ms: Date.now() - t0, detalhe: msg })
+    // O lead ficou sem resposta por falha técnica: a SDR recebe tarefa para responder (12/11/2026, Flash Imports)
+    await addLeadTask(leadId, 'A Stela não conseguiu responder este lead por uma falha técnica. Responda a última mensagem pelo Kommo.', CRM_MAP.negocio.responsavelPadrao, Math.floor(Date.now() / 1000) + 15 * 60, CRM_MAP.negocio.tarefaTipo)
+      .catch(err => console.error('[agente] falha ao criar a tarefa de erro:', err))
   } finally {
     await releaseLock(leadId, lockOwner)
   }

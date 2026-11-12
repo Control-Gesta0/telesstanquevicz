@@ -175,3 +175,8 @@ Os robôs "Painel - …" e "Define Campanha" preenchem a origem hoje. Desligados
 - **Sintoma:** Francisco (26408041) respondeu "Empréstimo" e "Vcs atendem qual cidade" às 8h53 e ficou sem resposta; Sidnei (26408591) igual. A equipe entrava depois de 11 minutos.
 - **Causa:** as mensagens chegavam ao webhook (todas marcadas como vistas), mas eram descartadas no gate. O cache de 60 s do "lead é da Stela?" é gravado como '1', e o Upstash devolve o número 1; a comparação `=== '1'` dava sempre falso. Toda mensagem que chegava até 60 s depois de outra (inclusive o eco da própria resposta da Stela) era jogada fora em silêncio. O bug existia desde que o cache foi criado; com a Stela atendendo leads de verdade, apareceu.
 - **Correção:** `gateDoCache` compara pelo valor em texto. Confirmado no Redis que o valor volta como número. Teste novo. Publicado às 10h50 de 09/11.
+
+## Lead sem resposta às 12h30 de 12/11/2026 (Flash Imports, 26439805)
+
+- **Causa:** a Stela gerou a resposta, mas a conexão com o Kommo (api-g.kommo.com) caiu no meio ("fetch failed", "other side closed") e o cliente da API não tentava de novo em erro de conexão, só em 429/5xx. O atendimento terminou em erro e ninguém foi avisado.
+- **Correção:** `lib/kommo.ts` tenta de novo (até 3 vezes) quando a conexão cai. O disparo do Salesbot continua sem repetir, porque a mensagem pode já ter saído. Se mesmo assim der erro, a Stela cria tarefa para a SDR em 15 minutos: "A Stela não conseguiu responder este lead por uma falha técnica". Testes novos; publicado.

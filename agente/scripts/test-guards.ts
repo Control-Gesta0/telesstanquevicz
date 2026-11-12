@@ -133,6 +133,20 @@ async function main() {
     eq('qualificado com roteiro incompleto é recusado', out.isError, true)
   }
 
+  // 12/11/2026: conexão com o Kommo caiu no meio e a resposta se perdeu
+  {
+    const K = await import('../lib/kommo')
+    const original = globalThis.fetch
+    let chamadas = 0
+    globalThis.fetch = (async () => { chamadas++; if (chamadas === 1) throw new TypeError('fetch failed'); return new Response('{"ok":1}', { status: 200 }) }) as typeof fetch
+    const r = await K.kommoGet<{ ok: number }>('/api/v4/teste').catch(() => null)
+    eq('Kommo: conexão que cai é tentada de novo', [r?.ok, chamadas], [1, 2])
+    chamadas = 0
+    globalThis.fetch = (async () => { chamadas++; throw new TypeError('fetch failed') }) as typeof fetch
+    const bot = await K.runSalesbot(1, 2).then(() => 'ok', () => 'erro')
+    eq('Kommo: Salesbot não repete (a mensagem pode já ter saído)', [bot, chamadas], ['erro', 1])
+    globalThis.fetch = original
+  }
   // 09/11/2026: o cache do gate voltava como número e toda mensagem em menos de 60 s era descartada
   {
     const { gateDoCache } = await import('../api/inbound')
